@@ -1,0 +1,6 @@
+# Apply to common linear modules
+type: espnet_lora
+rank: 8
+alpha: 8
+dropout_rate: 0.05
+target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]

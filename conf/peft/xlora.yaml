@@ -1,0 +1,14 @@
+# X-LoRA
+type: xlora
+hidden_size: 4096
+adapters: {}
+enable_softmax: true
+layerwise_scalings: false
+xlora_depth: 1
+xlora_size: 2048
+xlora_dropout_p: 0.2
+use_trainable_adapters: false
+softmax_temperature: 1.0
+top_k_lora: null
+scaling_pass_value: 0.0
+global_scaling_weight: 1.0

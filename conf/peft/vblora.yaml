@@ -1,0 +1,9 @@
+# VBLoRA
+type: vblora
+r: 4
+num_vectors: 256
+vector_length: 256
+topk: 2
+vblora_dropout: 0.0
+bias: none
+target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]

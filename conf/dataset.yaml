@@ -1,0 +1,34 @@
+dataset:
+  _target_: espnet3.components.data.data_organizer.DataOrganizer
+  train:
+    # ASR dataset
+    - name: train_eurospeech
+      dataset:
+        _target_: src.data.dataset.EuroSpeechPortugalDataset
+        split: train
+
+  valid:
+    # ASR data
+    - name: valid_eurospeech
+      dataset:
+        _target_: src.data.dataset.EuroSpeechPortugalDataset
+        split: validation
+
+  preprocessor:
+    _target_: espnet2.train.preprocessor.S2TPreprocessor
+    train: train
+    token_type: bpe
+    token_list: ${tokenizer.save_path}/tokens.txt
+    bpemodel: ${tokenizer.save_path}/bpe.model
+    text_prev_name: text_prev
+    text_ctc_name: text_ctc
+    fs: 16000
+    na_symbol: <na>
+    speech_length: 30
+    speech_resolution: 0.02
+    speech_init_silence: 30
+    text_prev_apply_prob: 0.5
+    time_apply_prob: 0.5
+    notime_symbol: <notimestamps>
+    first_time_symbol: <0.00>
+    last_time_symbol: <30.00>

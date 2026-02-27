@@ -1,0 +1,13 @@
+# load default config
+defaults:
+  - default.yaml
+  - dataset.yaml
+  - peft: vblora
+
+lr: 5e-5
+exp_tag: peft_vblora_lr${lr}
+
+model:
+  _target_: src.peft_model.OWSMFinetune
+  model_tag: espnet/owsm_v4_medium_1B
+  peft: ${peft}

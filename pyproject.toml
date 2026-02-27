@@ -1,0 +1,15 @@
+[project]
+name = "03-owsm-finetuning"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "editdistance>=0.8.1",
+    "loralib>=0.1.2",
+    "peft>=0.18.1",
+    "torch>=2.10.0",
+    "torchaudio>=2.10.0",
+    "torchcodec>=0.10.0",
+    "wandb>=0.25.0",
+]

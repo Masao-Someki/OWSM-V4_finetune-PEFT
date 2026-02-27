@@ -1,0 +1,12 @@
+# AdaLoRA
+type: adalora
+init_r: 12
+target_r: 8
+lora_alpha: 8
+lora_dropout: 0.05
+task_type: seq_2_seq_lm
+total_step: 1000
+tinit: 100
+tfinal: 100
+deltaT: 1
+target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
