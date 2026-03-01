@@ -1,20 +1,22 @@
 import numpy as np
-from datasets import Audio, load_from_disk
+from datasets import Audio, concatenate_datasets, load_dataset, load_from_disk
 from torch.utils.data import Dataset
 
-PORTUGAL_DATA_DIR = "/work/nvme/bbjs/clin10/eurospeech_finetune/espnet/egs3/eurospeech_portugal/s2t1/data/portugal"
+from espnet2.bin.s2t_inference import Speech2Text
+from espnet2.text.cleaner import TextCleaner
 
 class EuroSpeechPortugalDataset(Dataset):
-    def __init__(self, data_dir=PORTUGAL_DATA_DIR, split="train", ratio=1.0):
+    def __init__(self, data_dir, split, ratio=1.0):
         if not (0 < ratio <= 1.0):
             raise ValueError("ratio must be in the range (0, 1].")
-        
+
         dataset_dict = load_from_disk(data_dir)
         if split in dataset_dict:
             self.dataset = dataset_dict[split]
         else:
             raise ValueError(f"Split '{split}' not found in dataset.")
 
+        self.dataset = self.dataset.cast_column("audio", Audio())
         if ratio < 1.0:
             keep = int(len(self.dataset) * ratio)
             self.dataset = self.dataset.select(range(keep))
@@ -30,9 +32,111 @@ class EuroSpeechPortugalDataset(Dataset):
             "text": f"<por><asr><notimestamps> {transcript}",
             "text_ctc": transcript,
             "text_prev": "<na>",
+            # "text_raw": transcript,
         }
         return example
 
+class FleursPortugalDataset(Dataset):
+    def __init__(self, data_dir, split, ratio=1.0):
+        if not (0 < ratio <= 1.0):
+            raise ValueError("ratio must be in the range (0, 1].")
+
+        dataset_dict = load_from_disk(data_dir)
+        if split in dataset_dict:
+            self.dataset = dataset_dict[split]
+        else:
+            raise ValueError(f"Split '{split}' not found in dataset.")
+
+        self.dataset = self.dataset.cast_column("audio", Audio())
+        if ratio < 1.0:
+            keep = int(len(self.dataset) * ratio)
+            self.dataset = self.dataset.select(range(keep))
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        item = self.dataset[idx]
+        transcript = str(item["transcription"]).strip()
+        example = {
+            "speech": item["audio"]["array"].astype(np.float32),
+            "text": f"<por><asr><notimestamps> {transcript}",
+            "text_ctc": transcript,
+            "text_prev": "<na>",
+            # "text_raw": transcript,
+        }
+        return example
+
+class FalarPortugalDataset(Dataset):
+    def __init__(self, data_dir, split, ratio=1.0):
+        if not (0 < ratio <= 1.0):
+            raise ValueError("ratio must be in the range (0, 1].")
+
+        cache_dir = str(data_dir) if data_dir else None
+
+        if split == "train":
+            train_splits = [
+                load_dataset(
+                    "inesc-id/FalAR",
+                    split=f"train_{i}",
+                    cache_dir=cache_dir,
+                    trust_remote_code=True,
+                )
+                for i in range(16)
+            ]
+            self.dataset = concatenate_datasets(train_splits)
+        else:
+            hf_split = "dev" if split == "validation" else split
+            self.dataset = load_dataset(
+                "inesc-id/FalAR",
+                split=hf_split,
+                cache_dir=cache_dir,
+                trust_remote_code=True,
+            )
+
+        self.dataset = self.dataset.cast_column("audio", Audio())
+        if ratio < 1.0:
+            keep = int(len(self.dataset) * ratio)
+            self.dataset = self.dataset.select(range(keep))
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        item = self.dataset[idx]
+        transcript = str(item["transcription"]).strip()
+
+        example = {
+            "speech": item["wav"]["array"].astype(np.float32),
+            "text": f"<por><asr><notimestamps> {transcript}",
+            "text_ctc": transcript,
+            "text_prev": "<na>",
+        }
+        return example
+
+
+class OWSMTokenizeTransform:
+    def __init__(self, model_tag, text_cleaner=None, *args, **kwargs):
+        owsm_model = Speech2Text.from_pretrained(model_tag)
+        self.tokenizer = owsm_model.tokenizer
+        self.converter = owsm_model.converter
+        self.text_cleaner = TextCleaner(text_cleaner) if text_cleaner else None
+
+
+    def tokenize(self, text):
+        if self.text_cleaner:
+            text = self.text_cleaner(text)
+        return np.array(self.converter.tokens2ids(self.tokenizer.text2tokens(text)))
+
+    def __call__(self, data):
+        example = data
+        ret = dict(
+            speech=example['speech'],
+            text=self.tokenize(example['text']),
+            text_ctc=self.tokenize(example['text_ctc']),
+            text_prev=self.tokenize(example['text_prev']),
+        )
+        return ret
 
 class WhisperTokenizeTransform:
     def __init__(self, model_tag, text_cleaner=None, *args, **kwargs):

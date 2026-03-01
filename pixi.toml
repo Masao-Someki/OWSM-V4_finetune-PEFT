@@ -10,3 +10,9 @@ version = "0.1.0"
 [dependencies]
 python = "3.11.*"
 pip = ">=26.0.1,<27"
+datasets = ">=4.6.0,<5"
+typeguard = ">=4.5.1,<5"
+
+#add by dahee
+libstdcxx-ng = ">=13"
+libgcc-ng = ">=13"

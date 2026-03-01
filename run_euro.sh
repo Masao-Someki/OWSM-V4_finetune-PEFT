@@ -11,17 +11,15 @@
 
 
 # config_path=conf/train.yaml
-config_path=conf/owsm_peft_lora_basic_falar.yaml # add dahee
+config_path=conf/owsm_peft_lora_basic_euro.yaml # euro 버전 따로 만듦
 
 . parse_options.sh
 . path.sh
 
-# for falar
-export HF_HOME=/work/nvme/bbjs/clin10/eurospeech_finetune/espnet/egs3/eurospeech_portugal/s2t1/hub       
 
 python run.py \
     --stages train \
     --train_config ${config_path} \
     # --infer_config conf/inference.yaml
 
-# dataset.yaml에서 원하는 데이터로더로 넣어주고 // replace config for data
+# dataset.yaml에서 원하는 데이터로더로 넣어주고 >> dataset_euro.yaml을 만듦
