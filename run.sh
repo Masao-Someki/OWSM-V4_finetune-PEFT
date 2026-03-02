@@ -11,7 +11,7 @@
 
 
 # config_path=conf/train.yaml
-config_path=conf/owsm_peft_lora_basic_falar.yaml # add dahee
+config_path=conf/whisper_peft_lora_basic_falar.yaml #conf/owsm_peft_lora_basic_falar.yaml # add dahee
 
 . parse_options.sh
 . path.sh
@@ -21,7 +21,7 @@ export HF_HOME=/work/nvme/bbjs/clin10/eurospeech_finetune/espnet/egs3/eurospeech
 
 python run.py \
     --stages train \
-    --train_config ${config_path} \
+    --train_config ${config_path} 
     # --infer_config conf/inference.yaml
 
-# dataset.yaml에서 원하는 데이터로더로 넣어주고 // replace config for data
+# replace config for data + modify dataset.yaml

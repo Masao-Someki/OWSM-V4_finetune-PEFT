@@ -66,7 +66,8 @@ class FleursPortugalDataset(Dataset):
             # "text_raw": transcript,
         }
         return example
-
+# src/data/dataset.py
+        
 class FalarPortugalDataset(Dataset):
     def __init__(self, data_dir, split, ratio=1.0):
         if not (0 < ratio <= 1.0):
@@ -114,6 +115,14 @@ class FalarPortugalDataset(Dataset):
         }
         return example
 
+class FalarPortugalWhisperDataset(FalarPortugalDataset):
+    def __init__(self, split, model_tag, data_dir=None ratio=1.0, text_cleaner=None):
+        super().__init__(data_dir=data_dir, split=split, ratio=ratio)
+        self.transform = WhisperTokenizeTransform(model_tag=model_tag, text_cleaner=text_cleaner)
+
+    def __getitem__(self, idx):
+        ex = super().__getitem__(idx)   # {"speech": waveform, "text": "...", ...}
+        return self.transform(ex)       # {"speech": (T,80), "speech_lengths": T, "text": ids, ...}
 
 class OWSMTokenizeTransform:
     def __init__(self, model_tag, text_cleaner=None, *args, **kwargs):
@@ -138,6 +147,46 @@ class OWSMTokenizeTransform:
         )
         return ret
 
+# class WhisperTokenizeTransform:
+#     def __init__(self, model_tag, text_cleaner=None, *args, **kwargs):
+#         from transformers import WhisperProcessor
+#         self.processor = WhisperProcessor.from_pretrained(model_tag)
+#         self.text_cleaner = TextCleaner(text_cleaner) if text_cleaner else None
+
+#     def tokenize(self, text):
+#         if self.text_cleaner:
+#             text = self.text_cleaner(text)
+#         tokens = self.processor.tokenizer.encode(text, return_tensors="np")
+#         return tokens.flatten()
+
+#     def __call__(self, data):
+#         example = data
+
+#         # preprocessing and calculate new speech_lengths
+#         # pad to 30 seconds (3000 frames after processing)
+#         # devide speech_lengths by 160, and build attention_mask
+#         # convert speech to list of numpy arrays for processor
+#         # speech = [s.detach().cpu().numpy() for s in speech]  # list of (T,)
+#         processed = self.processor(
+#             example['speech'],
+#             sampling_rate=16000,
+#             return_tensors="np",
+#             padding=True,
+#         )
+#         speech = np.transpose(np.squeeze(processed.input_features, axis=0), (1, 0))  # (B, D, T') --> (T', D)
+#         # pad to 30 seconds (3000 frames after processing)
+#         # speech = torch.nn.functional.pad(speech, (0, max(0, 3000 - speech.size(2))), value=0.0)[:, :, :3000]  # (B, D, 3000)
+#         # speech_lengths = torch.tensor([min(l // 160, 3000) for l in speech_lengths])  # (B,)
+
+#         ret = dict(
+#             speech=speech,
+#             text=self.tokenize(example['text']),
+#             text_ctc=self.tokenize(example['text_ctc']),
+#             text_prev=self.tokenize(example['text_prev']),
+#         )
+#         return ret
+
+# add dahee
 class WhisperTokenizeTransform:
     def __init__(self, model_tag, text_cleaner=None, *args, **kwargs):
         from transformers import WhisperProcessor
@@ -162,17 +211,21 @@ class WhisperTokenizeTransform:
             example['speech'],
             sampling_rate=16000,
             return_tensors="np",
-            padding=True,
+            padding=False,
         )
-        speech = np.transpose(np.squeeze(processed.input_features, axis=0), (1, 0))  # (B, D, T') --> (T', D)
+        feat = processed.input_features[0]   # (80, T')
+        T = feat.shape[1]
+        speech = feat.T                      # (T', 80)  
+
         # pad to 30 seconds (3000 frames after processing)
         # speech = torch.nn.functional.pad(speech, (0, max(0, 3000 - speech.size(2))), value=0.0)[:, :, :3000]  # (B, D, 3000)
         # speech_lengths = torch.tensor([min(l // 160, 3000) for l in speech_lengths])  # (B,)
-
+ 
         ret = dict(
-            speech=speech,
-            text=self.tokenize(example['text']),
-            text_ctc=self.tokenize(example['text_ctc']),
-            text_prev=self.tokenize(example['text_prev']),
+            speech=speech.astype(np.float32),
+            speech_lengths=np.array(T, dtype=np.int64),
+            text=self.tokenize(example["text"]),
+            text_ctc=self.tokenize(example["text_ctc"]),
+            text_prev=self.tokenize(example["text_prev"]),
         )
         return ret

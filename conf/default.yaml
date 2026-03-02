@@ -71,7 +71,7 @@ trainer:
 
   logger:
     - _target_: lightning.pytorch.loggers.WandbLogger
-      project: OWSM Finetuning Portugal
+      project: Whisper_Finetuning_Portugal #OWSM Finetuning Portugal
       save_dir: ${exp_dir}/wandb
       name: default_lr${lr}
 
