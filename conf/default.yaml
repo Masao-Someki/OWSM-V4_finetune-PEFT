@@ -2,7 +2,7 @@ recipedir: .
 
 exp_tag: default
 exp_dir: ${recipedir}/exp/${exp_tag}
-stats_dir: /work/nvme/bbjs/clin10/eurospeech_finetune/espnet/egs3/eurospeech_portugal/s2t1/exp/stats
+stats_dir: ${exp_dir}/stats #/work/nvme/bbjs/clin10/eurospeech_finetune/espnet/egs3/eurospeech_portugal/s2t1/exp/stats
 dataset_dir: ""
 seed: 2024
 lr: 5e-5
@@ -71,7 +71,7 @@ trainer:
 
   logger:
     - _target_: lightning.pytorch.loggers.WandbLogger
-      project: OWSM Finetuning Portugal
+      project: Whisper_Finetuning_Portugal #OWSM Finetuning Portugal
       save_dir: ${exp_dir}/wandb
       name: default_lr${lr}
 

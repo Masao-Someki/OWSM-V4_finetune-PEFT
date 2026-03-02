@@ -210,3 +210,17 @@ __marimo__/
 !.pixi/config.toml
 
 *.key
+# local outputs
+exp/
+logs/
+wandb/
+data/
+**/__pycache__/
+*.pyc
+
+# pixi / python env
+.pixi/
+.venv/
+
+# hf cache
+hf_cache/

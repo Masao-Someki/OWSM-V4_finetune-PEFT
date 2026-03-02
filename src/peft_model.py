@@ -177,6 +177,12 @@ class WhisperFinetune(nn.Module):
         text_lengths,
         **kwargs,
     ):
+        # add here: make sure speech_lengths is tensor on correct device + clamp
+        if not torch.is_tensor(speech_lengths):
+            speech_lengths = torch.as_tensor(speech_lengths, device=speech.device)
+        speech_lengths = speech_lengths.to(device=speech.device, dtype=torch.long)
+        speech_lengths = torch.clamp(speech_lengths, max=3000)
+
         # transpose back to (B, D, T') for whisper
         speech = speech.transpose(1, 2)  # (B, D, T')
         # pad to 30 seconds (3000 frames after processing)
@@ -186,11 +192,14 @@ class WhisperFinetune(nn.Module):
         # make decoder input ids and labels
         decoder_input_ids = text[:, :-1][:,:self.model.config.max_target_positions]  # (B, L-1)
         labels = text[:, 1:][:,:self.model.config.max_target_positions]  # (B, L-1)
-        
+        labels = labels.clone() # add dahee
+        labels[labels < 0] = -100 # add dahee
+
         output = self.model(input_features=speech, attention_mask=attention_mask, decoder_input_ids=decoder_input_ids, labels=labels)
         # breakpoint()
         loss = output.loss
-        acc = th_accuracy(output.logits.reshape(-1, output.logits.size(-1)), labels, ignore_label=50256)        # 50256 is ""
+        # acc = th_accuracy(output.logits.reshape(-1, output.logits.size(-1)), labels, ignore_label=50256)        # 50256 is ""
+        acc = th_accuracy(output.logits.reshape(-1, output.logits.size(-1)), labels, ignore_label=-100)        # 50256 is ""
         cer_att, wer_att = None, None
         if not self.training:
             ys_hat = output.logits.argmax(dim=-1)

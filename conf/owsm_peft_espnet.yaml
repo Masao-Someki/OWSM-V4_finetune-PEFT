@@ -11,3 +11,5 @@ model:
   _target_: src.peft_model.OWSMFinetune
   model_tag: espnet/owsm_v4_medium_1B
   peft: ${peft}
+
+stats_dir: ${exp_dir}/stats # add dahee

@@ -1,0 +1,24 @@
+dataset:
+  _target_: espnet3.components.data.data_organizer.DataOrganizer
+  train:
+    # ASR dataset
+    - name:  train_falar # train_eurospeech
+      dataset:
+        # _target_: src.data.dataset.EuroSpeechPortugalDataset
+        # data_dir: /work/nvme/bbjs/dyang10/datasets/eurospeech_portugal # add dahee
+        _target_: src.data.dataset.FalarPortugalWhisperDataset
+        model_tag: openai/whisper-medium
+        split: train
+
+  valid:
+    # ASR data
+    - name:  valid_falar # valid_eurospeech
+      dataset:
+        # _target_: src.data.dataset.EuroSpeechPortugalDataset
+        # data_dir: /work/nvme/bbjs/dyang10/datasets/eurospeech_portugal # add dahee
+        _target_: src.data.dataset.FalarPortugalWhisperDataset
+        model_tag: openai/whisper-medium
+        split: validation
+
+  preprocessor:
+    _target_: src.data.noop_preprocessor.NoOpPreprocessor

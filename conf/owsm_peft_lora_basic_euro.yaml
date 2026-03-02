@@ -1,0 +1,24 @@
+# load default config
+defaults:
+  - default.yaml
+  - dataset_euro.yaml
+  - peft: lora_basic
+
+lr: 5e-5
+exp_tag: euro_peft_lora_basic_lr${lr}
+
+# override trainer settings
+trainer:
+  max_epochs: 1
+
+# override scheduler (no warmup)
+scheduler:
+  _target_: torch.optim.lr_scheduler.ConstantLR
+  factor: 1.0
+  total_iters: 1   # 크게 의미 없음, 그냥 1로 둬도 됨
+
+
+model:
+  _target_: src.peft_model.OWSMFinetune
+  model_tag: espnet/owsm_v4_medium_1B
+  peft: ${peft}
