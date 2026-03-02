@@ -6,9 +6,10 @@ dataset:
       dataset:
         # _target_: src.data.dataset.EuroSpeechPortugalDataset
         # data_dir: /work/nvme/bbjs/dyang10/datasets/eurospeech_portugal # add dahee
-        _target_: src.data.dataset.FalarPortugalWhisperDataset
-        model_tag: openai/whisper-medium
-        split: train
+        _target_: src.data.dataset.FalarPortugalDataset
+        split: train_0
+        num_shards: 16
+        world_shard_size: 2
 
   valid:
     # ASR data
@@ -16,9 +17,9 @@ dataset:
       dataset:
         # _target_: src.data.dataset.EuroSpeechPortugalDataset
         # data_dir: /work/nvme/bbjs/dyang10/datasets/eurospeech_portugal # add dahee
-        _target_: src.data.dataset.FalarPortugalWhisperDataset
-        model_tag: openai/whisper-medium
-        split: validation
-
+        _target_: src.data.dataset.FalarPortugalSingleDataset
+        split: dev
+  
   preprocessor:
-    _target_: src.data.noop_preprocessor.NoOpPreprocessor
+    _target_: src.data.dataset.WhisperTokenizeTransform
+    model_tag: openai/whisper-large-v3

@@ -188,7 +188,7 @@ class WhisperFinetune(nn.Module):
         # pad to 30 seconds (3000 frames after processing)
         speech = torch.nn.functional.pad(speech, (0, max(0, 3000 - speech.size(2))), value=0.0)[:, :, :3000]  # (B, D, 3000)
         attention_mask = torch.arange(3000).expand(len(speech_lengths), 3000).to(speech.device) < speech_lengths.unsqueeze(1)  # (B, 3000)
-        
+
         # make decoder input ids and labels
         decoder_input_ids = text[:, :-1][:,:self.model.config.max_target_positions]  # (B, L-1)
         labels = text[:, 1:][:,:self.model.config.max_target_positions]  # (B, L-1)

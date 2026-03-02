@@ -2,17 +2,34 @@
 defaults:
   - default.yaml
   - dataset_whisper.yaml
-  - peft: lora_basic
+  - peft: lora_basic_whisper
 
 lr: 5e-5
 exp_tag: falar_peft_lora_basic_lr${lr}
 
-# override trainer settings
-trainer:
-  max_epochs: 1
+
+dataloader:
+  collate_fn:
+    _target_: espnet2.train.collate_fn.CommonCollateFn
+    int_pad_value: 50257
+  train:
+    iter_factory:
+    batch_size: 8
+    num_workers: 4
+    shuffle: true
+    pin_memory: true
+    prefetch_factor: 2
+  valid:
+    iter_factory:
+    batch_size: 8
+    num_workers: 4
+    shuffle: false
+    pin_memory: true
+    prefetch_factor: 2
+
 
 # override scheduler (no warmup)
-scheduler:
+override scheduler:
   _target_: torch.optim.lr_scheduler.ConstantLR
   factor: 1.0
   total_iters: 1   # 크게 의미 없음, 그냥 1로 둬도 됨
@@ -20,5 +37,5 @@ scheduler:
 
 model:
   _target_: src.peft_model.WhisperFinetune
-  model_tag: openai/whisper-medium
-  peft: ${peft} # if full finetune >> null
+  model_tag: openai/whisper-large-v3
+  peft: ${peft} # if full finetune >> nul

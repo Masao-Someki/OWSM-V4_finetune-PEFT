@@ -68,34 +68,62 @@ class FleursPortugalDataset(Dataset):
         return example
 # src/data/dataset.py
         
-class FalarPortugalDataset(Dataset):
-    def __init__(self, data_dir, split, ratio=1.0):
+from espnet3.components.data.dataset import ShardedDataset
+
+class FalarPortugalDataset(ShardedDataset):
+    def __init__(self, split="train", ratio=1.0, num_shards=None, world_shard_size=None):
         if not (0 < ratio <= 1.0):
             raise ValueError("ratio must be in the range (0, 1].")
 
-        cache_dir = str(data_dir) if data_dir else None
+        hf_split = "dev" if split == "validation" else split
+        self.dataset = load_dataset(
+            "inesc-id/FalAR",
+            split=hf_split,
+        )
+        self.world_shard_size = world_shard_size
+        self.num_shards = num_shards
 
-        if split == "train":
-            train_splits = [
-                load_dataset(
-                    "inesc-id/FalAR",
-                    split=f"train_{i}",
-                    cache_dir=cache_dir,
-                    trust_remote_code=True,
+        self.dataset = self.dataset.cast_column("wav", Audio())
+        if ratio < 1.0:
+            keep = int(len(self.dataset) * ratio)
+            self.dataset = self.dataset.select(range(keep))
+        self.ratio = ratio
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        item = self.dataset[idx]
+        transcript = str(item["transcription"]).strip()
+            
+        example = {
+            "speech": item["wav"]["array"].astype(np.float32),
+            "text": f"<por><asr><notimestamps> {transcript}",
+            "text_ctc": transcript,
+            "text_prev": "<na>",
+        }
+        return example
+    
+    def shard(self, idx):
+        return FalarPortugalDataset(
+                split=f"train_{idx}",
+                ratio=self.ratio,
+                num_shards=self.num_shards,
+                world_shard_size=self.world_shard_size
                 )
-                for i in range(16)
-            ]
-            self.dataset = concatenate_datasets(train_splits)
-        else:
-            hf_split = "dev" if split == "validation" else split
-            self.dataset = load_dataset(
-                "inesc-id/FalAR",
-                split=hf_split,
-                cache_dir=cache_dir,
-                trust_remote_code=True,
-            )
 
-        self.dataset = self.dataset.cast_column("audio", Audio())
+class FalarPortugalSingleDataset(Dataset):
+    def __init__(self,  split=None, data_dir=None, ratio=1.0):
+        if not (0 < ratio <= 1.0):
+            raise ValueError("ratio must be in the range (0, 1].")
+
+        hf_split = "dev" if split == "validation" else split
+        self.dataset = load_dataset(
+            "inesc-id/FalAR",
+            split=hf_split,
+        )
+
+        self.dataset = self.dataset.cast_column("wav", Audio())
         if ratio < 1.0:
             keep = int(len(self.dataset) * ratio)
             self.dataset = self.dataset.select(range(keep))
@@ -115,14 +143,6 @@ class FalarPortugalDataset(Dataset):
         }
         return example
 
-class FalarPortugalWhisperDataset(FalarPortugalDataset):
-    def __init__(self, split, model_tag, data_dir=None ratio=1.0, text_cleaner=None):
-        super().__init__(data_dir=data_dir, split=split, ratio=ratio)
-        self.transform = WhisperTokenizeTransform(model_tag=model_tag, text_cleaner=text_cleaner)
-
-    def __getitem__(self, idx):
-        ex = super().__getitem__(idx)   # {"speech": waveform, "text": "...", ...}
-        return self.transform(ex)       # {"speech": (T,80), "speech_lengths": T, "text": ids, ...}
 
 class OWSMTokenizeTransform:
     def __init__(self, model_tag, text_cleaner=None, *args, **kwargs):
@@ -223,7 +243,6 @@ class WhisperTokenizeTransform:
  
         ret = dict(
             speech=speech.astype(np.float32),
-            speech_lengths=np.array(T, dtype=np.int64),
             text=self.tokenize(example["text"]),
             text_ctc=self.tokenize(example["text_ctc"]),
             text_prev=self.tokenize(example["text_prev"]),
