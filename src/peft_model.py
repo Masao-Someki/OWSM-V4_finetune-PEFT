@@ -245,51 +245,61 @@ class OWSMV4BaseInferenceModel(nn.Module):
             )
 
     def forward(self, speech):
-        return self.s2t(speech)
+        return {"text": self.s2t(speech)}
 
 class WhisperInferenceModel(nn.Module):
-    def __init__(self, model_tag, checkpoint_path=None, device="cpu"):
+    def __init__(self, model_tag, peft=None, checkpoint_path=None, device="cuda"):
         super().__init__()
-        # get whisper model and preprocessor from transformers
         from transformers import WhisperForConditionalGeneration, AutoProcessor
+
+        self.device = torch.device(device)
+
         self.processor = AutoProcessor.from_pretrained(model_tag)
         self.model = WhisperForConditionalGeneration.from_pretrained(model_tag)
-        self.model = self.model.to(device)
+        self.model = _maybe_apply_peft(self.model, peft)
+
         if checkpoint_path is not None:
             state = torch.load(checkpoint_path, map_location="cpu")["state_dict"]
-            # breakpoint()
-            # self.model.load_state_dict(
-            #     {k.replace("model.model.", "model."): v for k, v in state.items() if k.startswith("model.model.")}
-            # )
-            self.load_state_dict(state)
-        self.model = self.model.to(torch.float32)  # use float32 for stability, can be changed to bf16 later
-    
-    def forward(
-        self,
-        speech,
-    ):
-        # transcribe the input speech waveform (1, T) to text
-        # preprocess speech
+            self.load_state_dict(state, strict=False)
+
+        self.model = self.model.to(self.device, dtype=torch.float32)
+        self.model.eval()
+
+        self.forced_decoder_ids = self.processor.get_decoder_prompt_ids(
+            language="pt",
+            task="transcribe"
+        )
+
+    def forward(self, speech):
+        """
+        speech: Tensor of shape (1, T) or (T,)
+        """
+        #speech = speech.astype(torch.float32)
         processed = self.processor(
             speech,
             sampling_rate=16000,
             return_tensors="pt",
-            padding=True,
+            padding="max_length",
+            truncation=True,
+            max_length=30 * 16000,
         )
-        # pad input features to 30 seconds (3000 frames after processing)
-        attention_mask = torch.arange(3000).expand(len(processed["input_features"]), 3000).to(self.model.device) < (processed["input_features"].size(2))  # (B, 3000)
-        input_features = torch.nn.functional.pad(
-            processed["input_features"],  # (B, D, T')
-            (0, max(0, 3000 - processed["input_features"].size(2))),  # pad to 3000
-            value=0.0,
-        )[:, :, :3000].to(self.model.device)  # (B, D, T')
-        # breakpoint()
-        # generate tokens
-        generated_ids = self.model.generate(input_features=input_features, attention_mask=attention_mask)  # (1, L)
-        # detokenize
-        generated_text = self.processor.batch_decode(generated_ids, skip_special_tokens=True)
-        # return the first (and only) generated text
-        return generated_text[0]
+
+        input_features = processed["input_features"].to(self.device)
+
+        with torch.no_grad():
+            generated_ids = self.model.generate(
+                input_features=input_features,
+                forced_decoder_ids=self.forced_decoder_ids,
+                num_beams=1,
+                max_new_tokens=128,
+            )
+
+        text = self.processor.batch_decode(
+            generated_ids,
+            skip_special_tokens=True
+        )
+
+        return {'text': text[0]}
 
 @lru_cache(maxsize=1)
 def _get_cached_owsm_tokenizer():
@@ -322,12 +332,12 @@ def owsm_output_fn(*, data, model_output, idx):
 
 def whisper_output_fn(*, data, model_output, idx):
     uttid = data.get("uttid", str(idx))
-    hyp = model_output
+    hyp = model_output['text']
     # remove the prefix "<por><asr><notimestamps>"
     hyp = hyp.replace("<por><asr><notimestamps>", "")
     # breakpoint()
     # ref = detokenize(
     #     data["text_raw"]
     # )
-    ref = data["text_raw"]
+    ref = data["text_ctc"]
     return {"uttid": uttid, "hyp": hyp, "ref": ref}

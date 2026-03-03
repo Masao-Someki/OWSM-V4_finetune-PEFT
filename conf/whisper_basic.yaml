@@ -2,10 +2,9 @@
 defaults:
   - default.yaml
   - dataset_whisper.yaml
-  - peft: lora_basic_whisper
 
-lr: 5e-5
-exp_tag: falar_peft_lora_basic_lr${lr}
+lr: 5e-6
+exp_tag: falar_full_whisper_lr${lr}
 
 
 dataloader:
@@ -14,15 +13,15 @@ dataloader:
     int_pad_value: 50257
   train:
     iter_factory:
-    batch_size: 8
-    num_workers: 4
+    batch_size: 2
+    num_workers: 2
     shuffle: true
     pin_memory: true
     prefetch_factor: 2
   valid:
     iter_factory:
-    batch_size: 8
-    num_workers: 4
+    batch_size: 2
+    num_workers: 2
     shuffle: false
     pin_memory: true
     prefetch_factor: 2
@@ -31,8 +30,7 @@ scheduler:
   _target_: espnet2.schedulers.warmup_lr.WarmupLR
   warmup_steps: 4000
 
-
 model:
   _target_: src.peft_model.WhisperFinetune
   model_tag: openai/whisper-large-v3
-  peft: ${peft} # if full finetune >> nul
+  peft: # if full finetune >> nul

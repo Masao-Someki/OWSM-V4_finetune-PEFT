@@ -9,7 +9,7 @@ dataset:
         _target_: src.data.dataset.FalarPortugalDataset
         split: train_0
         num_shards: 16
-        world_shard_size: 2
+        world_shard_size: 4
 
   valid:
     # ASR data
@@ -19,6 +19,12 @@ dataset:
         # data_dir: /work/nvme/bbjs/dyang10/datasets/eurospeech_portugal # add dahee
         _target_: src.data.dataset.FalarPortugalSingleDataset
         split: dev
+
+  test:
+    - name: test_falar
+      dataset:
+        _target_: src.data.dataset.FalarPortugalSingleDataset
+        split: test
   
   preprocessor:
     _target_: src.data.dataset.WhisperTokenizeTransform
