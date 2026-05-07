@@ -77,6 +77,8 @@ jobs:
 
       - name: Commit and push if changed
         run: |
+          echo "Waiting 3 minutes before commit for watcher test..."
+          sleep 180
           if [ -z "$(git status --porcelain -- chatgpt-test.txt)" ]; then
             echo "No changes to commit."
             exit 0

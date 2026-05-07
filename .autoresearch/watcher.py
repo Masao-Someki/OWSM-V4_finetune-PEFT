@@ -3,8 +3,8 @@
 Autoresearch watcher — called by check_and_submit.slurm.
 
 State machine:
-  EXPERIMENT_RUNNING   → poll sacct every 5min → on complete: collect metrics, git push → WAITING_FOR_PR_MERGE
-  WAITING_FOR_PR_MERGE → poll git fetch every 5min → on new commit: git pull, sbatch next → EXPERIMENT_RUNNING
+  RESEARCH_RUNNING            → poll sacct every 1min → on complete: collect metrics, git push → WAITING_FOR_RESEARCH_UPDATE
+  WAITING_FOR_RESEARCH_UPDATE → poll git fetch every 1min → on new commit: git pull, sbatch next → RESEARCH_RUNNING
   IDLE                 → do nothing, do not resubmit (manual restart required)
 """
 from __future__ import annotations
@@ -23,7 +23,17 @@ sys.path.insert(0, str(REPO_ROOT))
 from src.slack_notify import format_status_message, post_slack_message
 
 STATE_PATH = REPO_ROOT / ".autoresearch" / "watcher_state.json"
-RESUBMIT_DELAY_SEC = 300  # 5分
+WATCH_LOG_PATH = REPO_ROOT / ".autoresearch" / "watcher_commit_check.log"
+RESUBMIT_DELAY_SEC = 60  # 1分
+PHASE_RESEARCH_RUNNING = "RESEARCH_RUNNING"
+PHASE_WAITING_FOR_RESEARCH_UPDATE = "WAITING_FOR_RESEARCH_UPDATE"
+PHASE_IDLE = "IDLE"
+
+# Backward-compat aliases
+LEGACY_PHASE_MAP = {
+    "EXPERIMENT_RUNNING": PHASE_RESEARCH_RUNNING,
+    "WAITING_FOR_PR_MERGE": PHASE_WAITING_FOR_RESEARCH_UPDATE,
+}
 
 TERMINAL_STATES = {
     "COMPLETED", "FAILED", "CANCELLED", "TIMEOUT",
@@ -34,6 +44,12 @@ TERMINAL_STATES = {
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+
+def append_watch_log(message: str) -> None:
+    WATCH_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with WATCH_LOG_PATH.open("a", encoding="utf-8") as f:
+        f.write(f"{now_iso()} {message}\n")
 
 
 # ---------------------------------------------------------------------------
@@ -54,6 +70,10 @@ def save_state(state: dict) -> None:
     STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     state["phase_updated_at"] = now_iso()
     STATE_PATH.write_text(json.dumps(state, indent=2, ensure_ascii=False))
+
+
+def normalize_phase(phase: str) -> str:
+    return LEGACY_PHASE_MAP.get(phase, phase)
 
 
 # ---------------------------------------------------------------------------
@@ -300,7 +320,7 @@ def submit_next_experiment(state: dict) -> Optional[str]:
 
     state["array_job_id"] = new_array_job_id
     state["exp_name"] = next_exp_name
-    state["phase"] = "EXPERIMENT_RUNNING"
+    state["phase"] = PHASE_RESEARCH_RUNNING
     state["submitted_at"] = now_iso()
     save_state(state)
 
@@ -383,7 +403,7 @@ def handle_experiment_running(state: dict) -> None:
     except Exception:
         state["last_main_sha"] = ""
 
-    state["phase"] = "WAITING_FOR_PR_MERGE"
+    state["phase"] = PHASE_WAITING_FOR_RESEARCH_UPDATE
     save_state(state)
 
     try:
@@ -413,19 +433,23 @@ def handle_waiting_for_pr(state: dict) -> None:
         new_sha = current_main_sha()
     except Exception as e:
         print(f"[WARN] git fetch failed: {e}")
+        append_watch_log(f"fetch_failed last_sha={last_sha[:8]} error={str(e)[:160]}")
         resubmit_self()
         return
 
     if new_sha == last_sha:
         print(f"[INFO] no new commits on main (sha={last_sha[:8]}). still waiting.")
+        append_watch_log(f"no_new_commit sha={last_sha[:8]}")
         resubmit_self()
         return
 
     print(f"[INFO] new commits detected: {last_sha[:8]} → {new_sha[:8]}")
+    append_watch_log(f"new_commit_detected from={last_sha[:8]} to={new_sha[:8]}")
     try:
         git("pull", "origin", "main")
     except Exception as e:
         print(f"[ERROR] git pull failed: {e}", file=sys.stderr)
+        append_watch_log(f"pull_failed target_sha={new_sha[:8]} error={str(e)[:160]}")
         resubmit_self()
         return
 
@@ -440,9 +464,15 @@ def handle_waiting_for_pr(state: dict) -> None:
 
 def main() -> int:
     state = load_state()
-    phase = state.get("phase", "IDLE")
+    phase = normalize_phase(state.get("phase", PHASE_IDLE))
+    if state.get("phase") != phase:
+        state["phase"] = phase
+        save_state(state)
     print(f"[INFO] watcher tick: phase={phase} time={now_iso()}")
     print(f"[INFO] state: {json.dumps(state)}")
+    append_watch_log(
+        f"tick phase={phase} exp={state.get('exp_name', '')} array_job_id={state.get('array_job_id', '')}"
+    )
 
     post_slack_message(text=format_status_message(
         title=f"Watcher Tick: {phase}",
@@ -452,9 +482,9 @@ def main() -> int:
         ],
     ))
 
-    if phase == "EXPERIMENT_RUNNING":
+    if phase == PHASE_RESEARCH_RUNNING:
         handle_experiment_running(state)
-    elif phase == "WAITING_FOR_PR_MERGE":
+    elif phase == PHASE_WAITING_FOR_RESEARCH_UPDATE:
         handle_waiting_for_pr(state)
     else:
         print(f"[INFO] phase={phase!r}: idle, not resubmitting.")
