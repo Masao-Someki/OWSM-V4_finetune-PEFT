@@ -23,6 +23,7 @@ jobs:
           import json
           import os
           import urllib.request
+          import urllib.error
 
           api_key = os.environ["OPENAI_API_KEY"]
           payload = {
@@ -38,10 +39,37 @@ jobs:
               },
               method="POST",
           )
-          with urllib.request.urlopen(req) as res:
-              body = json.loads(res.read().decode("utf-8"))
+          text = ""
+          try:
+              with urllib.request.urlopen(req) as res:
+                  body = json.loads(res.read().decode("utf-8"))
 
-          text = body.get("output_text", "").strip()
+              text = (body.get("output_text") or "").strip()
+              if not text:
+                  parts = []
+                  for item in body.get("output", []):
+                      for content in item.get("content", []):
+                          if content.get("type") == "output_text":
+                              t = (content.get("text") or "").strip()
+                              if t:
+                                  parts.append(t)
+                  text = "\n".join(parts).strip()
+          except urllib.error.HTTPError as e:
+              err_body = e.read().decode("utf-8", errors="replace")
+              text = (
+                  "ChatGPT側でエラーが出たんだけど\n"
+                  f"status: {e.code}\n"
+                  f"reason: {e.reason}\n"
+                  f"body: {err_body[:500]}"
+              )
+          except Exception as e:
+              text = (
+                  "ChatGPT側でエラーが出たんだけど\n"
+                  f"reason: {type(e).__name__}: {e}"
+              )
+
+          if not text:
+              text = "ChatGPT側でエラーが出たんだけど\nreason: empty response text"
 
           with open("chatgpt-test.txt", "w", encoding="utf-8") as f:
               f.write(text + "\n")
