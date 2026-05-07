@@ -125,7 +125,7 @@ def git(*args, check: bool = True) -> tuple[int, str]:
 
 
 def current_main_sha() -> str:
-    _, sha = git("rev-parse", "origin/main")
+    _, sha = git("rev-parse", "origin/autosearch")
     return sha.strip()
 
 
@@ -446,7 +446,7 @@ def handle_waiting_for_pr(state: dict) -> None:
     print(f"[INFO] new commits detected: {last_sha[:8]} → {new_sha[:8]}")
     append_watch_log(f"new_commit_detected from={last_sha[:8]} to={new_sha[:8]}")
     try:
-        git("pull", "origin", "main")
+        git("pull", "origin", "autosearch")
     except Exception as e:
         print(f"[ERROR] git pull failed: {e}", file=sys.stderr)
         append_watch_log(f"pull_failed target_sha={new_sha[:8]} error={str(e)[:160]}")
