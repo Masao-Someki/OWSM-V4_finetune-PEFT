@@ -1,4 +1,4 @@
-name: Claude Test Writer
+name: ChatGPT Test Writer
 
 on:
   push:
@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  write-claude-test:
+  write-chatgpt-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,18 +43,18 @@ jobs:
 
           text = body.get("output_text", "").strip()
 
-          with open("claude-test.txt", "w", encoding="utf-8") as f:
+          with open("chatgpt-test.txt", "w", encoding="utf-8") as f:
               f.write(text + "\n")
           PY
 
       - name: Commit and push if changed
         run: |
-          if git diff --quiet -- claude-test.txt; then
+          if [ -z "$(git status --porcelain -- chatgpt-test.txt)" ]; then
             echo "No changes to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add claude-test.txt
-          git commit -m "test: update claude-test.txt from ChatGPT"
+          git add chatgpt-test.txt
+          git commit -m "test: update chatgpt-test.txt from ChatGPT"
           git push
