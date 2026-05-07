@@ -210,7 +210,7 @@ __marimo__/
 !.pixi/config.toml
 
 *.key
-# local outputs
+# local outputs — cluster-only, not pushed to GitHub
 exp/
 logs/
 wandb/
@@ -218,9 +218,13 @@ data/
 **/__pycache__/
 *.pyc
 
+# results/ は push する (metrics, eval CSV, log tails)
+# checkpoints は exp/ 以下にあるので上の exp/ 除外で自動的にブロックされる
+
 # pixi / python env
 .pixi/
 .venv/
 
 # hf cache
 hf_cache/
+cache/

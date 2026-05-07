@@ -1,0 +1,60 @@
+name: Claude Test Writer
+
+on:
+  push:
+    branches: [autosearch]
+
+permissions:
+  contents: write
+
+jobs:
+  write-claude-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate text with ChatGPT via OpenAI API
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          api_key = os.environ["OPENAI_API_KEY"]
+          payload = {
+              "model": "gpt-4o-mini",
+              "input": "以下の2行だけをそのまま出力してください。\nhello world\ngithub actionから送ってまーす",
+          }
+          req = urllib.request.Request(
+              "https://api.openai.com/v1/responses",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={
+                  "Authorization": f"Bearer {api_key}",
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+          with urllib.request.urlopen(req) as res:
+              body = json.loads(res.read().decode("utf-8"))
+
+          text = body.get("output_text", "").strip()
+
+          with open("claude-test.txt", "w", encoding="utf-8") as f:
+              f.write(text + "\n")
+          PY
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- claude-test.txt; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add claude-test.txt
+          git commit -m "test: update claude-test.txt from ChatGPT"
+          git push

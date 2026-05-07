@@ -10,9 +10,17 @@ version = "0.1.0"
 [dependencies]
 python = "3.11.*"
 pip = ">=26.0.1,<27"
-datasets = ">=4.6.0,<5"
+setuptools = ">=38.5.1,<74"
+datasets = ">=2.19,<4"
 typeguard = ">=4.5.1,<5"
+pytest = ">=8.0,<9"
+omegaconf = ">=2.3,<3"
 
 #add by dahee
 libstdcxx-ng = ">=13"
 libgcc-ng = ">=13"
+
+[pypi-dependencies]
+espnet = { git = "ssh://git@github.com/Masao-Someki/espnet.git", branch = "espnet3/fix_collect_stats" }
+torch = "==2.8.0"
+torchaudio = "==2.8.0"

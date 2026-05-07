@@ -1,0 +1,23 @@
+# Common metrics config shared across experiments.
+# Keep `train_config_path` aligned with the inference config used in the run.
+
+train_config_path: conf/owsm_peft_lora_basic.yaml
+recipedir: .
+
+exp_tag: default
+exp_dir: ${recipedir}/exp/${exp_tag}
+inference_dir: ${exp_dir}/infer
+
+dataset:
+  test:
+    - name: test_fleurs_all
+
+metrics:
+  - metric:
+      _target_: espnet3.systems.asr.metrics.cer.CER
+      ref_key: ref
+      hyp_key: hyp
+  - metric:
+      _target_: espnet3.systems.asr.metrics.wer.WER
+      ref_key: ref
+      hyp_key: hyp

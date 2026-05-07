@@ -1,0 +1,8 @@
+defaults:
+  - ../../inference.yaml
+
+train_config_path: conf/local_debug_full/generated/runtime_na_0.yaml
+exp_tag: local_debug_full_owsm_peft_lora_basic_a0
+exp_dir: ./exp/local_debug_full/local_debug_full_owsm_peft_lora_basic_a0
+inference_dir: ${exp_dir}/infer
+max_samples_per_subset_test: 10

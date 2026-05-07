@@ -1,0 +1,72 @@
+name: AutoResearch Wave Planner
+
+on:
+  push:
+    branches: [autosearch]
+    paths:
+      - ".autoresearch/latest_status.json"
+      - ".autoresearch/latest_metrics.json"
+      - ".autoresearch/next_goal.md"
+
+concurrency:
+  group: autoresearch-planner
+  cancel-in-progress: false  # キューに積む（スキップしない）
+
+jobs:
+  plan-next-wave:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install anthropic omegaconf pyyaml
+
+      - name: Configure git
+        run: |
+          git config user.name "autoresearch-bot"
+          git config user.email "autoresearch-bot@users.noreply.github.com"
+
+      - name: Run Claude autoresearch driver
+        id: driver
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python .autoresearch/claude_autoresearch_driver.py \
+            --repo-root . \
+            --prompts-dir .autoresearch/prompts \
+            --csv-path .autoresearch/experiments.csv \
+            --autoresearch-dir .autoresearch \
+            --model claude-opus-4-7 \
+            --max-configs 10 \
+            --max-tokens 8192
+
+      - name: Create PR and enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH=$(cat .autoresearch/next_branch.txt 2>/dev/null || echo "")
+          if [ -z "$BRANCH" ]; then
+            echo "No branch to create PR for. Driver may have determined no action needed."
+            exit 0
+          fi
+          EXP_NAME=$(cat .autoresearch/next_exp_name.txt 2>/dev/null || echo "unknown")
+          SUMMARY=$(head -5 .autoresearch/codex_summary.md 2>/dev/null || echo "(no summary)")
+          gh pr create \
+            --title "autoresearch: ${EXP_NAME}" \
+            --body "$(cat .autoresearch/codex_summary.md 2>/dev/null || echo 'AutoResearch wave proposal')" \
+            --base main \
+            --head "$BRANCH" \
+            --label "autoresearch" || echo "PR may already exist"
+          gh pr merge "$BRANCH" --auto --squash || echo "auto-merge may already be enabled"

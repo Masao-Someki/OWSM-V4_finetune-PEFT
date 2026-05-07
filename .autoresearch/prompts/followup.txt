@@ -1,0 +1,7 @@
+# DEPRECATED
+
+このファイルは旧アーキテクチャ (codex exec セッション継続) 用です。
+新アーキテクチャでは GitHub Actions の各実行が独立したステートレス呼び出しとなるため、
+followup/session の概念はなくなりました。
+
+状態は .autoresearch/ ディレクトリのファイルを通じて引き継がれます。

@@ -2,17 +2,25 @@ recipedir: .
 
 exp_tag: default
 exp_dir: ${recipedir}/exp/${exp_tag}
-stats_dir: ${exp_dir}/stats #/work/nvme/bbjs/clin10/eurospeech_finetune/espnet/egs3/eurospeech_portugal/s2t1/exp/stats
+stats_dir: ${exp_dir}/stats
 dataset_dir: ""
 seed: 2024
 lr: 5e-5
+base_model_tag: espnet/owsm_ctc_v4_1B
+
+wandb:
+  entity: ${oc.env:WANDB_ENTITY,masao-someki}
+  project: ${oc.env:WANDB_PROJECT,owsm-peft-autoresearch}
+  group: ${oc.env:WANDB_GROUP,manual}
+  job_type: ${oc.env:WANDB_JOB_TYPE,train}
+  name: ${exp_tag}_lr${lr}
 
 num_device: 4
 num_nodes: 1
 
 parallel:
   env: local
-  n_workers: 1
+  n_workers: 4
 
 optimizer:
   _target_: torch.optim.AdamW
@@ -63,17 +71,20 @@ tokenizer:
   save_path: data/bpe_50000
 
 trainer:
-  max_epochs: 4
+  max_epochs: 3
   precision: bf16
   accumulate_grad_batches: 2
   log_every_n_steps: 100
   gradient_clip_val: 5
+  limit_train_batches: 100
 
   logger:
     - _target_: lightning.pytorch.loggers.WandbLogger
-      project: Whisper_Finetuning_Portugal #OWSM Finetuning Portugal
+      entity: ${wandb.entity}
+      project: ${wandb.project}
       save_dir: ${exp_dir}/wandb
-      name: default_lr${lr}
+      group: ${wandb.group}
+      job_type: ${wandb.job_type}
+      name: ${wandb.name}
 
   strategy: auto
-

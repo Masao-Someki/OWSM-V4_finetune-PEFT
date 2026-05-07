@@ -1,50 +1,58 @@
-# Inference/decoding configuration for LibriSpeech 100h.
-# Keeps only the keys required by the infer stage.
+# Common inference config shared across experiments.
+# Override `train_config_path` per run (e.g., runtime train config) so exp paths propagate.
+
+train_config_path: conf/owsm_peft_lora_basic.yaml
+recipedir: .
+
+exp_tag: default
+exp_dir: ${recipedir}/exp/${exp_tag}
+inference_dir: ${exp_dir}/infer
+
+fleurs_repo: ${load_yaml:conf/dataset.yaml,fleurs_repo}
+fleurs_subsets_test: ${load_yaml:conf/dataset.yaml,fleurs_subsets_test}
+fleurs_cache_dir: ${load_yaml:conf/dataset.yaml,fleurs_cache_dir}
+lang_sym_mode: ${load_yaml:conf/dataset.yaml,lang_sym_mode}
+max_samples_per_subset_test: ${load_yaml:conf/dataset.yaml,max_samples_per_subset_test}
+
 dataset:
   _target_: espnet3.components.data.data_organizer.DataOrganizer
   test:
-    - name: test_falar
+    - name: test_fleurs_all
       dataset:
-        _target_: src.data.dataset.FalarPortugalSingleDataset
+        _target_: src.data.dataset.FleursDataset
         split: test
+        hf_repo: ${fleurs_repo}
+        hf_subsets: ${fleurs_subsets_test}
+        cache_dir: ${fleurs_cache_dir}
+        lang_sym_mode: ${lang_sym_mode}
+        return_lang_sym: true
+        max_samples_per_subset: ${max_samples_per_subset_test}
+
+model:
+  _target_: src.peft_model.OWSMV4BaseInferenceModel
+  model_tag: ${load_yaml:conf/default.yaml,base_model_tag}
+  lang_sym: <eng>
+  # Set to a checkpoint path when evaluating a finetuned run.
+  # Example: ${exp_dir}/checkpoints/last.ckpt
+  checkpoint_path: null
 
 parallel:
-  env: slurm
-  n_workers: 4
-  options:
-    queue: general
-    cores: 8
-    processes: 1
-    memory: 64GB
-    walltime: "04:00:00"
-
-    job_extra_directives:
-      - "--gres=gpu:1"
-    job_script_prologue:
-      - "source ./path.sh"
-    local_directory: "./_dask_tmp"
-
-# Root output directory for .scp files written by the infer stage.
-exp_tag: ${load_yaml:conf/whisper_basic.yaml,exp_tag}
-inference_dir: exp/${exp_tag}/infer
-
-# Inference model: load the trained config/checkpoint.
-model:
-  _target_: src.peft_model.WhisperInferenceModel
-  model_tag: openai/whisper-large-v3
-  checkpoint_path: exp/${exp_tag}/epoch0_step3125_valid.loss.ckpt
-  device: cuda
+  env: local
+  n_workers: 1
 
 # Generic ESPnet3 inference entrypoint settings.
-input_key: text
-output_fn: src.peft_model.whisper_output_fn
-
+input_key:
+  - speech
+  - lang_sym
+output_fn: src.peft_model.owsm_output_fn
+idx_key: uttid
+output_keys:
+  - hyp
+  - ref
+batch_size: null
 
 provider:
   _target_: espnet3.systems.base.inference_provider.InferenceProvider
-  params:
-    input_key: text
-    output_fn: src.peft_model.whisper_output_fn
 
 runner:
   _target_: espnet3.systems.base.inference_runner.InferenceRunner

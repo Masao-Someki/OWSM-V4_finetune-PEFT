@@ -1,0 +1,10 @@
+{
+  "phase": "IDLE",
+  "array_job_id": "",
+  "exp_name": "",
+  "next_exp_name": "",
+  "last_main_sha": "",
+  "submitted_at": "",
+  "phase_updated_at": "",
+  "_note": "Set phase to EXPERIMENT_RUNNING and fill array_job_id/exp_name to start the loop. Then: sbatch scripts/check_and_submit.slurm"
+}

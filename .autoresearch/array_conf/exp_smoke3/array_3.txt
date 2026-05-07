@@ -1,0 +1,3 @@
+conf/owsm_peft_lora_basic.yaml
+conf/owsm_peft_espnet.yaml
+conf/owsm_peft_adalora.yaml

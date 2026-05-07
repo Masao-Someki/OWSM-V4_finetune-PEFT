@@ -1,9 +1,0 @@
-# RandLoRA
-type: randlora
-r: 32
-randlora_alpha: 640
-randlora_dropout: 0.0
-projection_prng_key: 0
-save_projection: true
-bias: none
-target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]

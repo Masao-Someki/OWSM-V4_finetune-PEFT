@@ -9,12 +9,6 @@ exp_tag: sanity_lr${lr}
 
 model:
   _target_: src.model.OWSMFinetune
-  model_tag: espnet/owsm_v4_medium_1B
-
+  model_tag: ${base_model_tag}
 trainer:
   fast_dev_run: false
-  logger:
-    - _target_: lightning.pytorch.loggers.WandbLogger
-      project: ESPnet3 development
-      save_dir: ${exp_dir}/wandb
-      name: ${exp_tag}_lr${lr}

@@ -1,0 +1,23 @@
+# DEPRECATED
+
+このファイルは旧アーキテクチャ (codex exec CLI) 用のプロンプトテンプレートです。
+新アーキテクチャでは src/bin/claude_autoresearch_driver.py が system.txt と動的なユーザーメッセージを
+使って Claude API を呼びます。
+
+旧プロンプト内容は下記に保存しています（参照用）:
+
+---
+
+You are the experiment planner for OWSM PEFT autoresearch.
+
+Context:
+- Repository root: {repo_root}
+- experiments csv: {csv_path}
+- Search space policy: prompts/search_space.md (must read first)
+- Checklist: notes/autoresearch_checklist.md
+- Findings log: notes/autoresearch_findings.md
+- Previous experiment wave:
+  - exp_name: {exp_name}
+  - array_job_id: {array_job_id}
+  - mode: {mode}
+  - max_configs: {max_configs}

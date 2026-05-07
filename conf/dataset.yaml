@@ -1,22 +1,37 @@
+recipedir: .
+fleurs_repo: google/fleurs
+fleurs_subsets_train: all
+fleurs_subsets_valid: all
+fleurs_subsets_test: all
+fleurs_cache_dir: ${recipedir}/cache/fleurs
+lang_sym_mode: from_subset
+max_samples_per_subset_train: null
+max_samples_per_subset_valid: 50
+max_samples_per_subset_test: null
+
 dataset:
   _target_: espnet3.components.data.data_organizer.DataOrganizer
   train:
-    # ASR dataset
-    - name:  train_falar # train_eurospeech
+    - name: train_fleurs_all
       dataset:
-        # _target_: src.data.dataset.EuroSpeechPortugalDataset
-        # data_dir: /work/nvme/bbjs/dyang10/datasets/eurospeech_portugal # add dahee
-        _target_: src.data.dataset.FalarPortugalDataset
+        _target_: src.data.dataset.FleursDataset
         split: train
+        hf_repo: ${fleurs_repo}
+        hf_subsets: ${fleurs_subsets_train}
+        cache_dir: ${fleurs_cache_dir}
+        lang_sym_mode: ${lang_sym_mode}
+        max_samples_per_subset: ${max_samples_per_subset_train}
 
   valid:
-    # ASR data
-    - name:  valid_falar # valid_eurospeech
+    - name: valid_fleurs_all
       dataset:
-        # _target_: src.data.dataset.EuroSpeechPortugalDataset
-        # data_dir: /work/nvme/bbjs/dyang10/datasets/eurospeech_portugal # add dahee
-        _target_: src.data.dataset.FalarPortugalDataset
+        _target_: src.data.dataset.FleursDataset
         split: validation
+        hf_repo: ${fleurs_repo}
+        hf_subsets: ${fleurs_subsets_valid}
+        cache_dir: ${fleurs_cache_dir}
+        lang_sym_mode: ${lang_sym_mode}
+        max_samples_per_subset: ${max_samples_per_subset_valid}
 
   preprocessor:
     _target_: espnet2.train.preprocessor.S2TPreprocessor
