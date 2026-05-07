@@ -117,7 +117,10 @@ def all_terminal(states: dict[str, str]) -> bool:
 # ---------------------------------------------------------------------------
 
 def git(*args, check: bool = True) -> tuple[int, str]:
-    rc, out, err = run_cmd(["git", "-C", str(REPO_ROOT)] + list(args))
+    env = os.environ.copy()
+    # Avoid OpenSSL mismatch caused by pixi-provided libs in LD_LIBRARY_PATH.
+    env.pop("LD_LIBRARY_PATH", None)
+    rc, out, err = run_cmd(["/usr/bin/git", "-C", str(REPO_ROOT)] + list(args), env=env)
     if check and rc != 0:
         print(f"[ERROR] git {' '.join(args)} failed: {err}", file=sys.stderr)
         raise RuntimeError(f"git {args[0]} failed (rc={rc}): {err}")
