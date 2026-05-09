@@ -1,31 +1,26 @@
 # Wave Summary
 
 ## Why this config set
-
-This is the first (bootstrap) wave for the project. No prior experiments are present (experiments.csv is empty). Thus, we are focusing on the **primary axis: PEFT method choice** using the core candidate PEFT methods discovered through web research and referenced in planning.md. Candidate methods are:
-- **LoRA**: Standard strong baseline for PEFT ([PEFT paper](https://arxiv.org/abs/2106.09685), [HuggingFace PEFT](https://huggingface.co/docs/peft/index)).
-- **AdaLoRA**: Adaptive LoRA variant, recent and widely benchmarked ([AdaLoRA paper](https://arxiv.org/abs/2303.10512)).
-- **IA3**: Lightweight and fast well-known adapter ([IA3 paper](https://arxiv.org/abs/2205.05638)).
-- **VERA**: Recent PEFT technique with promising results ([VERA repo](https://github.com/microsoft/VERA)).
-- **OFT**: Output Feature Tuning, used in recent PEFT literature ([PEFT: A Survey](https://arxiv.org/abs/2309.07308)).
-
-All five configs share common hyperparameters with LoRA-style models for parameters such as `r`, `alpha`, and `dropout` unless the method doesn't require them (e.g., IA3).
+- Bootstrap wave: No prior experiments in experiments.csv, so exploration must cover all practically supported PEFT methods as the first baseline.
+- All PEFT methods enumerated in planning.md are included here: LORA (baseline/best-supported), AdaLoRA (adaptive LoRA), IA3 (scaling vectors), OFT (Output-Focused Tuning), and Prefix Tuning.
+- Parameter values are based on standard/official defaults for each method in ASR/transformer large-model community use (see links below).
+- All configs use lr=5e-5 as a safe and established PEFT learning rate; other main axes (dataset, model) fixed to prompt defaults.
 
 ## Search-space coverage
-
-- **Axis covered:** PEFT method (categorical)
-- **Values:** lora, adalora, ia3, vera, oft
-- All other axes remain at base defaults; the next wave will sweep the best method over additional axes.
+- Current axis: "PEFT method family/type". Candidates: lora, adalora, ia3, oft, prefix.
+- Other axes (PEFT-specific parameters, learning rate, optimizer, warmup, batch size, max_epochs) deferred until method is chosen.
 
 ## Checklist updates
-- [x] PEFT method coverage: first exploratory round for all major PEFT types
-- [ ] Peft parameters: pending
-- [ ] Learning rate: pending
-- [ ] Optimizer: pending
-- [ ] Warmup steps: pending
-- [ ] Batch size: pending
-- [ ] Max epochs: pending
+- [x] Initialize: method-family categorical axis coverage started.
+- [ ] PEFT-specific param/ablation coverage — pending later waves.
+- [ ] Stability check, debug, and smoke test to be run with this set.
 
 ## Next action
+- Run/debug this batch. Compare validation metric (CER/WER).
+- If all finish without failure, move to PEFT-parameter ablation for the best-performing method(s).
+- If instability arises with any method, try simplified configs or reduce parameter values locally.
 
-Once results for all methods are available, shortlist the best method(s) and advance to exploring PEFT parameter sweeps for the best-performing one, per the roadmap. If instability or failure in any config, lock down and debug before expanding parameter search.
+## Web research summary
+- PEFT method support for speech/ASR: based on [HuggingFace PEFT docs](https://huggingface.co/docs/peft/index), [LoRA paper](https://arxiv.org/abs/2106.09685), [AdaLoRA](https://arxiv.org/abs/2303.10512), [IA3 in PEFT](https://arxiv.org/abs/2205.05638), OFT [source](https://github.com/huggingface/peft/pull/409) and prefix tuning [paper](https://arxiv.org/abs/2101.00190).
+- Common best-practice hyperparameters: r=8, alpha=16 for LoRA/AdaLoRA, prefix_length=30 for prefix, dropout=0.05 standard in community for regularization.
+
