@@ -1,0 +1,1 @@
+- Initial wave configurations are established to explore various methods, setting up the groundwork for subsequent exploratory and fine-tuning phases. 
