@@ -1,0 +1,13 @@
+defaults:
+  - ../../owsm_peft_espnet
+
+lr: 2e-5
+exp_tag: exp_20260509_004521_espnet_lr2e-5
+
+peft:
+  type: espnet
+  r: 4
+  espnet_alpha: 8
+  espnet_dropout: 0.2
+  task_type: seq_2_seq_lm
+  target_modules: ["linear_q", "linear_k", "linear_v"]
