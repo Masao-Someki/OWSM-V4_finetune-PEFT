@@ -84,5 +84,3 @@ C) Local files in this repo
 - WRITE_HERE
 
 ---
-
-debug
