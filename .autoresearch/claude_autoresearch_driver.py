@@ -368,14 +368,13 @@ def run_git(*args: str, cwd: Path, check: bool = True) -> tuple[int, str]:
     return r.returncode, r.stdout.strip()
 
 
-def commit_to_branch(repo_root: Path, next_exp_name: str, written_files: list[str]) -> str:
-    branch = f"autoresearch/{next_exp_name}"
-    run_git("checkout", "-b", branch, cwd=repo_root)
+def commit_to_current_branch(repo_root: Path, next_exp_name: str, written_files: list[str]) -> str:
+    _, branch = run_git("rev-parse", "--abbrev-ref", "HEAD", cwd=repo_root)
+    branch = branch.strip()
     run_git("add", "--", *written_files, cwd=repo_root)
     _, diff = run_git("diff", "--cached", "--name-only", cwd=repo_root, check=False)
     if not diff.strip():
         print("[WARN] nothing staged after add")
-        run_git("checkout", "-", cwd=repo_root, check=False)
         return ""
     run_git(
         "-c", "user.name=autoresearch-bot",
@@ -520,9 +519,9 @@ def main() -> int:
     }, indent=2), encoding="utf-8")
     written.append(".autoresearch/store/bootstrap_done.json")
 
-    # Create branch and push.
+    # Commit and push on the current branch.
     try:
-        branch = commit_to_branch(repo_root, confirmed_exp_name, written)
+        branch = commit_to_current_branch(repo_root, confirmed_exp_name, written)
     except Exception as e:
         print(f"[ERROR] git branch/commit failed: {e}", file=sys.stderr)
         try_notify("AutoResearch: Git Commit Failed", [f"- error: `{str(e)[:200]}`"])
@@ -532,7 +531,7 @@ def main() -> int:
         print("[ERROR] branch creation failed (nothing to commit)")
         return 1
 
-    # Write next_branch for the GitHub Actions PR creation step.
+    # Keep writing next_branch for compatibility with external tooling.
     (autoresearch_dir / "store" / "next_branch.txt").write_text(branch)
     print(f"[INFO] done. branch={branch} exp_name={confirmed_exp_name}")
 
