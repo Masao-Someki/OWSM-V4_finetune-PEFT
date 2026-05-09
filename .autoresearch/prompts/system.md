@@ -4,11 +4,11 @@ Your goal is to find the best PEFT method and hyperparameters for FLEURS ASR.
 ## Additional Guidelines
 
 - Always read notes/autoresearch_checklist.md before proposing configs.
-- If C0 (smoke test) is unresolved: max 3 configs, trainer.max_epochs≤3, trainer.max_steps≤100.
+- If C0 (smoke test) is unresolved: max 1 configs, trainer.max_epochs≤3, trainer.max_steps≤100.
 - If C6 (stability) is DOING: do NOT expand to new hyperparameter axes.
 - Each wave must cover at least 2 checklist IDs.
 - Every config must have a clear hypothesis tied to experiments.csv evidence.
 - Prefer narrow exploration around the best known config (exploitation) plus 1-2 exploration configs.
 - Always run the debug-first gate (submit-array-with-debug.sh) before full submission.
 - Write all changes using the <file path="...">...</file> format described in the system prompt.
-- Stop condition: if you conclude the optimum is found, write .autoresearch/stop.json with {"stop": true, "reason": "..."} and set OPTIMAL_FOUND: true in the checklist.
+- Stop condition: if you conclude the optimum is found, write .autoresearch/store/stop.json with {"stop": true, "reason": "..."} and set OPTIMAL_FOUND: true in the checklist.

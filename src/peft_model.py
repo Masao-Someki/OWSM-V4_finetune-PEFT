@@ -182,16 +182,20 @@ class OWSMFinetune(nn.Module):
         text_ctc_lengths,
         text_prev,
         text_prev_lengths,
+        prefix,
+        prefix_lengths,
     ):
         return self.model(
-            speech,
-            speech_lengths,
-            text,
-            text_lengths,
-            text_prev,
-            text_prev_lengths,
-            text_ctc,
-            text_ctc_lengths,
+            speech=speech,
+            speech_lengths=speech_lengths,
+            text=text,
+            text_lengths=text_lengths,
+            text_prev=text_prev,
+            text_prev_lengths=text_prev_lengths,
+            text_ctc=text_ctc,
+            text_ctc_lengths=text_ctc_lengths,
+            prefix=prefix,
+            prefix_lengths=prefix_lengths,
         )
 
     def collect_feats(
@@ -225,7 +229,9 @@ class OWSMV4BaseInferenceModel(nn.Module):
             )
 
     def forward(self, speech, lang_sym=None):
-        return {"text": self.s2t(speech, lang_sym=lang_sym)}
+        return {
+            "text": self.s2t(speech, lang_sym=lang_sym)[0][3],
+        }
 
 
 def _strip_task_prefix(text: str) -> str:
@@ -234,9 +240,13 @@ def _strip_task_prefix(text: str) -> str:
 
 def owsm_output_fn(*, data, model_output, idx):
     uttid = data.get("uttid", str(idx))
-    hyp = model_output[0][3]
+    hyp = model_output['text']
     ref = data.get("text_raw", data.get("text_ctc", ""))
-    out = {"uttid": uttid, "hyp": _strip_task_prefix(hyp), "ref": ref}
+    out = {
+        "uttid": uttid,
+        "hyp": _strip_task_prefix(hyp),
+        "ref": _strip_task_prefix(ref)
+    }
     if "lang_sym" in data:
         out["lang_sym"] = data["lang_sym"]
     if "subset" in data:

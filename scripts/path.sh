@@ -3,17 +3,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# export HF_HOME=$(pwd)/hub
-export HF_HOME=/work/nvme/bbjs/dyang10/hf_cache
+export HF_HOME=$(pwd)/hub
 export LD_LIBRARY_PATH="/u/someki1/.pixi/envs/ffmpeg/lib:${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="/u/someki1/.pixi/envs/icu/lib:${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="/u/someki1/.pixi/envs/readline/lib:${LD_LIBRARY_PATH}"
 export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
 
-export ESPNET_ROOT=/work/nvme/bbjs/dyang10/espnet
-export PYTHONPATH="${ESPNET_ROOT}:${REPO_ROOT}:${PYTHONPATH:-}"
-
-export OWSM_ROOT=/work/nvme/bbjs/dyang10/OWSM/OWSM-V4_finetune-PEFT
 export ESPNET_MODEL_ZOO_CACHE="${REPO_ROOT}/.cache/espnet_model_zoo"
 mkdir -p "${ESPNET_MODEL_ZOO_CACHE}"
 

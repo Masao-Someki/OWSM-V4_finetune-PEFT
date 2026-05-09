@@ -8,30 +8,32 @@ exp_tag: default
 exp_dir: ${recipedir}/exp/${exp_tag}
 inference_dir: ${exp_dir}/infer
 
-fleurs_repo: ${load_yaml:conf/dataset.yaml,fleurs_repo}
-fleurs_subsets_test: ${load_yaml:conf/dataset.yaml,fleurs_subsets_test}
-fleurs_cache_dir: ${load_yaml:conf/dataset.yaml,fleurs_cache_dir}
-lang_sym_mode: ${load_yaml:conf/dataset.yaml,lang_sym_mode}
-max_samples_per_subset_test: ${load_yaml:conf/dataset.yaml,max_samples_per_subset_test}
+fleurs_repo: google/fleurs
+fleurs_subsets_test: pt_br
+fleurs_cache_dir: ${recipedir}/cache/fleurs_hf_test
+lang_sym_mode: from_subset
+max_samples_per_subset_test: null
 
 dataset:
   _target_: espnet3.components.data.data_organizer.DataOrganizer
+  recipe_dir: ${recipedir}
   test:
     - name: test_fleurs_all
-      dataset:
-        _target_: src.data.dataset.FleursDataset
+      data_src_args:
         split: test
         hf_repo: ${fleurs_repo}
         hf_subsets: ${fleurs_subsets_test}
         cache_dir: ${fleurs_cache_dir}
+        shuffle: false
         lang_sym_mode: ${lang_sym_mode}
         return_lang_sym: true
         max_samples_per_subset: ${max_samples_per_subset_test}
 
 model:
   _target_: src.peft_model.OWSMV4BaseInferenceModel
-  model_tag: ${load_yaml:conf/default.yaml,base_model_tag}
+  model_tag: espnet/owsm_ctc_v4_1B
   lang_sym: <eng>
+  device: cuda
   # Set to a checkpoint path when evaluating a finetuned run.
   # Example: ${exp_dir}/checkpoints/last.ckpt
   checkpoint_path: null

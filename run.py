@@ -52,7 +52,6 @@ if __name__ == "__main__":
     _patch_local_parallel_behavior()
     parser = build_parser(
         stages=DEFAULT_STAGES,
-        add_arguments=None,  # You can create your parser and put here if needed
     )
     args, stages_to_run = parse_cli_and_stage_args(parser, stages=DEFAULT_STAGES)
 

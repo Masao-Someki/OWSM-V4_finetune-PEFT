@@ -15,7 +15,7 @@ wandb:
   job_type: ${oc.env:WANDB_JOB_TYPE,train}
   name: ${exp_tag}_lr${lr}
 
-num_device: 4
+num_device: 1
 num_nodes: 1
 
 parallel:
@@ -38,26 +38,12 @@ dataloader:
     int_pad_value: -1
   train:
     iter_factory:
-      _target_: espnet2.iterators.sequence_iter_factory.SequenceIterFactory
-      shuffle: true
-      collate_fn: ${dataloader.collate_fn}
-      batches:
-        type: numel
-        shape_files:
-          - ${stats_dir}/train/feats_shape
-        batch_size: 4
-        batch_bins: 200000
+    shuffle: true
+    batch_size: 4
   valid:
     iter_factory:
-      _target_: espnet2.iterators.sequence_iter_factory.SequenceIterFactory
-      shuffle: false
-      collate_fn: ${dataloader.collate_fn}
-      batches:
-        type: numel
-        shape_files:
-          - ${stats_dir}/valid/feats_shape
-        batch_size: 4
-        batch_bins: ${dataloader.train.iter_factory.batches.batch_bins}
+    shuffle: false
+    batch_size: 4
 
 best_model_criterion:
   - - valid/loss
@@ -71,7 +57,7 @@ tokenizer:
   save_path: data/bpe_50000
 
 trainer:
-  max_epochs: 3
+  max_epochs: 2
   precision: bf16
   accumulate_grad_batches: 2
   log_every_n_steps: 100

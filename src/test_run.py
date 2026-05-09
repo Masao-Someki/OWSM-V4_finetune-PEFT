@@ -86,7 +86,7 @@ def main() -> int:
         cmd = [
             "bash",
             "-lc",
-            f". ./scripts/path.sh && python run.py --stages {args.stages} --train_config {tmp_path}",
+            f". ./scripts/path.sh && python run.py --stages {args.stages} --training_config {tmp_path}",
         ]
         print(f"[INFO] running: {' '.join(cmd)}")
         proc = subprocess.run(cmd, cwd=repo_root, env=os.environ.copy())

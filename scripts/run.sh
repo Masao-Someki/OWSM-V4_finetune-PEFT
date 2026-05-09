@@ -23,4 +23,4 @@ config_path=conf/owsm_peft_lora_basic.yaml
 
 python run.py \
     --stages train \
-    --train_config ${config_path}
+    --training_config ${config_path}

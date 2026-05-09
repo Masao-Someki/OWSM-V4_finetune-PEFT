@@ -1,5 +1,0 @@
-# DEPRECATED
-
-このファイルは旧アーキテクチャ用です。
-新アーキテクチャでは claude_autoresearch_driver.py が .autoresearch/latest_error.log を
-ユーザーメッセージに直接埋め込んでエラー分析を依頼します。

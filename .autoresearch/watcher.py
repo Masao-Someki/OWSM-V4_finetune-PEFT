@@ -22,9 +22,11 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from src.slack_notify import format_status_message, post_slack_message
 
-STATE_PATH = REPO_ROOT / ".autoresearch" / "watcher_state.json"
-WATCH_LOG_PATH = REPO_ROOT / ".autoresearch" / "watcher_commit_check.log"
-RESUBMIT_DELAY_SEC = 60  # 1分
+STORE_DIR = REPO_ROOT / ".autoresearch" / "store"
+STATE_PATH = STORE_DIR / "watcher_state.json"
+WATCH_LOG_PATH = STORE_DIR / "logs" / "watcher_commit_check.log"
+LEGACY_STATE_PATH = REPO_ROOT / ".autoresearch" / "watcher_state.json"
+RESUBMIT_DELAY_SEC = 60  # 1 minute
 PHASE_RESEARCH_RUNNING = "RESEARCH_RUNNING"
 PHASE_WAITING_FOR_RESEARCH_UPDATE = "WAITING_FOR_RESEARCH_UPDATE"
 PHASE_IDLE = "IDLE"
@@ -57,6 +59,12 @@ def append_watch_log(message: str) -> None:
 # ---------------------------------------------------------------------------
 
 def load_state() -> dict:
+    if not STATE_PATH.exists() and LEGACY_STATE_PATH.exists():
+        try:
+            STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            STATE_PATH.write_text(LEGACY_STATE_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+        except Exception:
+            pass
     if not STATE_PATH.exists():
         return {"phase": "IDLE"}
     try:
@@ -89,7 +97,7 @@ def run_cmd(args: list[str], **kwargs) -> tuple[int, str, str]:
 
 
 def query_array_states(array_job_id: str) -> dict[str, str]:
-    """sacct で array_job_id の全タスク状態を返す。{job_id_task: state}"""
+    """Return task states for an array_job_id via sacct. {job_id_task: state}"""
     rc, out, _ = run_cmd([
         "sacct", "-n", "-P", "-j", array_job_id,
         "--format=JobIDRaw,State",
@@ -140,30 +148,30 @@ def has_new_commits(last_sha: str) -> bool:
 
 def git_push_results(exp_name: str = "") -> None:
     """
-    実験結果を main へ push。
+    Push experiment results to main.
 
     Pushed:
       .autoresearch/   — state files (metrics JSON, error log, next_goal, etc.)
       experiments.csv  — run metadata with wer/cer
       results/{exp_name}/ — eval metrics, eval CSV, train log tails, error log tails
-      notes/           — checklist / findings (変更があれば)
+      notes/           — checklist / findings (if changed)
 
     NOT pushed:
-      exp/             — gitignore 済み (checkpoints 含む)
-      logs/            — gitignore 済み (raw Slurm logs)
+      exp/             — gitignored (includes checkpoints)
+      logs/            — gitignored (raw Slurm logs)
     """
     git("add",
-        ".autoresearch/watcher_state.json",
-        ".autoresearch/latest_status.json",
-        ".autoresearch/latest_metrics.json",
-        ".autoresearch/latest_error.log",
-        ".autoresearch/next_goal.md",
-        "experiments.csv",
+        ".autoresearch/store/watcher_state.json",
+        ".autoresearch/store/latest_status.json",
+        ".autoresearch/store/latest_metrics.json",
+        ".autoresearch/store/latest_error.log",
+        ".autoresearch/store/next_goal.md",
+        ".autoresearch/store/experiments.csv",
         check=False)
 
     git("add", ".autoresearch/notes/", check=False)
 
-    # results/{exp_name}/ を追加（存在する場合）
+    # Stage results/{exp_name}/ when present.
     if exp_name:
         results_dir = REPO_ROOT / ".autoresearch" / "results" / exp_name
         if results_dir.exists():
@@ -196,15 +204,15 @@ def collect_metrics(exp_name: str, array_job_id: str) -> dict:
         sys.executable, str(REPO_ROOT / ".autoresearch" / "collect_metrics.py"),
         "--exp-name", exp_name,
         "--array-job-id", array_job_id,
-        "--csv-path", str(REPO_ROOT / ".autoresearch" / "experiments.csv"),
-        "--output", str(REPO_ROOT / ".autoresearch" / "latest_metrics.json"),
-        "--error-output", str(REPO_ROOT / ".autoresearch" / "latest_error.log"),
+        "--csv-path", str(REPO_ROOT / ".autoresearch" / "store" / "experiments.csv"),
+        "--output", str(REPO_ROOT / ".autoresearch" / "store" / "latest_metrics.json"),
+        "--error-output", str(REPO_ROOT / ".autoresearch" / "store" / "latest_error.log"),
     ], cwd=str(REPO_ROOT))
     if rc != 0:
         print(f"[WARN] collect_metrics failed (rc={rc}): {err}", file=sys.stderr)
         return {}
     print(out)
-    metrics_path = REPO_ROOT / ".autoresearch" / "latest_metrics.json"
+    metrics_path = REPO_ROOT / ".autoresearch" / "store" / "latest_metrics.json"
     if metrics_path.exists():
         try:
             return json.loads(metrics_path.read_text())
@@ -224,7 +232,7 @@ def write_latest_status(exp_name: str, array_job_id: str, task_states: dict[str,
         "finished_at": now_iso(),
         "failed_task_ids": failed,
     }
-    out = REPO_ROOT / ".autoresearch" / "latest_status.json"
+    out = REPO_ROOT / ".autoresearch" / "store" / "latest_status.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(status, indent=2, ensure_ascii=False))
 
@@ -244,7 +252,7 @@ def write_next_goal(exp_name: str, array_job_id: str, metrics: dict) -> None:
         f"- Best WER: `{best_wer}`\n"
         f"- Best run: `{best_uid}`\n"
         f"- Failed tasks: `{failed_count}`\n"
-        f"- See `.autoresearch/latest_metrics.json` for full details.\n\n"
+        f"- See `.autoresearch/store/latest_metrics.json` for full details.\n\n"
         f"## Instruction\n"
         f"1. Read `notes/autoresearch_checklist.md` and prioritize unresolved IDs.\n"
         f"2. Read `experiments.csv` and summarize completed/failed results.\n"
@@ -252,7 +260,7 @@ def write_next_goal(exp_name: str, array_job_id: str, metrics: dict) -> None:
         f"4. If C0 is unresolved: max 3 configs, trainer.max_epochs≤3.\n"
         f"5. Write all output files using `<file path=\"...\">...</file>` format.\n"
     )
-    (REPO_ROOT / ".autoresearch" / "next_goal.md").write_text(content)
+    (REPO_ROOT / ".autoresearch" / "store" / "next_goal.md").write_text(content)
 
 
 # ---------------------------------------------------------------------------
@@ -261,12 +269,12 @@ def write_next_goal(exp_name: str, array_job_id: str, metrics: dict) -> None:
 
 def submit_next_experiment(state: dict) -> Optional[str]:
     """
-    .autoresearch/next_exp_name.txt を読んで array 投入。
-    成功したら新しい array_job_id を返す。
+    Read .autoresearch/store/next_exp_name.txt and submit array jobs.
+    Return new array_job_id on success.
     """
-    next_exp_name_path = REPO_ROOT / ".autoresearch" / "next_exp_name.txt"
+    next_exp_name_path = REPO_ROOT / ".autoresearch" / "store" / "next_exp_name.txt"
     if not next_exp_name_path.exists():
-        print("[ERROR] .autoresearch/next_exp_name.txt not found after git pull")
+        print("[ERROR] .autoresearch/store/next_exp_name.txt not found after git pull")
         return None
 
     next_exp_name = next_exp_name_path.read_text().strip()
@@ -294,7 +302,7 @@ def submit_next_experiment(state: dict) -> Optional[str]:
     rc, out, err = run_cmd([
         "bash",
         str(REPO_ROOT / ".autoresearch" / "submit-array-with-debug.sh"),
-        next_exp_name, array_range, str(config_list),  # .autoresearch/array_conf/ "0",
+        next_exp_name, array_range, str(config_list),
     ], cwd=str(REPO_ROOT))
 
     if rc != 0:
@@ -310,7 +318,7 @@ def submit_next_experiment(state: dict) -> Optional[str]:
         return None
 
     print(out)
-    # "Submitted batch job 17915098" を解析
+    # Parse "Submitted batch job 17915098".
     new_array_job_id = ""
     for line in out.splitlines():
         if "Submitted batch job" in line:
@@ -365,7 +373,7 @@ def handle_experiment_running(state: dict) -> None:
     exp_name = state.get("exp_name", "")
 
     if not array_job_id:
-        print("[ERROR] array_job_id not set in watcher_state.json")
+        print("[ERROR] array_job_id not set in .autoresearch/store/watcher_state.json")
         resubmit_self()
         return
 
@@ -394,12 +402,12 @@ def handle_experiment_running(state: dict) -> None:
         ],
     ))
 
-    # 結果収集
+    # Collect results.
     metrics = collect_metrics(exp_name, array_job_id)
     write_latest_status(exp_name, array_job_id, task_states)
     write_next_goal(exp_name, array_job_id, metrics)
 
-    # mainのSHAを記録してからpush
+    # Record main SHA before pushing.
     try:
         git("fetch", "origin", check=False)
         state["last_main_sha"] = current_main_sha()

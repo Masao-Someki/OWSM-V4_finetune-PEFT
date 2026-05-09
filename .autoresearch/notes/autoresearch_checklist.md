@@ -1,36 +1,39 @@
 # Autoresearch Checklist
 
-Use this checklist to drive experiment planning.  
-Codex must read this file and `experiments.csv` before proposing next configs.
+Use this checklist to drive wave planning and execution.
+Codex must read this file, `prompt.txt`, and `experiments.csv` before proposing next configs.
+
+## Source of Truth
+- Search space and hard constraints must come from `prompt.txt`.
+- If this checklist conflicts with `prompt.txt`, follow `prompt.txt`.
+- This checklist tracks progress and decision quality; it should not redefine search ranges.
 
 ## Rules
 - Keep statuses up to date: `TODO`, `DOING`, `DONE`, `BLOCKED`.
-- Prefer unresolved (`TODO`/`DOING`) items when selecting next wave.
-- When an item becomes `DONE`, add a short evidence note with run ids.
-- If evidence is conflicting, keep as `DOING` and specify what to test next.
-- There is no fixed search order. Choose an adaptive order that improves narrowing speed:
-  prioritize high-uncertainty + high-impact items, then shrink around winners.
+- Prefer unresolved (`TODO`/`DOING`) items when selecting the next wave.
+- When an item becomes `DONE`, add short evidence with run ids from `experiments.csv`.
+- If evidence is conflicting, keep as `DOING` and write what to test next.
+- Keep entries reusable across projects; avoid task-specific constants here.
 
 ## Checklist
 
 | ID | Topic | Question | Status | Priority | Last update | Evidence / Notes |
 |---|---|---|---|---|---|---|
-| C0 | Smoke test policy | For pipeline verification wave, enforce `max_configs<=3`, `trainer.max_epochs=3`, `trainer.max_steps=100` | DOING | High | 2026-04-27 | Enforced in retry settings (`--max_configs 3 --quick_max_epochs 3 --quick_max_steps 100`) and default quick epoch cap updated to 3 in launcher scripts; execution blocked by Slurm controller connectivity before submission |
-| C1 | PEFT family | Which PEFT family is best on current FLEURS objective? (`lora/espnet_lora/adalora/randlora/vblora/delora`) | TODO | High | - | - |
-| C2 | LR | What LR range is robust for top PEFT families? | TODO | High | - | - |
-| C3 | Epoch budget | What `trainer.max_epochs` is enough before overfit/plateau? | TODO | Medium | - | - |
-| C4 | Warmup | What `scheduler.warmup_steps` works best with chosen LR/batch regime? | TODO | Medium | - | - |
-| C5 | Data robustness | Do `dataset.ratio`, `time_apply_prob`, `text_prev_apply_prob` improve robustness? | TODO | Medium | - | - |
-| C6 | Stability | Which settings reduce failure rate / debug failure risk? | DOING | High | 2026-04-27 | Root cause identified from debug logs: host-memory OOM kill (`exit_code=137`, Slurm `oom_kill`) under 8G request while loading `espnet/owsm_ctc_v4_1B`; raised default memory requests to 32G for debug and array launch paths, pending validation retry |
+| C0 | Input integrity | Is `prompt.txt` complete and internally consistent for this wave? | TODO | High | - | Confirm objective, constraints, output contract, and max_configs are filled |
+| C1 | Evidence use | Are next configs grounded in recent evidence from `experiments.csv`? | TODO | High | - | Reference best/worst runs and unresolved failures |
+| C2 | Exploit vs Explore | Does the wave include both exploitation and exploration per `prompt.txt` policy? | TODO | High | - | State which config belongs to which role |
+| C3 | Axis coverage | Does the wave cover required comparison axes from `prompt.txt` without unnecessary expansion? | TODO | Medium | - | List covered axes and intentionally deferred axes |
+| C4 | Stability risk | Are known runtime/resource risks controlled before broadening search? | TODO | High | - | If blocked, run minimal safe validation first |
+| C5 | Reproducibility | Are outputs reproducible and contract-compliant (`conf/`, `array.txt`, `next_exp_name.txt`, summary)? | TODO | Medium | - | Validate file paths and formatting rules before submit |
 
 ## Decision Policy
-1. Each wave must target at least 2 checklist IDs.
-2. Include at least one config for exploitation (best-known) and one for exploration (uncertain checklist item).
-3. Do not expand search dimensions if unresolved failure/root-cause (`C6`) is blocking.
-4. If `C0` is unresolved, run in smoke-test mode first and keep wave small/safe.
+1. Each wave should target at least 2 unresolved checklist IDs.
+2. Keep one config for exploitation and one for exploration unless `prompt.txt` says otherwise.
+3. Do not introduce new axes when stability is unresolved.
+4. If `C0` or `C4` is unresolved, prefer a smaller/safe wave.
 
 ## Stop Condition Marker
-- When Codex concludes the optimum is found, add this line in this file:
+- When optimum is judged reached, add:
   - `OPTIMAL_FOUND: true`
-- Also write `.autoresearch/stop.json` with:
+- Also write `.autoresearch/store/stop.json`:
   - `{"stop": true, "reason": "<short reason>"}`.

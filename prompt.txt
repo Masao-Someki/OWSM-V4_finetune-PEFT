@@ -1,0 +1,87 @@
+# AutoResearch Input Form (Simple)
+
+Write only this form. Keep it short.
+This file is the source of truth for planning the next wave.
+
+How to fill:
+- Replace `WRITE_HERE`.
+- If unsure, use the suggested default.
+- Keep bullets concise.
+
+---
+
+## Required (Fill these)
+
+1) Goal for this wave
+- What do you want to improve most?
+- Write: Improve Portuguese ASR quality (validation WER) for OWSM PEFT finetuning.
+
+2) Most important metric
+- Which metric should decide success?
+- Write: validation WER (Portuguese split)
+
+3) Number of trials in this wave
+- How many configs to run in the main wave.
+- Write: 10
+
+4) Current concern
+- What is the main risk now?
+- Write: training instability and occasional memory-related failures when expanding search too quickly.
+
+5) Base configs
+- List the base config files the planner is allowed to expand for this wave.
+- Write:
+  - conf/owsm_peft_lora_basic.yaml
+  - conf/owsm_peft_espnet.yaml
+  - conf/owsm_peft_adalora.yaml
+
+6) What to explore in this wave (axes, not values)
+- List the tuning axes you want to explore.
+- Do NOT write numeric candidate values here.
+- The planner will propose concrete value ranges when generating search space.
+- Write:
+  - learning rate
+  - max_epochs
+  - warmup_steps
+  - PEFT method choice
+  - data ratio
+
+7) Debug gate required
+- Should we run a small debug job first, and only run the full parallel wave if debug passes?
+- Write: yes/no
+- Suggested default: yes
+
+---
+
+## Don'ts (Do not do in this wave)
+
+A) Hard prohibitions
+- Write explicit things the planner must not do.
+- Write:
+  - do not use lr above WRITE_HERE
+  - do not increase training budget beyond WRITE_HERE
+  - do not introduce new axes beyond WRITE_HERE
+
+B) Forbidden combinations
+- Write combinations that are not allowed.
+- Write:
+  - WRITE_HERE
+
+---
+
+## References (Optional but recommended)
+
+- Add URLs, papers, docs, or notes the planner should consider.
+- The planner should use these as guidance, while still obeying this form.
+
+A) URLs
+- WRITE_HERE
+
+B) Papers / reports
+- WRITE_HERE
+
+C) Local files in this repo
+- WRITE_HERE
+
+---
+

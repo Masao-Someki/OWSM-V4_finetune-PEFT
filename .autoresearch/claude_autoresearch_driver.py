@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-GitHub Actions から呼ばれる Claude API ドライバー。
+Claude API driver invoked from GitHub Actions.
 
-.autoresearch/ の state を読み、Claude に次のwave config を提案させ、
-新ブランチに commit して push する。
+Reads autoresearch state, asks Claude to propose the next experiment wave,
+then commits and pushes generated files on a new branch.
 
-出力ファイルは Claude に <file path="...">content</file> 形式で書かせて
-正規表現でパースする。
+File writes are returned as <file path="...">content</file> blocks and parsed
+via regex.
 """
 from __future__ import annotations
 
@@ -28,9 +28,10 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--repo-root", default=".")
     p.add_argument("--prompts-dir", default=".autoresearch/prompts")
-    p.add_argument("--csv-path", default=".autoresearch/experiments.csv")
+    p.add_argument("--csv-path", default=".autoresearch/store/experiments.csv")
     p.add_argument("--autoresearch-dir", default=".autoresearch")
     p.add_argument("--model", default="claude-opus-4-7")
+    p.add_argument("--mode", choices=["auto", "bootstrap", "iterative"], default="auto")
     p.add_argument("--max-configs", type=int, default=10)
     p.add_argument("--max-tokens", type=int, default=8192)
     return p.parse_args()
@@ -64,9 +65,47 @@ def read_csv_tail(csv_path: Path, n_rows: int = 20) -> str:
 # Prompt building
 # ---------------------------------------------------------------------------
 
+def sync_search_space_from_root_prompt(repo_root: Path, prompts_dir: Path) -> None:
+    """
+    Generate `.autoresearch/prompts/search_space.md` from repo-root `prompt.txt`.
+    """
+    root_prompt_path = repo_root / "prompt.txt"
+    out_path = prompts_dir / "search_space.md"
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+
+    if root_prompt_path.exists():
+        root_prompt = root_prompt_path.read_text(encoding="utf-8", errors="replace").strip()
+    else:
+        root_prompt = "(prompt.txt not found at repository root)"
+
+    generated = f"""# Search Space Snapshot (Generated)
+
+This file is auto-generated from repository-root `prompt.txt`.
+Generated at: {now_iso()}
+
+## Interpretation Policy
+- Follow search-space definitions and hard constraints from `prompt.txt`.
+- If this file conflicts with `prompt.txt`, prioritize `prompt.txt`.
+- Use `.autoresearch/notes/` and `experiments.csv` for evidence and prioritization only.
+
+## prompt.txt (current)
+```text
+{root_prompt}
+```
+"""
+    out_path.write_text(generated, encoding="utf-8")
+
+
 def build_system_prompt(repo_root: Path, prompts_dir: Path) -> str:
     search_space = read_file_safe(prompts_dir / "search_space.md")
-    system_extra = read_file_safe(prompts_dir / "system.txt") if (prompts_dir / "system.txt").exists() else ""
+    system_md = prompts_dir / "system.md"
+    system_txt = prompts_dir / "system.txt"
+    if system_md.exists():
+        system_extra = read_file_safe(system_md)
+    elif system_txt.exists():
+        system_extra = read_file_safe(system_txt)
+    else:
+        system_extra = ""
 
     return f"""You are the experiment planner for OWSM PEFT autoresearch.
 Your goal is to find the best PEFT method and hyperparameters for FLEURS ASR by proposing the next experiment wave.
@@ -98,7 +137,7 @@ conf/exp_20260429_123456/config_0.yaml
 conf/exp_20260429_123456/config_1.yaml
 </file>
 
-<file path=".autoresearch/next_exp_name.txt">exp_20260429_123456</file>
+<file path=".autoresearch/store/next_exp_name.txt">exp_20260429_123456</file>
 
 <file path=".autoresearch/codex_summary.md">
 # Wave Summary
@@ -110,7 +149,7 @@ Do NOT include `</file>` anywhere inside file content.
 ## Files You May Write
 - `conf/{{next_exp_name}}/` — new YAML configs (create directory)
 - `array_conf/{{next_exp_name}}/array.txt` — one config path per line
-- `.autoresearch/next_exp_name.txt` — REQUIRED: single line, the next_exp_name value
+- `.autoresearch/store/next_exp_name.txt` — REQUIRED: single line, the next_exp_name value
 - `.autoresearch/codex_summary.md` — your summary of this wave
 - `.autoresearch/notes/autoresearch_checklist.md` — update statuses only
 - `.autoresearch/notes/autoresearch_findings.md` — append new entry only
@@ -156,17 +195,19 @@ def build_user_prompt(
     csv_path: Path,
     max_configs: int,
     next_exp_name: str,
+    mode: str,
 ) -> str:
-    next_goal = read_file_safe(autoresearch_dir / "next_goal.md")
-    latest_metrics = read_file_safe(autoresearch_dir / "latest_metrics.json")
-    latest_status = read_file_safe(autoresearch_dir / "latest_status.json")
-    latest_error = read_file_safe(autoresearch_dir / "latest_error.log", max_chars=3000)
+    store_dir = autoresearch_dir / "store"
+    next_goal = read_file_safe(store_dir / "next_goal.md")
+    latest_metrics = read_file_safe(store_dir / "latest_metrics.json")
+    latest_status = read_file_safe(store_dir / "latest_status.json")
+    latest_error = read_file_safe(store_dir / "latest_error.log", max_chars=3000)
     checklist = read_file_safe(repo_root / ".autoresearch" / "notes" / "autoresearch_checklist.md")
     findings = read_file_safe(repo_root / ".autoresearch" / "notes" / "autoresearch_findings.md", max_chars=4000)
     csv_text = read_csv_tail(csv_path, n_rows=20)
 
-    has_errors = (autoresearch_dir / "latest_error.log").exists() and \
-                 (autoresearch_dir / "latest_error.log").stat().st_size > 0
+    has_errors = (store_dir / "latest_error.log").exists() and \
+                 (store_dir / "latest_error.log").stat().st_size > 0
 
     error_section = ""
     if has_errors:
@@ -177,14 +218,34 @@ def build_user_prompt(
 ```
 """
 
+    mode_section = ""
+    if mode == "bootstrap":
+        mode_section = """
+## Mode
+Bootstrap mode (first wave initialization).
+- Assume no reliable prior wave results.
+- Build a conservative first wave from root `prompt.txt`.
+- If needed, initialize missing `.autoresearch/notes/` files with minimal reusable content.
+"""
+    else:
+        mode_section = """
+## Mode
+Iterative mode (wave 2+).
+- Use latest metrics/errors/checklist evidence to refine direction.
+- Prioritize debugging and stability first when failures exist.
+"""
+
     return f"""## Task
 
 Plan and write the next experiment wave.
 
 **next_exp_name**: `{next_exp_name}`
 **max_configs**: {max_configs}
+**mode**: `{mode}`
 **timestamp**: {now_iso()}
 
+---
+{mode_section}
 ---
 
 ## next_goal.md
@@ -229,7 +290,7 @@ You MUST write these files (use `<file path="...">...</file>` format):
 
 1. `conf/{next_exp_name}/config_N.yaml` — one per proposed config (max {max_configs})
 2. `.autoresearch/array_conf/{next_exp_name}/array.txt` — list of those config paths
-3. `.autoresearch/next_exp_name.txt` — must contain exactly: `{next_exp_name}`
+3. `.autoresearch/store/next_exp_name.txt` — must contain exactly: `{next_exp_name}`
 4. `.autoresearch/codex_summary.md` — your rationale and wave summary
 
 Include these sections in codex_summary.md:
@@ -238,6 +299,13 @@ Include these sections in codex_summary.md:
 - **Checklist updates**: which IDs change status and why
 - **Next action**: what the wave after this should target
 """
+
+
+def resolve_mode(args_mode: str, store_dir: Path) -> str:
+    if args_mode in {"bootstrap", "iterative"}:
+        return args_mode
+    marker = store_dir / "bootstrap_done.json"
+    return "iterative" if marker.exists() else "bootstrap"
 
 
 # ---------------------------------------------------------------------------
@@ -270,7 +338,7 @@ def apply_file_operations(response_text: str, repo_root: Path) -> list[str]:
             print(f"[WARN] skipping disallowed path: {rel_path}")
             continue
 
-        # ディレクトリトラバーサル防止
+        # Prevent directory traversal.
         target = (repo_root / rel_path).resolve()
         if not str(target).startswith(str(repo_root)):
             print(f"[WARN] skipping path outside repo: {rel_path}")
@@ -339,6 +407,9 @@ def main() -> int:
     prompts_dir = (repo_root / args.prompts_dir).resolve()
     autoresearch_dir = (repo_root / args.autoresearch_dir).resolve()
     csv_path = (repo_root / args.csv_path).resolve()
+    store_dir = (autoresearch_dir / "store").resolve()
+    store_dir.mkdir(parents=True, exist_ok=True)
+    mode = resolve_mode(args.mode, store_dir)
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     next_exp_name = f"exp_{ts}"
@@ -356,14 +427,16 @@ def main() -> int:
 
     client = anthropic.Anthropic(api_key=api_key)
 
+    sync_search_space_from_root_prompt(repo_root, prompts_dir)
     system_prompt = build_system_prompt(repo_root, prompts_dir)
     user_prompt = build_user_prompt(
-        repo_root, autoresearch_dir, csv_path, args.max_configs, next_exp_name
+        repo_root, autoresearch_dir, csv_path, args.max_configs, next_exp_name, mode
     )
 
-    print(f"[INFO] calling Claude API: model={args.model} next_exp_name={next_exp_name}")
+    print(f"[INFO] calling Claude API: model={args.model} mode={mode} next_exp_name={next_exp_name}")
     try_notify("AutoResearch: Wave Planning Started", [
         f"- model: `{args.model}`",
+        f"- mode: `{mode}`",
         f"- next_exp_name: `{next_exp_name}`",
         f"- max_configs: `{args.max_configs}`",
     ])
@@ -392,34 +465,45 @@ def main() -> int:
     print(f"[INFO] Claude response: {len(response_text)} chars "
           f"(in={tokens_in} out={tokens_out})")
 
-    # デバッグ用に保存
+    # Runtime state is kept under .autoresearch/store (prompts/ is template-only).
+    (store_dir / "last_response.txt").write_text(response_text, encoding="utf-8")
+    # Keep writing to the legacy location for backward compatibility.
     (prompts_dir / "last_response.txt").write_text(response_text, encoding="utf-8")
 
-    # ファイル操作実行
+    # Apply file operations from model output.
     written = apply_file_operations(response_text, repo_root)
 
     if not written:
-        print("[ERROR] Claude wrote no files. Check prompts/last_response.txt")
+        print("[ERROR] Claude wrote no files. Check .autoresearch/store/last_response.txt")
         try_notify("AutoResearch: No Files Written", [
             "- Claude response produced no <file> tags",
-            f"- See prompts/last_response.txt",
+            "- See .autoresearch/store/last_response.txt",
         ])
         return 1
 
-    # next_exp_name 確認
-    next_exp_name_path = autoresearch_dir / "next_exp_name.txt"
+    # Verify next_exp_name output.
+    next_exp_name_path = autoresearch_dir / "store" / "next_exp_name.txt"
     if not next_exp_name_path.exists():
-        print("[ERROR] .autoresearch/next_exp_name.txt not written by Claude")
+        print("[ERROR] .autoresearch/store/next_exp_name.txt not written by Claude")
         return 1
     confirmed_exp_name = next_exp_name_path.read_text().strip()
 
-    # array.txt 確認
+    # Verify array.txt.
     array_txt = repo_root / ".autoresearch" / "array_conf" / confirmed_exp_name / "array.txt"
     if not array_txt.exists():
         print(f"[ERROR] array.txt not found: {array_txt}")
         return 1
 
-    # ブランチ作成・push
+    bootstrap_marker_path = store_dir / "bootstrap_done.json"
+    bootstrap_marker_path.write_text(json.dumps({
+        "done": True,
+        "mode": mode,
+        "updated_at": now_iso(),
+        "exp_name": confirmed_exp_name,
+    }, indent=2), encoding="utf-8")
+    written.append(".autoresearch/store/bootstrap_done.json")
+
+    # Create branch and push.
     try:
         branch = commit_to_branch(repo_root, confirmed_exp_name, written)
     except Exception as e:
@@ -431,8 +515,8 @@ def main() -> int:
         print("[ERROR] branch creation failed (nothing to commit)")
         return 1
 
-    # next_branch.txt を書く (GitHub Actions workflow が PR 作成に使う)
-    (autoresearch_dir / "next_branch.txt").write_text(branch)
+    # Write next_branch for the GitHub Actions PR creation step.
+    (autoresearch_dir / "store" / "next_branch.txt").write_text(branch)
     print(f"[INFO] done. branch={branch} exp_name={confirmed_exp_name}")
 
     try_notify("AutoResearch: Wave Proposed", [

@@ -108,6 +108,7 @@ for raw in raw_splits:
         seed=int(os.environ["seed"]),
         trust_remote_code=(os.environ["trust_remote_code"].lower() == "true"),
         use_cache=True,
+        build_cache_if_missing=True,
     )
     print(f"[INFO] split={split} num_examples={len(ds)}")
 PY

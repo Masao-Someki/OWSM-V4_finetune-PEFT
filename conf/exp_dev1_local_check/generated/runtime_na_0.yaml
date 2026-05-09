@@ -1,0 +1,8 @@
+defaults:
+  - ../../owsm_peft_lora_basic.yaml
+
+recipedir: .
+exp_tag: exp_dev1_local_check_owsm_peft_lora_basic_a0
+exp_dir: ${recipedir}/exp/exp_dev1_local_check/${exp_tag}
+wandb:
+  group: exp_dev1_local_check

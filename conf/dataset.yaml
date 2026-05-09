@@ -1,8 +1,8 @@
 recipedir: .
 fleurs_repo: google/fleurs
-fleurs_subsets_train: all
-fleurs_subsets_valid: all
-fleurs_subsets_test: all
+fleurs_subsets_train: pt_br
+fleurs_subsets_valid: pt_br
+fleurs_subsets_test: pt_br
 fleurs_cache_dir: ${recipedir}/cache/fleurs
 lang_sym_mode: from_subset
 max_samples_per_subset_train: null
@@ -11,10 +11,9 @@ max_samples_per_subset_test: null
 
 dataset:
   _target_: espnet3.components.data.data_organizer.DataOrganizer
+  recipe_dir: ${recipedir}
   train:
-    - name: train_fleurs_all
-      dataset:
-        _target_: src.data.dataset.FleursDataset
+    - data_src_args:
         split: train
         hf_repo: ${fleurs_repo}
         hf_subsets: ${fleurs_subsets_train}
@@ -23,9 +22,7 @@ dataset:
         max_samples_per_subset: ${max_samples_per_subset_train}
 
   valid:
-    - name: valid_fleurs_all
-      dataset:
-        _target_: src.data.dataset.FleursDataset
+    - data_src_args:
         split: validation
         hf_repo: ${fleurs_repo}
         hf_subsets: ${fleurs_subsets_valid}
@@ -34,7 +31,7 @@ dataset:
         max_samples_per_subset: ${max_samples_per_subset_valid}
 
   preprocessor:
-    _target_: espnet2.train.preprocessor.S2TPreprocessor
+    _target_: espnet2.train.preprocessor.S2TCTCPreprocessor
     train: train
     token_type: bpe
     token_list: ${tokenizer.save_path}/tokens.txt
@@ -44,10 +41,6 @@ dataset:
     fs: 16000
     na_symbol: <na>
     speech_length: 30
-    speech_resolution: 0.02
     speech_init_silence: 30
     text_prev_apply_prob: 0.5
-    time_apply_prob: 0.5
-    notime_symbol: <notimestamps>
-    first_time_symbol: <0.00>
-    last_time_symbol: <30.00>
+    nolang_symbol: <unk>

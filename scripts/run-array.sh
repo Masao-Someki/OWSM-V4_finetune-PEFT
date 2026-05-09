@@ -11,7 +11,7 @@
 #SBATCH --output=logs/%x/%A_%a.log
 #SBATCH --error=logs/%x/%A_%a.log
 
-set -euo pipefail
+# set -euo pipefail
 
 SCRIPT_DIR="$(pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -40,7 +40,7 @@ array_base_index=0
 task_id=""
 keep_runtime_config=true
 experiment_comment=""
-experiments_csv=".autoresearch/experiments.csv"
+experiments_csv=".autoresearch/store/experiments.csv"
 infer_config=""
 measure_config=""
 quick_train=false
@@ -249,12 +249,12 @@ if [ "${#stage_args[@]}" -eq 0 ]; then
   stage_args=("train")
 fi
 
-run_args=(python run.py --stages "${stage_args[@]}" --train_config "${runtime_cfg}")
+run_args=(python run.py --stages "${stage_args[@]}" --training_config "${runtime_cfg}")
 if [ -n "${resolved_infer_config}" ]; then
-  run_args+=(--infer_config "${resolved_infer_config}")
+  run_args+=(--inference_config "${resolved_infer_config}")
 fi
 if [ -n "${resolved_measure_config}" ]; then
-  run_args+=(--measure_config "${resolved_measure_config}")
+  run_args+=(--metrics_config "${resolved_measure_config}")
 fi
 run_cmd_text="$(printf '%q ' "${run_args[@]}")"
 

@@ -68,7 +68,7 @@ def now_iso() -> str:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Upsert experiment tracking rows in CSV.")
     p.add_argument("--mode", choices=["start", "finish"], required=True)
-    p.add_argument("--csv-path", default=".autoresearch/experiments.csv")
+    p.add_argument("--csv-path", default=".autoresearch/store/experiments.csv")
     p.add_argument("--run-uid", required=True)
     p.add_argument("--exit-code", type=int, default=None)
 

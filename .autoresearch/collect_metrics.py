@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Scan exp/{exp_name}/*/infer/metrics.json and update experiments.csv.
-Writes summary to .autoresearch/latest_metrics.json.
+Writes summary to .autoresearch/store/latest_metrics.json.
 Copies result artifacts to results/{exp_name}/ for GitHub tracking.
 
 Copied to results/ (git-tracked):
@@ -40,9 +40,9 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--exp-name", required=True)
     p.add_argument("--array-job-id", required=True)
-    p.add_argument("--csv-path", default=".autoresearch/experiments.csv")
-    p.add_argument("--output", default=".autoresearch/latest_metrics.json")
-    p.add_argument("--error-output", default=".autoresearch/latest_error.log")
+    p.add_argument("--csv-path", default=".autoresearch/store/experiments.csv")
+    p.add_argument("--output", default=".autoresearch/store/latest_metrics.json")
+    p.add_argument("--error-output", default=".autoresearch/store/latest_error.log")
     p.add_argument("--results-dir", default=".autoresearch/results")
     p.add_argument("--logs-dir", default="logs")
     return p.parse_args()
@@ -71,7 +71,7 @@ def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> 
 
 
 def extract_metrics(metrics_data: dict) -> tuple[float | None, float | None]:
-    """metrics.json から WER/CER を抽出。ESPnet3 の出力形式に対応。"""
+    """Extract WER/CER from metrics.json (ESPnet3-compatible)."""
     def _find(data: Any, keys: list[str]) -> float | None:
         if isinstance(data, dict):
             for k in keys:
@@ -99,7 +99,7 @@ def tail_lines(path: Path, n: int) -> str:
 
 
 # ---------------------------------------------------------------------------
-# results/ への書き出し
+# Write artifacts into results/
 # ---------------------------------------------------------------------------
 
 def copy_to_results(
@@ -107,7 +107,7 @@ def copy_to_results(
     exp_tag: str,
     results_exp_dir: Path,
 ) -> None:
-    """成功した実験の結果を results/{exp_name}/{exp_tag}/ にコピー。"""
+    """Copy successful run artifacts into results/{exp_name}/{exp_tag}/."""
     exp_dir = exp_root / exp_tag
     out_dir = results_exp_dir / exp_tag
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -117,11 +117,11 @@ def copy_to_results(
     if metrics_src.exists():
         shutil.copy2(metrics_src, out_dir / "metrics.json")
 
-    # eval CSV (infer/ 以下の *.csv を全部)
+    # eval CSV (all *.csv under infer/)
     for csv_src in (exp_dir / "infer").glob("*.csv"):
         shutil.copy2(csv_src, out_dir / csv_src.name)
 
-    # train.log の末尾 (複数ある場合は最新のもの)
+    # tail of train.log (use the newest when multiple logs exist)
     train_logs = sorted(exp_dir.glob("train*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
     if not train_logs:
         train_logs = sorted(exp_dir.glob("*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
@@ -140,7 +140,7 @@ def copy_error_to_results(
     run_uid: str,
     results_errors_dir: Path,
 ) -> None:
-    """失敗タスクのSlurmログ末尾を results/{exp_name}/errors/{run_uid}.txt にコピー。"""
+    """Copy tail of failed Slurm logs into results/{exp_name}/errors/{run_uid}.txt."""
     exp_logs = logs_dir / exp_name
     # run_uid: {array_job_id}_{task_id}_{exp_tag}
     parts = run_uid.split("_")
@@ -174,7 +174,7 @@ def copy_error_to_results(
 
 
 def collect_aggregate_error_log(failed_run_uids: list[str], results_errors_dir: Path) -> str:
-    """results/errors/ から集約したエラーログを .autoresearch/latest_error.log 用に返す。"""
+    """Build aggregate error log content for .autoresearch/store/latest_error.log."""
     chunks = []
     for run_uid in failed_run_uids[:5]:
         safe_uid = run_uid.replace("/", "_")
@@ -205,7 +205,7 @@ def main() -> int:
     failed_run_uids: list[str] = []
 
     # -----------------------------------------------------------------------
-    # Step 1: metrics.json を走査
+    # Step 1: scan metrics.json files
     # -----------------------------------------------------------------------
     metrics_by_exp_tag: dict[str, tuple[float | None, float | None]] = {}
     for metrics_path in sorted(exp_root.glob("*/infer/metrics.json")):
@@ -219,11 +219,11 @@ def main() -> int:
         metrics_by_exp_tag[exp_tag] = (wer, cer)
         print(f"[INFO] {exp_tag}: WER={wer} CER={cer}")
 
-        # 成功した実験の結果を results/ にコピー
+        # Copy successful run artifacts to results/
         copy_to_results(exp_root, exp_tag, results_exp_dir)
 
     # -----------------------------------------------------------------------
-    # Step 2: experiments.csv 更新
+    # Step 2: update experiments.csv
     # -----------------------------------------------------------------------
     with lock_path.open("a+") as lockf:
         fcntl.flock(lockf, fcntl.LOCK_EX)
@@ -272,12 +272,12 @@ def main() -> int:
         fcntl.flock(lockf, fcntl.LOCK_UN)
 
     # -----------------------------------------------------------------------
-    # Step 3: 失敗ログを results/errors/ にコピー
+    # Step 3: copy failure logs into results/errors/
     # -----------------------------------------------------------------------
     for run_uid in failed_run_uids:
         copy_error_to_results(logs_dir, args.exp_name, run_uid, results_errors_dir)
 
-    # .autoresearch/latest_error.log (集約版)
+    # .autoresearch/store/latest_error.log (aggregated)
     err_path = Path(args.error_output)
     err_path.parent.mkdir(parents=True, exist_ok=True)
     if failed_run_uids:
@@ -289,7 +289,7 @@ def main() -> int:
         err_path.write_text("")
 
     # -----------------------------------------------------------------------
-    # Step 4: latest_metrics.json 出力
+    # Step 4: write latest_metrics.json
     # -----------------------------------------------------------------------
     output_data = {
         "exp_name": args.exp_name,
