@@ -210,11 +210,11 @@ if [ "${submit_with_debug}" = "true" ]; then
   elif [ "${debug_state}" != "COMPLETED" ]; then
     echo "[ERROR] debug job failed with state=${debug_state}. Canceling dependent array ${array_job_id}."
     scancel "${array_job_id}" || true
-    mkdir -p .autoresearch/store .autoresearch/resources
-    rm -rf .autoresearch/resources/*
+    mkdir -p .autoresearch/store .autoresearch/failure_logs
+    rm -rf .autoresearch/failure_logs/*
     debug_log_path="logs/${exp_name}/debug_${debug_job_id}.log"
     if [ -f "${debug_log_path}" ]; then
-      cp -f "${debug_log_path}" ".autoresearch/resources/debug_${debug_job_id}.log"
+      cp -f "${debug_log_path}" ".autoresearch/failure_logs/debug_${debug_job_id}.log"
       cp -f "${debug_log_path}" ".autoresearch/store/latest_error.log"
     else
       echo "debug log not found: ${debug_log_path}" > .autoresearch/store/latest_error.log
@@ -230,7 +230,7 @@ if [ "${submit_with_debug}" = "true" ]; then
 EOF
     current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
     if [ -n "${current_branch}" ]; then
-      git add .autoresearch/store/latest_error.log .autoresearch/store/latest_status.json .autoresearch/resources/ "${experiments_csv}" || true
+      git add .autoresearch/store/latest_error.log .autoresearch/store/latest_status.json .autoresearch/failure_logs/ "${experiments_csv}" || true
       if [ -n "$(git diff --cached --name-only)" ]; then
         git -c user.name=autoresearch-bot -c user.email=autoresearch-bot@users.noreply.github.com commit -m "autoresearch: debug failed ${exp_name} (${debug_job_id})" || true
         git push origin "${current_branch}" || true

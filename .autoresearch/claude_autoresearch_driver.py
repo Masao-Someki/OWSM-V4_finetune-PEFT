@@ -120,7 +120,7 @@ All file writes MUST use this exact XML tag format:
 
 <file path="conf/exp_20260429_123456/config_0.yaml">
 defaults:
-  - ../../owsm_peft_lora_basic
+  - ../owsm_peft_lora_basic
 
 lr: 5e-5
 exp_tag: exp_20260429_123456_lora_lr5e-5
@@ -150,23 +150,23 @@ Do NOT include `</file>` anywhere inside file content.
 
 ## Files You May Write
 - `conf/{{next_exp_name}}/` — new YAML configs (create directory)
+- `conf/` — shared configs when needed for bug fixes or feature updates
 - `array_conf/{{next_exp_name}}/array.txt` — one config path per line
 - `.autoresearch/store/next_exp_name.txt` — REQUIRED: single line, the next_exp_name value
 - `.autoresearch/codex_summary.md` — your summary of this wave
 - `.autoresearch/notes/autoresearch_checklist.md` — update statuses only
 - `.autoresearch/notes/autoresearch_findings.md` — append new entry only
+- `src/` — code changes for bug fixes, model implementation, and pipeline updates
+- `scripts/` — launcher/runtime bug fixes when needed
 - `tests/test_config_load.py` — update parametrized config list if new test cases needed
 - `tests/test_search_space.py` — update if needed
 
 ## Files You Must NOT Edit
-- `conf/default.yaml`, `conf/dataset.yaml`, `conf/inference.yaml`, `conf/metrics.yaml`
-- `conf/owsm_peft_*.yaml` (templates — use as defaults targets)
-- `experiments.csv`, `src/`, `scripts/`, `run.py`, `pixi.toml`
 - `exp/`, `dump/`, `data/`, `secrets/`, `.env`, `keys/`
 
 ## Config Format Rules
 Each config in `conf/{{next_exp_name}}/` must:
-1. Use `defaults: [- ../../<peft_template>]` to inherit from a PEFT template
+1. Use `defaults: [- ../<peft_template_stem>]` to inherit from a PEFT template under `conf/`
 2. Set `lr`, `peft.type`, and at minimum override the fields being tested
 3. Use `exp_tag: {{next_exp_name}}_<descriptor>` (unique per config)
 4. NOT set `exp_dir` (inherited from default.yaml via exp_tag)
@@ -348,10 +348,15 @@ FILE_TAG_RE = re.compile(
 
 ALLOWED_PREFIXES = (
     "conf/exp_",
+    "conf/",
     "array_conf/",
     ".autoresearch/array_conf/",
     ".autoresearch/",
     ".autoresearch/notes/",
+    "src/",
+    "scripts/",
+    "run.py",
+    "pixi.toml",
     "tests/",
 )
 
