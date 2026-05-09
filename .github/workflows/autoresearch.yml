@@ -61,3 +61,39 @@ jobs:
             --model gpt-4o-mini \
             --max-configs 10 \
             --max-tokens 8192
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "${SLACK_WEBHOOK_URL:-}" ]; then
+            echo "SLACK_WEBHOOK_URL is not set; skip Slack notification."
+            exit 0
+          fi
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          webhook = os.environ["SLACK_WEBHOOK_URL"]
+          run_url = f"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}"
+          ref = os.environ.get("GITHUB_REF_NAME", "")
+          sha = os.environ.get("GITHUB_SHA", "")[:10]
+          payload = {
+              "text": (
+                  "GitHub Actions failed: AutoResearch Wave Planner\n"
+                  f"- repo: {os.environ.get('GITHUB_REPOSITORY')}\n"
+                  f"- branch: {ref}\n"
+                  f"- sha: {sha}\n"
+                  f"- run: {run_url}"
+              )
+          }
+          req = urllib.request.Request(
+              webhook,
+              data=json.dumps(payload).encode("utf-8"),
+              headers={"Content-Type": "application/json"},
+              method="POST",
+          )
+          urllib.request.urlopen(req).read()
+          PY

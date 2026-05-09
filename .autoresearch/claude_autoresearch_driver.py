@@ -348,6 +348,7 @@ FILE_TAG_RE = re.compile(
 
 ALLOWED_PREFIXES = (
     "conf/exp_",
+    "array_conf/",
     ".autoresearch/array_conf/",
     ".autoresearch/",
     ".autoresearch/notes/",
@@ -362,6 +363,10 @@ def apply_file_operations(response_text: str, repo_root: Path) -> list[str]:
         content = m.group(2)
         if content.startswith("\n"):
             content = content[1:]
+
+        # Backward compatibility: accept legacy array_conf/<exp>/array.txt and remap it.
+        if rel_path.startswith("array_conf/"):
+            rel_path = f".autoresearch/{rel_path}"
 
         if not any(rel_path.startswith(p) for p in ALLOWED_PREFIXES):
             print(f"[WARN] skipping disallowed path: {rel_path}")
