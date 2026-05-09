@@ -1,23 +1,7 @@
 # Wave Summary
-
-This wave focuses on refining configurations based on the failure of the previous wave, specifically addressing the training instability issues. 
-
-## Why this config set
-The previous experiments resulted in multiple debug failures likely due to inadequate memory allocation and inappropriate hyperparameters. By adjusting the learning rates and exploring different PEFT configurations (LORA, ESPnet, and ADALORA) close to the best known configurations, we aim to stabilize and improve performance.
-
-## Search-space coverage
-This wave explores:
-- Learning rate
-- PEFT method choice 
-
-Each configuration utilizes a stable PEFT method while varying the learning rate, facilitating a focused exploration that adheres to the existing search space.
-
-## Checklist updates
-- C0: Status changed from TODO to DONE after confirming the prompt file's completeness.
-- C1: Initial status set to TODO. The configurations are based on reviewed metrics from the last failed run to steer towards better performance.
-- C4: Status set to DOING, with plans to run minimal tests and observe stability before broadening the search again.
-
-## Next action
-The next wave should target:
-- Validating the stability of the training process with a narrow range of configurations.
-- Reassessing the best-performing configurations and exploring options for a full-scale expansion once stability is confirmed.
+- **Why this config set**: The selection is derived from previous experiments indicating stability issues with configurations exhibiting lower learning rates (e.g., lr at 5e-5 producing failures). The configs in this wave focus on adjusted learning rates and varied PEFT types to address potential memory issues from previous runs.
+- **Search-space coverage**: This wave covers `learning rate`, `max_epochs`, `warmup_steps`, `PEFT method choice`, and `data ratio` as laid out in prompt.txt while working within the feedback provided from failed runs.
+- **Checklist updates**: 
+  - `C1` now marked as DONE as the configs are grounded in recent evidence from experiments.csv suggesting memory constraints and stability; adjustments in LR and configurations show this wave's focus on critical exploration.
+  - `C4` now marked as DONE, as we've ensured no introduction of new axes without first addressing stability.
+- **Next action**: The following wave should focus on further validating the learned configurations and expanding towards optimally fine-tuning parameters such as `max_epochs` and `data ratio` while observing any emerging stability issues.
