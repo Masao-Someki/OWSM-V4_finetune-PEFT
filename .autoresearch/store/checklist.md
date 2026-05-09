@@ -1,0 +1,7 @@
+- [x] C0 (stability/smoketest): Smoke test of primary methods in limited-epoch mode
+- [x] Initial search space: Enumerated key PEFT methods supported in code/infra
+- [ ] Method effectiveness (metric): Awaiting first results
+- [ ] Parameter exploration (winner-only): Locked until method(s) selected
+- [ ] Hyperparam exploration (winner-only): Locked until method(s) selected
+- [ ] Final optimization: Not started
+- [ ] OPTIMAL_FOUND: false
