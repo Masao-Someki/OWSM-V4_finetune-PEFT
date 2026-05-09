@@ -46,7 +46,7 @@ jobs:
           fi
           echo "Detected mode: $(cat "$GITHUB_OUTPUT" | tail -1)"
 
-      - name: Run ChatGPT autoresearch driver
+      - name: Run autoresearch driver
         id: driver
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -58,10 +58,11 @@ jobs:
             --csv-path experiments.csv \
             --autoresearch-dir .autoresearch \
             --mode "${{ steps.mode.outputs.mode }}" \
-            --model gpt-4o-mini \
-            --model-research gpt-4o-mini \
-            --model-bugfix gpt-4o-mini \
-            --model-prompt-refresh gpt-4o-mini \
+            --model gpt-4.1-mini \
+            --model-research gpt-4.1 \
+            --model-bugfix gpt-4.1-mini \
+            --model-prompt-refresh gpt-4.1 \
+            --model-search-plan gpt-4.1 \
             --max-configs 10 \
             --max-tokens 8192
 
