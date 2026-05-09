@@ -1,8 +1,0 @@
-defaults:
-  - ../base_recipe_template
-
-method:
-  type: method_C
-  param_a: 5
-  param_b: 0.1
-  exp_tag: exp_20260509_211638_variant_c

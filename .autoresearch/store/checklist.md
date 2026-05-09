@@ -1,3 +1,0 @@
-- [x] Initial wave planning completed
-- [ ] Needs to validate effectiveness of methods in configurations
-- [ ] Stability and performance metrics to be assessed
