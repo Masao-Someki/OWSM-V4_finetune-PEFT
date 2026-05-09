@@ -1,19 +1,10 @@
 # Wave Summary
+**Why this config set**: Based on recent failures in the previous experiment (`exp_20260509_011856`), which was marked `DEBUG_FAILED`, I propose a concentrated stability testing phase. Config 0 serves as a minimal test with lower parameter settings, whereas Config 1 is aligned closely to our previous best known configurations with elevated settings.
 
-**Why this config set**:
-This experiment wave includes a combination of exploitation and exploration configurations. The exploitation config seeks to capitalize on our existing understanding of hyperparameters (particularly the low learning rate of `5e-5`). The exploration configs investigate potential alternatives (learning rates of `3e-5` and `2e-5`), which could yield better performance based on feedback from previous trials.
+**Search-space coverage**: This wave focuses on the method parameter tuning specifically within the `adapter_like_method` family, without broadening to other axes due to unresolved stability issues (`C0` and `C4`).
 
-**Search-space coverage**:
-- Learning rate (lr): 5e-5, 3e-5, 2e-5
-- Method param_a: 8, 10, 12
-- Method param_b: 0.05, 0.1, 0.15
+**Checklist updates**: 
+- `C0` is still `TODO` as we need to ensure the integrity of `prompt.txt`.
+- `C4` remains `TODO` due to ongoing stability concerns; we are limiting our config complexity for this wave to evaluate memory usage.
 
-**Checklist updates**:
-- `C0`: Resolved as we have ensured that `prompt.txt` is complete and internally consistent.
-- `C1`: Now marked `TODO` after evidence check; exploring exploitation and exploratory configs based on earlier failures.
-- `C2`: Three configs have been labeled; `config_0` as exploitation, and `config_1` and `config_2` as exploration.
-- `C4`: Resolved by controlling runtime risks with adjusted memory and reaffirmed max configs.
-- `C5`: Remains `TODO`, confirming that configs follow reproducibility criteria.
-
-**Next action**:
-The subsequent wave should focus on deepening exploration based on the metrics gathered from the current configurations, potentially expanding the configurations further if stability continues to be observed and promising outcomes are realized.
+**Next action**: The subsequent wave should focus on enhancing learning rates and epochs while evaluating any improvements to memory configurations, provided that we achieve stability in this current wave.

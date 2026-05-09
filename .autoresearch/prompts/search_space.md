@@ -1,0 +1,7 @@
+- [x] Method family: `adapter_like_method`
+  - Candidate values:
+    - `adapter_like_method` with `param_a` [4, 8] and `param_b` [0.01, 0.05].
+- [x] Learning Rate: `lr`
+  - Candidate values:
+    - `5e-5`
+- [ ] No expansion on other axes as C0/C4 are prioritized.

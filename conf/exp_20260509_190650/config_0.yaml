@@ -1,0 +1,10 @@
+defaults:
+  - ../base_recipe_template
+
+lr: 5e-5
+exp_tag: exp_20260509_190650_basic_test
+
+method:
+  type: adapter_like_method
+  param_a: 4
+  param_b: 0.01
