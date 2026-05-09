@@ -41,10 +41,12 @@ How to fill:
 - The planner will propose concrete value ranges when generating search space.
 - Write:
   - learning rate
+  - optimizer
+  - batch size
   - max_epochs
   - warmup_steps
-  - PEFT method choice
-  - data ratio
+  - PEFT method choice (please check all method available on PEFT library)
+  - Best PEFT parameter set for each of the PEFT method, such as ranks, etc.
 
 7) Debug gate required
 - Should we run a small debug job first, and only run the full parallel wave if debug passes?
