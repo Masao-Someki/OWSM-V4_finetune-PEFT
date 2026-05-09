@@ -28,12 +28,10 @@ How to fill:
 - What is the main risk now?
 - Write: training instability and occasional memory-related failures when expanding search too quickly.
 
-5) Base configs
-- List the base config files the planner is allowed to expand for this wave.
-- Write:
-  - conf/owsm_peft_lora_basic.yaml
-  - conf/owsm_peft_espnet.yaml
-  - conf/owsm_peft_adalora.yaml
+5) Config format reference
+- Refer to conf/base_recipe_template.yaml for the config format and available fields.
+- Do NOT restrict methods to existing conf/ files.
+- Use web search to enumerate candidate methods and propose configs accordingly.
 
 6) What to explore in this wave (axes, not values)
 - List the tuning axes you want to explore.
@@ -63,16 +61,5 @@ How to fill:
 
 ## References (Optional but recommended)
 
-- Add URLs, papers, docs, or notes the planner should consider.
-- The planner should use these as guidance, while still obeying this form.
-
-A) URLs
-- WRITE_HERE
-
-B) Papers / reports
-- WRITE_HERE
-
-C) Local files in this repo
-- WRITE_HERE
 
 ---
