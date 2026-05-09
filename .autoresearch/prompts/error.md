@@ -17,6 +17,16 @@ Identify root causes and propose the minimum safe next step.
 - Immediate mitigations for the next wave
 - Whether to run a small safety-validation wave before full expansion
 
+## If Root Cause Is Unclear
+- Explicitly state that the root cause is not yet confirmed.
+- Propose concrete logging/instrumentation changes for the next run.
+- Add logs that help distinguish competing hypotheses.
+- Prefer minimal, high-signal logging first (avoid noisy broad dumps).
+- In `codex_summary.md`, include:
+  - what new logs were added
+  - where they are written
+  - what decision each log is intended to support
+
 ## Constraints
 - Do not broaden search axes until blocking stability issues are controlled.
 - Keep recommendations consistent with root `prompt.txt` constraints.

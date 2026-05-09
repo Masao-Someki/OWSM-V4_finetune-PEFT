@@ -4,9 +4,7 @@ on:
   push:
     branches: [autosearch]
     paths:
-      - ".autoresearch/store/latest_status.json"
-      - ".autoresearch/store/latest_metrics.json"
-      - ".autoresearch/store/next_goal.md"
+      - ".autoresearch/**"
       - "prompt.txt"
   workflow_dispatch:
 

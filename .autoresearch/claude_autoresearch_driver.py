@@ -194,6 +194,7 @@ You only need to manually edit tests if you need to add specific test logic for 
 def build_user_prompt(
     repo_root: Path,
     autoresearch_dir: Path,
+    prompts_dir: Path,
     csv_path: Path,
     max_configs: int,
     next_exp_name: str,
@@ -210,6 +211,10 @@ def build_user_prompt(
 
     has_errors = (store_dir / "latest_error.log").exists() and \
                  (store_dir / "latest_error.log").stat().st_size > 0
+
+    prompt_md = read_file_safe(prompts_dir / "prompt.md") if (prompts_dir / "prompt.md").exists() else ""
+    followup_md = read_file_safe(prompts_dir / "followup.md") if (prompts_dir / "followup.md").exists() else ""
+    error_md = read_file_safe(prompts_dir / "error.md") if (prompts_dir / "error.md").exists() else ""
 
     error_section = ""
     if has_errors:
@@ -237,6 +242,26 @@ Iterative mode (wave 2+).
 - Prioritize debugging and stability first when failures exist.
 """
 
+    template_section = ""
+    if has_errors and error_md:
+        template_section = f"""
+## Template Focus
+Use this error-handling template as the primary instruction:
+{error_md}
+"""
+    elif mode == "iterative" and followup_md:
+        template_section = f"""
+## Template Focus
+Use this follow-up template as the primary instruction:
+{followup_md}
+"""
+    elif prompt_md:
+        template_section = f"""
+## Template Focus
+Use this base planning template as the primary instruction:
+{prompt_md}
+"""
+
     return f"""## Task
 
 Plan and write the next experiment wave.
@@ -248,6 +273,8 @@ Plan and write the next experiment wave.
 
 ---
 {mode_section}
+---
+{template_section}
 ---
 
 ## next_goal.md
@@ -423,7 +450,7 @@ def main() -> int:
     sync_search_space_from_root_prompt(repo_root, prompts_dir)
     system_prompt = build_system_prompt(repo_root, prompts_dir)
     user_prompt = build_user_prompt(
-        repo_root, autoresearch_dir, csv_path, args.max_configs, next_exp_name, mode
+        repo_root, autoresearch_dir, prompts_dir, csv_path, args.max_configs, next_exp_name, mode
     )
 
     print(f"[INFO] calling ChatGPT API: model={args.model} mode={mode} next_exp_name={next_exp_name}")
