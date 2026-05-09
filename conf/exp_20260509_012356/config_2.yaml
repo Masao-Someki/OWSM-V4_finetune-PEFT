@@ -1,0 +1,11 @@
+defaults:
+  - ../owsm_peft_adalora
+
+lr: 3e-5
+exp_tag: exp_20260509_012356_adalora_lr3e-5
+
+peft:
+  type: adalora
+  scale: 2
+  lora_alpha: 6
+  task_type: seq_2_seq_lm
