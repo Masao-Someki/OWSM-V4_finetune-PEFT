@@ -1,2 +1,0 @@
-hello world  
-github actionから送ってまーす
