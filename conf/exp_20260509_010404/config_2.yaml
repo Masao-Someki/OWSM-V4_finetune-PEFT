@@ -1,0 +1,17 @@
+defaults:
+  - ../../owsm_peft_adalora
+
+lr: 3e-5
+exp_tag: exp_20260509_010404_adalora_lr3e-5
+
+peft:
+  type: adalora
+  r: 32
+  adalora_alpha: 4
+  adalora_dropout: 0.03
+  task_type: seq_2_seq_lm
+  target_modules: ["linear_v", "linear_out"]
+
+max_epochs: 2
+warmup_steps: 150
+data_ratio: 0.1

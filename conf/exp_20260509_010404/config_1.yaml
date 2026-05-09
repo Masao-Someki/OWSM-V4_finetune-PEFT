@@ -1,0 +1,17 @@
+defaults:
+  - ../../owsm_peft_espnet
+
+lr: 1e-4
+exp_tag: exp_20260509_010404_espnet_lr1e-4
+
+peft:
+  type: espnet
+  r: 16
+  espnet_alpha: 16
+  espnet_dropout: 0.1
+  task_type: seq_2_seq_lm
+  target_modules: ["linear_q", "linear_k"]
+
+max_epochs: 2
+warmup_steps: 200
+data_ratio: 0.2
