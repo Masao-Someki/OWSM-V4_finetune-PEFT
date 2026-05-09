@@ -120,7 +120,7 @@ def detect_and_apply_prompt_updates(
                 f"- current_sha256: `{prompt_hash}`\n"
                 "- Treat this as an intentional search-space/policy update.\n"
                 "- Re-baseline notes/checklist interpretation before proposing configs.\n"
-                "- Regenerate `.autoresearch/prompts/search_space.md` via ChatGPT in this run.\n"
+                "- Regenerate `.autoresearch/store/search_space.md` via ChatGPT in this run.\n"
             ),
             encoding="utf-8",
         )
@@ -161,7 +161,8 @@ Your goal is to propose the next experiment wave to improve the target metric de
 {search_space}
 
 ## Search Space Authoring (MUST write each run)
-- You must write `.autoresearch/prompts/search_space.md` in this run.
+- Use `.autoresearch/prompts/search_space.md` as reference context/template.
+- You must write `.autoresearch/store/search_space.md` in this run.
 - Build it from repository-root `prompt.txt` plus web research evidence.
 - Enumerate explicit candidate values per axis from `prompt.txt` section 6.
 - Include trial order and rationale links for each axis.
@@ -202,7 +203,7 @@ Do NOT include `</file>` anywhere inside file content.
 - `.autoresearch/array_conf.txt` — one config path per line (overwrite each wave)
 - `.autoresearch/store/next_exp_name.txt` — REQUIRED: single line, the next_exp_name value
 - `.autoresearch/codex_summary.md` — your summary of this wave
-- `.autoresearch/prompts/search_space.md` — regenerated search-space checklist and value enumeration
+- `.autoresearch/store/search_space.md` — active search-space checklist and value enumeration for next research
 - `.autoresearch/notes/autoresearch_checklist.md` — update statuses only
 - `.autoresearch/notes/autoresearch_findings.md` — append new entry only
 - `src/` — code changes for bug fixes, model implementation, and pipeline updates
@@ -382,7 +383,7 @@ You MUST write these files (use `<file path="...">...</file>` format):
 2. `.autoresearch/array_conf.txt` — list of those config paths
 3. `.autoresearch/store/next_exp_name.txt` — must contain exactly: `{next_exp_name}`
 4. `.autoresearch/codex_summary.md` — your rationale and wave summary
-5. `.autoresearch/prompts/search_space.md` — regenerated from `prompt.txt` + web research
+5. `.autoresearch/store/search_space.md` — regenerated from `prompt.txt` + web research (active file)
 
 Include these sections in codex_summary.md:
 - **Why this config set**: evidence from experiments.csv
@@ -390,12 +391,13 @@ Include these sections in codex_summary.md:
 - **Checklist updates**: which IDs change status and why
 - **Next action**: what the wave after this should target
 
-For `.autoresearch/prompts/search_space.md`:
+For `.autoresearch/store/search_space.md`:
 - Use checkboxes (`- [ ]`) for executable steps.
 - For each axis listed in `prompt.txt` section 6, enumerate explicit candidate values.
 - Include per-axis trial order and source links.
 - Do not introduce extra axes unless explicitly allowed by `prompt.txt`.
 - Follow the structure/style of `search_space_human.md` as the primary format template.
+- Use `.autoresearch/prompts/search_space.md` as context baseline, then write improved content to `.autoresearch/store/search_space.md`.
 - Run sequentially after phase-1 completion:
   - Phase 1: method/algorithm family comparison first.
   - Phase 2+: only after Phase 1 is complete, expand other axes one-by-one in sequential order.

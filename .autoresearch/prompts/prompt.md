@@ -14,7 +14,7 @@ Propose the next experiment wave based on:
 - Use evidence from `experiments.csv` to justify each config.
 - Include both exploitation and exploration unless `prompt.txt` says otherwise.
 - If unresolved stability risk exists, prefer a smaller safer wave.
-- Plan in checklist order from `.autoresearch/prompts/search_space.md` (top-down).
+- Plan in checklist order from active `.autoresearch/store/search_space.md` (use `.autoresearch/prompts/search_space.md` as reference template).
 - In `codex_summary.md`, explicitly mark completed checklist steps with `[x]` and pending with `[ ]`.
 - Before finalizing search-space values, run web research and cite links in `codex_summary.md`.
 - Use high-reasoning/thinking mode behavior: compare multiple sources, resolve conflicts, and explain assumptions.

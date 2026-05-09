@@ -57,17 +57,7 @@ How to fill:
 
 ## Don'ts (Do not do in this wave)
 
-A) Hard prohibitions
-- Write explicit things the planner must not do.
-- Write:
-  - do not use lr above WRITE_HERE
-  - do not increase training budget beyond WRITE_HERE
-  - do not introduce new axes beyond WRITE_HERE
 
-B) Forbidden combinations
-- Write combinations that are not allowed.
-- Write:
-  - WRITE_HERE
 
 ---
 

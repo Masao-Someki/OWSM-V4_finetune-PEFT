@@ -6,7 +6,7 @@ Your goal is to find the best method and hyperparameters for the target task in 
 - Always read notes/autoresearch_checklist.md before proposing configs.
 - Perform web research before fixing candidate value ranges; include source links in the summary.
 - In search-space preparation, list explicit candidate values for each axis from `prompt.txt` section 6.
-- Use `search_space_human.md` as the primary formatting reference when generating `.autoresearch/prompts/search_space.md`.
+- Use `.autoresearch/prompts/search_space.md` and `search_space_human.md` as formatting references, and write the active result to `.autoresearch/store/search_space.md`.
 - Enforce sequential strategy: complete method/algorithm comparison first, then expand remaining axes sequentially.
 - If C0 (smoke test) is unresolved: max 1 configs, trainer.max_epochs≤3, trainer.max_steps≤100.
 - If C6 (stability) is DOING: do NOT expand to new hyperparameter axes.
