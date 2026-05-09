@@ -474,6 +474,8 @@ For `.autoresearch/store/search_plan.md`:
 - Write a comprehensive multi-wave research roadmap covering ALL axes from `prompt.txt` section 6.
 - Use `store/planning.md` as the definitive candidate inventory — every candidate listed there must appear in the roadmap.
 - Structure as a sequence of waves, each targeting one axis:
+  - Every wave MUST use a markdown table for candidates — no bullet lists, no prose-only sections.
+  - Table columns: candidate | status | comment | config | source
   - Wave N: <axis name> — list ALL candidates from planning.md for that axis, with trial order and source links.
   - Mark candidates done/pending/skipped based on experiments.csv evidence.
   - Include unlock condition: what result from this wave allows moving to the next.
@@ -596,7 +598,11 @@ def build_planning_user_prompt(repo_root: Path, prompts_dir: Path) -> str:
 ## Instructions
 For each axis listed in section 6:
 - Use web search to find ALL available options, not just the most popular.
-- For PEFT methods: search the HuggingFace PEFT library documentation for the complete list of supported PeftType enum values.
+- For PEFT methods:
+  - Search `https://huggingface.co/docs/peft/package_reference/peft_types` for the `PeftType` enum.
+  - List every value in that enum (e.g. LORA, LOHA, LOKR, ADALORA, IA3, LLAMA_ADAPTER, VERA, OFT, BOFT, LOFTQ, FOURIERFT, HRA, VBLORA, etc.).
+  - Do NOT stop at the most common ones — enumerate the complete enum.
+- For numeric axes (lr, warmup_steps, etc.): list coarse, log-scale candidates covering the plausible range.
 - Include source URLs for every candidate.
 - Do not pre-select or filter — list everything supported.
 
