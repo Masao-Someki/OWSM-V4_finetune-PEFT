@@ -1,14 +1,23 @@
 # Wave Summary
 
-**Why this config set**: This wave focuses on a mixture of exploitation and slight exploration based on previous runs. Config 0 is a refinement of the best-performing Lora settings from prior experiments. Config 1 explores a different PEFT method for comparison, and Config 2 delves deeper into Adalora variations, intentionally using a lower learning rate to stabilize training.
+This wave focuses on refining configurations based on the failure of the previous wave, specifically addressing the training instability issues. 
 
-**Search-space coverage**: The axes covered in this wave include:
-- learning rate (5e-5 for Lora and ESPnet; reduced to 5e-6 for Adalora)
-- PEFT method choices (Lora, ESPnet, Adalora)
+## Why this config set
+The previous experiments resulted in multiple debug failures likely due to inadequate memory allocation and inappropriate hyperparameters. By adjusting the learning rates and exploring different PEFT configurations (LORA, ESPnet, and ADALORA) close to the best known configurations, we aim to stabilize and improve performance.
 
-**Checklist updates**: 
-- C0 status remains `DOING` as no new evidence directly resolving prompt integrity has emerged.
-- C1 is now `DOING`, backed by past run outcomes, suggesting configurations that need further examination.
-- C2 moves to `DOING` with the inclusion of two variants (Lora and ESPnet) seeking to define the most effective PEFT method.
+## Search-space coverage
+This wave explores:
+- Learning rate
+- PEFT method choice 
 
-**Next action**: The subsequent wave should target a more focused exploration of learning rates and max_epochs to further optimize run stability, addressing memory concerns observed during earlier failures.
+Each configuration utilizes a stable PEFT method while varying the learning rate, facilitating a focused exploration that adheres to the existing search space.
+
+## Checklist updates
+- C0: Status changed from TODO to DONE after confirming the prompt file's completeness.
+- C1: Initial status set to TODO. The configurations are based on reviewed metrics from the last failed run to steer towards better performance.
+- C4: Status set to DOING, with plans to run minimal tests and observe stability before broadening the search again.
+
+## Next action
+The next wave should target:
+- Validating the stability of the training process with a narrow range of configurations.
+- Reassessing the best-performing configurations and exploring options for a full-scale expansion once stability is confirmed.
