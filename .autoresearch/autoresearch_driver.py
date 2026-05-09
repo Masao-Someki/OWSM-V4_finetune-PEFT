@@ -164,8 +164,9 @@ Your goal is to propose the next experiment wave to improve the target metric de
 - Use `.autoresearch/prompts/search_space.md` as reference context/template.
 - You must write `.autoresearch/store/search_space.md` in this run.
 - Build it from repository-root `prompt.txt` plus web research evidence.
-- Enumerate explicit candidate values per axis from `prompt.txt` section 6.
-- Include trial order and rationale links for each axis.
+- Choose one current focus axis from `prompt.txt` section 6.
+- Enumerate explicit candidate values, trial order, and rationale links for that current focus axis only.
+- Keep the remaining axes deferred until the current focus axis is resolved.
 
 ## Output Format
 All file writes MUST use this exact XML tag format:
@@ -393,14 +394,15 @@ Include these sections in codex_summary.md:
 
 For `.autoresearch/store/search_space.md`:
 - Use checkboxes (`- [ ]`) for executable steps.
-- For each axis listed in `prompt.txt` section 6, enumerate explicit candidate values.
-- Include per-axis trial order and source links.
+- Choose one active axis from `prompt.txt` section 6 and enumerate explicit candidate values only for that axis.
+- Include trial order and source links for the active axis.
 - Do not introduce extra axes unless explicitly allowed by `prompt.txt`.
 - Follow the structure/style of `search_space_human.md` as the primary format template.
 - Use `.autoresearch/prompts/search_space.md` as context baseline, then write improved content to `.autoresearch/store/search_space.md`.
-- Run sequentially after phase-1 completion:
-  - Phase 1: method/algorithm family comparison first.
-  - Phase 2+: only after Phase 1 is complete, expand other axes one-by-one in sequential order.
+- Make the search space explicitly sequential:
+  - Say why the current axis is the right one to resolve now.
+  - Keep non-active axes as deferred placeholders only.
+  - State what result unlocks the next axis and name that next axis.
 """
 
 

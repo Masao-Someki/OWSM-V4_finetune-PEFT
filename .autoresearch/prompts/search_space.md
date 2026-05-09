@@ -2,85 +2,48 @@
 
 ## Rules
 - [ ] All axes must come from `prompt.txt` section 6.
-- [ ] Enumerate explicit candidate values for each axis.
+- [ ] Enumerate explicit candidate values only for the current active axis.
 - [ ] Include source links for proposed values.
-- [ ] Do not expand non-Phase1 axes before Phase1 completion.
+- [ ] Keep non-active axes deferred until the current active axis is resolved.
 
 ## Sequential Policy
-- [ ] Phase 1 (method/algorithm family comparison) must finish first.
-- [ ] Phase 2+ starts only after Phase 1 is marked complete.
-- [ ] After Phase 1, expand remaining axes sequentially (one axis focus per step).
+- [ ] Choose one current focus axis.
+- [ ] Run only the minimum set of experiments needed to resolve that axis.
+- [ ] After resolving the current axis, update this file and choose the next focus axis.
 
-## Phase 1: Method / Algorithm Family
+## Current Focus
 
-| algorithm | done | comment | config |
+### Focus axis
+- [ ] `WRITE_CURRENT_AXIS_HERE`
+
+### Why this axis now
+- [ ] Evidence from prior runs / web research:
+
+### Candidate values for current focus
+
+| value | done | comment | config |
 | --- | --- | --- | --- |
-| baseline_from_prompt |  | baseline |  |
-| candidate_1 |  | from docs/papers |  |
-| candidate_2 |  | from docs/papers |  |
-| candidate_3 |  | from docs/papers |  |
+| candidate_1 |  | baseline / low risk |  |
+| candidate_2 |  | evidence-backed comparison |  |
+| candidate_3 |  | boundary / exploration |  |
 
-- [ ] Experimented all method-family candidates?: yes/no
-- [ ] Phase 1 winner summary (why this method won):
+- [ ] Current axis resolved?: yes/no
+- [ ] Winner / best-so-far summary:
 - [ ] Evidence links:
 
-## Phase 2+: Axis-by-Axis Expansion (Sequential)
+## Deferred Axes
 
-### Axis: learning rate
-- [ ] Candidate values: 
-- [ ] Trial order: 
-- [ ] Fixed settings for fair comparison:
-- [ ] Expand condition:
-- [ ] Stop condition:
-- [ ] Sources:
+- [ ] learning rate
+- [ ] optimizer
+- [ ] batch size
+- [ ] max_epochs
+- [ ] warmup_steps
+- [ ] PEFT method choice (please check all method available on PEFT library)
+- [ ] Best PEFT parameter set for each of the PEFT method, such as ranks, etc.
 
-### Axis: optimizer
-- [ ] Candidate values: 
-- [ ] Trial order: 
-- [ ] Fixed settings for fair comparison:
-- [ ] Expand condition:
-- [ ] Stop condition:
-- [ ] Sources:
-
-### Axis: batch size
-- [ ] Candidate values: 
-- [ ] Trial order: 
-- [ ] Fixed settings for fair comparison:
-- [ ] Expand condition:
-- [ ] Stop condition:
-- [ ] Sources:
-
-### Axis: max_epochs
-- [ ] Candidate values: 
-- [ ] Trial order: 
-- [ ] Fixed settings for fair comparison:
-- [ ] Expand condition:
-- [ ] Stop condition:
-- [ ] Sources:
-
-### Axis: warmup_steps
-- [ ] Candidate values: 
-- [ ] Trial order: 
-- [ ] Fixed settings for fair comparison:
-- [ ] Expand condition:
-- [ ] Stop condition:
-- [ ] Sources:
-
-### Axis: PEFT method choice (please check all method available on PEFT library)
-- [ ] Candidate values: 
-- [ ] Trial order: 
-- [ ] Fixed settings for fair comparison:
-- [ ] Expand condition:
-- [ ] Stop condition:
-- [ ] Sources:
-
-### Axis: Best PEFT parameter set for each of the PEFT method, such as ranks, etc.
-- [ ] Candidate values: 
-- [ ] Trial order: 
-- [ ] Fixed settings for fair comparison:
-- [ ] Expand condition:
-- [ ] Stop condition:
-- [ ] Sources:
+## Unlock Condition For Next Axis
+- [ ] What result from the current axis allows moving on:
+- [ ] Which axis should be explored next after this one:
 
 ## Source Reference
 - prompt source: `prompt.txt`

@@ -21,7 +21,7 @@ Propose the next experiment wave based on:
 - For method-family choice, gather a broad candidate list from official documentation, then prioritize by practicality.
 - In `search_space.md`, enumerate concrete candidate values per axis (not only generic ranges).
 - Mirror the output structure in `search_space_human.md`.
-- Use sequential progression: finish algorithm-family sweep first, then expand other axes in order.
+- Use sequential progression throughout: identify one active axis to explore now, enumerate only that axis concretely, and keep the remaining axes deferred until the active axis is resolved.
 
 ## Required Outputs
 Write using `<file path="...">...</file>` blocks:
