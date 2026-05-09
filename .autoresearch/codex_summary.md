@@ -1,18 +1,19 @@
 # Wave Summary
-This wave aims to stabilize recent configurations and explore slightly higher learning rates to determine their effects on model performance.
 
-## Why this config set
-Given the previous configurations resulted in `Killed` processes due to memory issues, we are keeping `lr` values as per the allowed range from last experimentation, prioritizing stability. Config `0` maintains the lower learning rate (`5e-5`) for safe convergence, while `1` tests the upper limit (`1e-4`) in a controlled manner to gauge its effect.
+**Why this config set**:
+This experiment wave includes a combination of exploitation and exploration configurations. The exploitation config seeks to capitalize on our existing understanding of hyperparameters (particularly the low learning rate of `5e-5`). The exploration configs investigate potential alternatives (learning rates of `3e-5` and `2e-5`), which could yield better performance based on feedback from previous trials.
 
-## Search-space coverage
-This wave covers:
-- Learning Rate (5e-5, 1e-4)
-- Optimizer (AdamW) - using the same across configs.
-- Batch Size (16, 32) - implicitly covered since both configs can be adjusted later depending on memory issues.
+**Search-space coverage**:
+- Learning rate (lr): 5e-5, 3e-5, 2e-5
+- Method param_a: 8, 10, 12
+- Method param_b: 0.05, 0.1, 0.15
 
-## Checklist updates
-- **C1**: Marked as `TODO` because of no recent evidence.
-- **C4**: Remains `TODO` due to risk of OOM; ensuring the configurations are set to avoid it.
+**Checklist updates**:
+- `C0`: Resolved as we have ensured that `prompt.txt` is complete and internally consistent.
+- `C1`: Now marked `TODO` after evidence check; exploring exploitation and exploratory configs based on earlier failures.
+- `C2`: Three configs have been labeled; `config_0` as exploitation, and `config_1` and `config_2` as exploration.
+- `C4`: Resolved by controlling runtime risks with adjusted memory and reaffirmed max configs.
+- `C5`: Remains `TODO`, confirming that configs follow reproducibility criteria.
 
-## Next action
-After this wave, the objective would be to examine if any other configurations can be tweaked without increasing the OOM risks. Further exploration could involve looking into different batch sizes if resource limits allow it.
+**Next action**:
+The subsequent wave should focus on deepening exploration based on the metrics gathered from the current configurations, potentially expanding the configurations further if stability continues to be observed and promising outcomes are realized.
