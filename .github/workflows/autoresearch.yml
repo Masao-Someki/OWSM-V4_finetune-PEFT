@@ -32,7 +32,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install anthropic omegaconf pyyaml
+        run: pip install omegaconf pyyaml
 
       - name: Configure git
         run: |
@@ -49,10 +49,10 @@ jobs:
           fi
           echo "Detected mode: $(cat "$GITHUB_OUTPUT" | tail -1)"
 
-      - name: Run Claude autoresearch driver
+      - name: Run ChatGPT autoresearch driver
         id: driver
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           python .autoresearch/claude_autoresearch_driver.py \
@@ -61,7 +61,7 @@ jobs:
             --csv-path .autoresearch/store/experiments.csv \
             --autoresearch-dir .autoresearch \
             --mode "${{ steps.mode.outputs.mode }}" \
-            --model claude-opus-4-7 \
+            --model gpt-4o-mini \
             --max-configs 10 \
             --max-tokens 8192
 

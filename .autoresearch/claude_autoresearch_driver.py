@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Claude API driver invoked from GitHub Actions.
+ChatGPT API driver invoked from GitHub Actions.
 
-Reads autoresearch state, asks Claude to propose the next experiment wave,
+Reads autoresearch state, asks ChatGPT to propose the next experiment wave,
 then commits and pushes generated files on a new branch.
 
 File writes are returned as <file path="...">content</file> blocks and parsed
@@ -16,6 +16,8 @@ import os
 import re
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -30,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--prompts-dir", default=".autoresearch/prompts")
     p.add_argument("--csv-path", default=".autoresearch/store/experiments.csv")
     p.add_argument("--autoresearch-dir", default=".autoresearch")
-    p.add_argument("--model", default="claude-opus-4-7")
+    p.add_argument("--model", default="gpt-4o-mini")
     p.add_argument("--mode", choices=["auto", "bootstrap", "iterative"], default="auto")
     p.add_argument("--max-configs", type=int, default=10)
     p.add_argument("--max-tokens", type=int, default=8192)
@@ -414,18 +416,10 @@ def main() -> int:
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     next_exp_name = f"exp_{ts}"
 
-    try:
-        import anthropic
-    except ImportError:
-        print("[ERROR] anthropic package not installed. Run: pip install anthropic")
-        return 1
-
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    api_key = os.environ.get("OPENAI_API_KEY", "")
     if not api_key:
-        print("[ERROR] ANTHROPIC_API_KEY not set")
+        print("[ERROR] OPENAI_API_KEY not set")
         return 1
-
-    client = anthropic.Anthropic(api_key=api_key)
 
     sync_search_space_from_root_prompt(repo_root, prompts_dir)
     system_prompt = build_system_prompt(repo_root, prompts_dir)
@@ -433,7 +427,7 @@ def main() -> int:
         repo_root, autoresearch_dir, csv_path, args.max_configs, next_exp_name, mode
     )
 
-    print(f"[INFO] calling Claude API: model={args.model} mode={mode} next_exp_name={next_exp_name}")
+    print(f"[INFO] calling ChatGPT API: model={args.model} mode={mode} next_exp_name={next_exp_name}")
     try_notify("AutoResearch: Wave Planning Started", [
         f"- model: `{args.model}`",
         f"- mode: `{mode}`",
@@ -442,27 +436,50 @@ def main() -> int:
     ])
 
     try:
-        message = client.messages.create(
-            model=args.model,
-            max_tokens=args.max_tokens,
-            system=[
+        payload = {
+            "model": args.model,
+            "max_output_tokens": args.max_tokens,
+            "input": [
                 {
-                    "type": "text",
-                    "text": system_prompt,
-                    "cache_control": {"type": "ephemeral"},
-                }
+                    "role": "system",
+                    "content": [{"type": "input_text", "text": system_prompt}],
+                },
+                {
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": user_prompt}],
+                },
             ],
-            messages=[{"role": "user", "content": user_prompt}],
+        }
+        req = urllib.request.Request(
+            "https://api.openai.com/v1/responses",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
         )
+        with urllib.request.urlopen(req) as res:
+            body = json.loads(res.read().decode("utf-8"))
     except Exception as e:
-        print(f"[ERROR] Claude API call failed: {e}", file=sys.stderr)
-        try_notify("AutoResearch: Claude API Failed", [f"- error: `{str(e)[:200]}`"])
+        print(f"[ERROR] ChatGPT API call failed: {e}", file=sys.stderr)
+        try_notify("AutoResearch: ChatGPT API Failed", [f"- error: `{str(e)[:200]}`"])
         return 1
 
-    response_text = message.content[0].text
-    tokens_in = message.usage.input_tokens
-    tokens_out = message.usage.output_tokens
-    print(f"[INFO] Claude response: {len(response_text)} chars "
+    response_text = (body.get("output_text") or "").strip()
+    if not response_text:
+        parts: list[str] = []
+        for item in body.get("output", []):
+            for content in item.get("content", []):
+                if content.get("type") == "output_text":
+                    t = (content.get("text") or "").strip()
+                    if t:
+                        parts.append(t)
+        response_text = "\n".join(parts).strip()
+    usage = body.get("usage", {}) if isinstance(body, dict) else {}
+    tokens_in = usage.get("input_tokens", 0)
+    tokens_out = usage.get("output_tokens", 0)
+    print(f"[INFO] ChatGPT response: {len(response_text)} chars "
           f"(in={tokens_in} out={tokens_out})")
 
     # Runtime state is kept under .autoresearch/store (prompts/ is template-only).
@@ -474,9 +491,9 @@ def main() -> int:
     written = apply_file_operations(response_text, repo_root)
 
     if not written:
-        print("[ERROR] Claude wrote no files. Check .autoresearch/store/last_response.txt")
+        print("[ERROR] ChatGPT wrote no files. Check .autoresearch/store/last_response.txt")
         try_notify("AutoResearch: No Files Written", [
-            "- Claude response produced no <file> tags",
+            "- ChatGPT response produced no <file> tags",
             "- See .autoresearch/store/last_response.txt",
         ])
         return 1
