@@ -1,0 +1,10 @@
+defaults:
+  - ../base_recipe_template
+
+lr: 1e-3
+exp_tag: exp_20260509_181831_espnet_variant
+
+method:
+  type: espnet
+  param_a: 7
+  param_b: 0.06
