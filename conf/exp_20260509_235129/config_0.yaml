@@ -1,0 +1,20 @@
+defaults:
+  - ../base_recipe_template
+
+# Debug config to diagnose systematic failures in all PEFT candidates.
+exp_tag: exp_20260509_235129_debug_lora_base
+# Minimal model config to isolate script/infra/model init issues
+lr: 1e-4
+method:
+  type: lora
+  r: 4
+  alpha: 8
+  dropout: 0.0
+
+trainer:
+  fast_dev_run: 3   # Only run 3 train/valid steps, no full epoch
+  max_epochs: 1
+  max_steps: 6
+  log_every_n_steps: 1
+  accumulate_grad_batches: 1
+# Rationale: drastically reduce steps/params to elicit error/failure signal

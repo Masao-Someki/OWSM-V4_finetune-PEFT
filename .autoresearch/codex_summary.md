@@ -1,37 +1,30 @@
-# Wave Summary: exp_20260509_222054 (Bootstrap)
+# Wave Summary: exp_20260509_235129
 
-## Why this config set:
-- This is the initialization ("bootstrap") wave—no reliable prior results in experiments.csv.
-- All main PEFT method types likely supported/feasible with the code base are included, based on web research and current SOTA/official docs: LoRA, Adalora, IA3, Adapter, Prefix tuning, OFT and LoRA scale variants.
-- LoRA is included at baseline, very low (r=2), and high rank (r=32) settings to check for under- and over-capacity in this backbone.
-- Adalora is included for adaptive/auto-rank, which is widely cited as outperforming LoRA in some settings ([Ding et al., 2023](https://arxiv.org/abs/2303.10512)).
-- OFT is included as a baseline orthogonal PEFT method that is used in recent speech/ASR finetune papers.
-- Prefix tuning is included as it is an established baseline for transformer PEFT, especially in speech/seq2seq.
-- Adapter is included as a classic PEFT baseline.
-- This set covers all high-level method types suggested by prompt.txt and by the latest literature.
-- Parameters such as batch size, epochs, optimizer are held at template-safe values (base_recipe_template), focusing the wave on method axis only.
+## Why this config set
 
-## Search-space coverage:
-- Covers the full categorical PEFT "method" axis.
-- Candidate methods: LoRA, Adalora, IA3, Adapter, Prefix tuning, OFT, and 2 additional LoRA ranks for boundary check.
-- All method types listed in planning.md, matching prompt.txt section 6.
+- All PEFT methods in previous wave failed immediately (status=FAILED, exit_code=1, zero runtime, see experiments.csv).
+- No evidence any specific PEFT method or hyperparameter is the root cause.
+- All configs failed fast, including LoRA baseline, IA3, Adapter, Prefix, Adalora, OFT, and LoRA r2/r32 variants.
+- The likely root cause is infrastructure (code/data/initialization incompatibility) rather than algorithm.
+- Common debug-gate protocols (lightning, PyTorch, espnet) recommend a `fast_dev_run` or <10 steps as first triage.
+- Therefore, a single minimal test config with LoRA (as archetype PEFT, minimal r/alpha/dropout, 3 steps) is used to trigger exactly where/what the error is.
 
-## Checklist updates:
-- [x] Enumerated all PEFT method candidates (methods axis: LoRA variants, Adalora, IA3, Adapter, Prefix tuning, OFT).
-- [x] Submitted initial configs for all plausible PEFT method types.
-- [ ] Remaining: Peft parameters, learning rate, optimizer, warmup_steps, batch size, max_epochs will be explored only after best method is clear.
+## Search-space coverage
 
-## Next action:
-- Wait for metrics from this bootstrap wave.
-- Advance to a parameter or learning-rate sweep on the best performing method(s).
-- If multiple methods are close, next wave may bifurcate into deeper parameter search for top 2–3 candidates.
-- If none converge or evidence of instability, rerun LoRA/Adapter with shorter epoch/batch to debug.
+- Axis: PEFT Method. Diagnostic step only.
+- Only LoRA tested in this step, as universal testbed for PEFT infra.
+- **No true algorithmic search**—this is a troubleshooting/triage wave due to SYSTEMATIC FAILURE in all prior configs.
 
-## Web research references:
-- [LoRA: https://arxiv.org/abs/2106.09685](https://arxiv.org/abs/2106.09685) (baseline, popularity)
-- [Adalora: https://arxiv.org/abs/2303.10512](https://arxiv.org/abs/2303.10512) (adaptive rank)
-- [IA3: https://arxiv.org/abs/2205.05638](https://arxiv.org/abs/2205.05638) (lightweight fine-tune)
-- [Prefix Tuning: https://arxiv.org/abs/2101.00190](https://arxiv.org/abs/2101.00190)
-- [Adapter: https://arxiv.org/abs/1902.00751](https://arxiv.org/abs/1902.00751)
-- [OFT: https://arxiv.org/abs/2310.05327](https://arxiv.org/abs/2310.05327) (speech/ASR PEFT)
+## Checklist updates
+
+- Mark all previous PEFT method runs as `done` or `skipped` if tested (per prompt: only status update allowed), except this new one.
+- Propose no new methods or hyperparams until error root cause is found.
+- Checklist/progress is effectively paused at the lowest debug gate.
+
+## Next action
+
+- After this run: 
+    - If FAILURE, collect full stack/error, update checklist as SYSTEMIC ERROR, and begin ablations (e.g., remove PEFT, try vanilla model).
+    - If SUCCESS, repeat with r=8, full dropout, then adapter/ia3/prefix in debug mode to isolate which method/param breaks pipeline.
+    - Only once at least one PEFT method passes debug gate, resume full search wave (max 10 per wave).
 

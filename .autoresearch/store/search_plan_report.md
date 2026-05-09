@@ -1,30 +1,35 @@
-# Search Space Index & Web Research Summary
+# Search Space Snapshot (Wave: exp_20260509_235129)
 
-## Current candidate axis: PEFT method
+## Active Axis: PEFT Method
 
-| method         | comment                          |
-|----------------|----------------------------------|
-| lora           | Most cited; baseline; variants (r) |
-| adalora        | Adaptive-rank; recent SOTA variant |
-| ia3            | Lightweight gate-based variant     |
-| adapter        | Classic bottleneck adapters        |
-| prefix_tuning  | Virtual tokens, established       |
-| oft            | Orthogonal Fusion Tuning; recent  |
-| lora (r=2)     | Boundary: low capacity            |
-| lora (r=32)    | Boundary: high capacity           |
+| algorithm     | status   | comment                           | config                                         |
+|---------------|----------|-----------------------------------|------------------------------------------------|
+| lora          | pending  | Baseline, most cited, r=8         | conf/exp_20260509_222054/config_0.yaml (FAILED)   |
+| adalora       | pending  | Adaptive-rank, recent SOTA        | conf/exp_20260509_222054/config_4.yaml (FAILED)   |
+| ia3           | pending  | Lightweight gate-based PEFT       | conf/exp_20260509_222054/config_2.yaml (FAILED)   |
+| adapter       | pending  | Classic bottleneck adapters       | conf/exp_20260509_222054/config_1.yaml (FAILED)   |
+| prefix_tuning | pending  | Virtual tokens, S2S, low resource | conf/exp_20260509_222054/config_3.yaml (FAILED)   |
+| oft           | pending  | Orthogonal Fusion, ASR/S2S        | conf/exp_20260509_222054/config_5.yaml (FAILED)   |
+| lora_r2       | pending  | LoRA, low-rank ablation           | conf/exp_20260509_222054/config_6.yaml (FAILED)   |
+| lora_r32      | pending  | LoRA, high-rank ablation          | conf/exp_20260509_222054/config_7.yaml (FAILED)   |
+| debug_lora    | pending  | Diagnosing all failures           | conf/exp_20260509_235129/config_0.yaml           |
 
-## Source links and highlights
+All canonical methods above systematically failed (status=FAILED) at first step. Now using smallest possible LoRA config (r=4, alpha=8, 0 dropout, 3 steps) to elicit root error and trigger working pipeline.
 
-| method         | web reference | highlight/why selected |
-|----------------|--------------|------------------------|
-| lora           | [LoRA paper](https://arxiv.org/abs/2106.09685)  | SOTA baseline for PEFT. |
-| adalora        | [AdaLoRA paper](https://arxiv.org/abs/2303.10512) | Adaptive, best large-scale. |
-| ia3            | [IA3 paper](https://arxiv.org/abs/2205.05638) | Less parameters, practical for many tasks. |
-| adapter        | [Adapter paper](https://arxiv.org/abs/1902.00751) | Oldest/classic PEFT method. |
-| prefix_tuning  | [Prefix Tuning paper](https://arxiv.org/abs/2101.00190) | Widely used, especially for sequence2sequence. |
-| oft            | [OFT paper](https://arxiv.org/abs/2310.05327) | New, promising on speech/S2S tasks. |
-| lora (r=2,32)  | Lora variants | Common for capacity ablation. |
+## Web/Documentation Sources
 
-## Summary
-All major PEFT methods are included in this wave. Next axis (parameters, lr, optimizer) will be explored after initial results.
+| Method    | Citation/Link |
+|-----------|---------------|
+| LoRA      | https://arxiv.org/abs/2106.09685 |
+| AdaLoRA   | https://github.com/jiachunfeng/Adalora |
+| IA3       | https://arxiv.org/abs/2205.05638 |
+| Adapter   | https://arxiv.org/abs/1902.00751 |
+| PrefixTuning | https://arxiv.org/abs/2101.00190 |
+| OFT       | https://arxiv.org/abs/2307.01949 |
+| ESPnet PEFT | https://github.com/espnet/espnet/issues/4923 |
+
+## Action Items
+
+- DO NOT advance to new search axes before any PEFT candidate passes debug-gate.
+- Collect/triage error-to-fix if this config fails again.
 
