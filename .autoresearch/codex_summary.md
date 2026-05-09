@@ -1,19 +1,27 @@
 # Wave Summary
 
 ## Why this config set
-The initial wave established baseline variants for three different method settings, but there is no metric or error evidence reported yet (experiments.csv is still empty, and no errors are reported by checklist or metrics). Therefore, the most informative next-step is to re-run these baseline configurations under the new wave name (`exp_20260509_211638`) so that metric and stability evidence can be obtained for all the primary method variants. This allows us to:
-- Validate that all three method types (`method_A`, `method_B`, `method_C`) are functional and stable under default parameters.
-- Gather comparative performance results for the three approaches, which is necessary before extending search to fine-grained parameters or other axes.
+The previous wave defined the conceptual baseline for method exploration without actual experiment results (no rows in experiments.csv). According to the project sequential policy and search plan, we must explicitly and independently cover all major method types to establish both stability and method effectiveness, before considering hyperparameter and fine-tuning axes. Here, we pick the three most broadly recognized parameter-efficient fine-tuning (PEFT) methods—`lora`, `adalora`, and `ia3`—as supported by current libraries and literature. Each config uses the same core hyperparameters for direct comparison.
 
 ## Search-space coverage
-- Axis covered: Method type (`method_A`, `method_B`, `method_C`).
-- Other hyperparameter axes are intentionally deferred until there is stability and basic result coverage across these method variants.
+- Current axis: "method type" (categorical).
+- Methods selected based on both project requirements and web best practices for PEFT.
+- Covers three prominent PEFT algorithmic variants: LoRA, AdaLoRA, Ia3.
+- All other axes (hyperparameters, dataset, optimizer, etc.) deferred until one stable, effective method is identified.
 
 ## Checklist updates
-- We are actively executing (but not yet resolving) "validate effectiveness of methods in configurations".
-- We continue to block on "Stability and performance metrics to be assessed" until results are available.
+- [x] Initial wave planning completed (already complete).
+- [/] Needs to validate effectiveness of methods in configurations: REMAINS INCOMPLETE, will be resolved by the results of this wave.
+- [/] Stability and performance metrics to be assessed: REMAINS INCOMPLETE, dependent on wave execution.
+- No item marked complete from new evidence (since experiments.csv is still empty).
 
 ## Next action
-After this wave, review metrics and stability for each method variant:
-- If any methods show critical errors, debug/refine them first.
-- If all run stably, select the best-performing method and move to the next axis (likely parameterization or key PEFT hyperparameter for the selected method).
+- After results for these three configs are available, the winning (or best-performing and stable) method will be chosen.
+- The search will then proceed to optimize PEFT hyperparameters (e.g., r, alpha, dropout) for that method, as planned in the space.
+- If failures occur, debugging/stability investigation becomes first priority before expansion.
+
+## Additional
+- Rationale for method values:
+    - LoRA: Baseline/most widely adopted PEFT [https://arxiv.org/abs/2106.09685].
+    - AdaLoRA: Adaptive, evidence of improved efficiency [https://arxiv.org/abs/2303.10512].
+    - IA3: Simpler, competitive on multiple tasks [https://arxiv.org/abs/2205.05638].

@@ -1,30 +1,27 @@
-# Search Space Report (exp_20260509_211638)
+# Search Space Report
 
-## Current axis (active): Method type
+## Active Axis: Method Type
 
-| method    | description                 | config                                     |
-|-----------|----------------------------|--------------------------------------------|
-| method_A  | Baseline, established      | conf/exp_20260509_211638/config_0.yaml     |
-| method_B  | Alternative, param shift   | conf/exp_20260509_211638/config_1.yaml     |
-| method_C  | Different params, explore  | conf/exp_20260509_211638/config_2.yaml     |
+| value    | rationale / comment                                             | config                                         |
+|----------|----------------------------------------------------------------|------------------------------------------------|
+| lora     | Standard PEFT baseline, widely used, robust                    | conf/exp_20260509_212910/config_0.yaml         |
+| adalora  | Adaptive LoRA variant, efficient and flexible, recent results  | conf/exp_20260509_212910/config_1.yaml         |
+| ia3      | Lightweight, highly parameter-efficient, competitive           | conf/exp_20260509_212910/config_2.yaml         |
 
-*All three main methods covered in this wave.*
+## Web/Literature Evidence Table
 
-## Deferred axes
+| Method   | Source/Reference                                                                                               |
+|----------|--------------------------------------------------------------------------------------------------------------|
+| lora     | https://arxiv.org/abs/2106.09685, https://github.com/huggingface/peft                                        |
+| adalora  | https://arxiv.org/abs/2303.10512, https://github.com/huggingface/peft                                        |
+| ia3      | https://arxiv.org/abs/2205.05638, https://github.com/huggingface/peft                                        |
 
-- PEFT parameters: Defer until method coverage is complete
-- Learning rate: Defer
-- optimizer: Defer
-- warmup_steps: Defer
-- batch size: Defer
-- max_epochs: Defer
+## Coverage
 
-## Evidence and sources (web research summary)
-- No run results (experiments.csv empty) — necessary baseline method check.
-- See conf/exp_20260509_205921/ for initial template and prompt.txt for axis validity.
+- All major PEFT methods from `prompt.txt` and web best practices are tested.
+- No locked-out methods from guides or open-source examples.
 
-## Next Steps
-- When metrics are available, select the most promising method or debug/skip broken ones.
-- Unlock tuning of key hyperparameters for the best method.
+## Next Expansion
 
-Prepared for Slack or review: summarizes which methods are tried, rationale, and deferred search axes.
+- Once a method "winner" is stable, hyperparameter search (e.g. r, alpha, dropout).
+- If runtime/stability issues: debug/patch, hold off further expansion.

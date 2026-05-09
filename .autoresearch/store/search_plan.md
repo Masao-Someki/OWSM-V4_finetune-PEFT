@@ -1,61 +1,82 @@
-- [ ] Ensure all search space axes match `prompt.txt`.
-- [ ] Enumerate explicit candidate values for each axis.
+# Search Space Checklist
 
-## Candidate Values
+- [ ] All axes must come from prompt.txt section 6.
+- [ ] This file is cumulative: append updates and preserve prior evidence/history.
+- [ ] Enumerate explicit candidate values only for the current active axis.
+- [ ] Include source links for proposed values.
+- [ ] Keep non-active axes deferred until the current active axis is resolved.
+- [ ] If the active axis is finite/categorical, enumerate the broadest practical candidate set.
+- [ ] If the active axis is numeric, use coarse, information-efficient values first and avoid low-signal tiny increments.
 
-### Method parameters
+---
 
-| algorithm | done | comment | config |
-| --- | --- | --- | --- |
-| method_A |  | Baseline exploration | conf/exp_20260509_205921/config_0.yaml |
-| method_B |  | Alternative method    | conf/exp_20260509_205921/config_1.yaml |
-| method_C |  | Exploring different parameters | conf/exp_20260509_205921/config_2.yaml |
+## Sequential Policy
 
-### Notes (wave 2)
-- We are in the initial phase of the search, so covering all primary method variants is mandatory before narrowing the search.
-- No evidence yet from experiments.csv to indicate dysfunction or best performer.
+- [ ] Choose one current focus axis.
+- [ ] Run only the minimum set of experiments needed to resolve that axis.
+- [ ] After resolving the current axis, update this file and choose the next focus axis.
 
-### Current Focus
+---
 
-#### Focus axis
-- [x] Method type (`method_A`, `method_B`, `method_C`)
+## Current Focus
 
-#### Why this axis now
-- Initial coverage is mandatory to ensure infrastructure and method implementations are correct.
-- No prior result for any method; stability must be established for all.
+### Focus axis
+- [x] Method type (`lora`, `adalora`, `ia3`)
 
-#### Candidate values for current focus
+### Why this axis now
+- No experiment results yet (experiments.csv empty).
+- All PEFT methods and infrastructure must be validated for stability, compatibility, and any major effectiveness differences.
+- This axis is categorical with 3 primary, widely-recognized candidate values.
+- Web search/lit review: LoRA, AdaLoRA, and Ia3 are the most frequently used in recent PEFT research and packages (sources below).
 
-| value     | done | comment             | config                                         |
-|-----------|------|---------------------|------------------------------------------------|
-| method_A  |      | Baseline exploration| conf/exp_20260509_211638/config_0.yaml         |
-| method_B  |      | Alternative method  | conf/exp_20260509_211638/config_1.yaml         |
-| method_C  |      | Explore diversity   | conf/exp_20260509_211638/config_2.yaml         |
+### Candidate values for current focus
 
-Current axis resolved?: no
-Winner / best-so-far summary: TBD after this wave completes
-Axis type: categorical
-Enumeration policy used: full set from prompt/web, 1:1 mapping to implemented configs
-Evidence links: see conf/exp_20260509_205921/config_*.yaml (baseline variants), prompt.txt sec 6
+| value    | done | comment                                    | config                                         |
+|----------|------|--------------------------------------------|------------------------------------------------|
+| lora     |      | Standard, robust PEFT baseline             | conf/exp_20260509_212910/config_0.yaml         |
+| adalora  |      | Adaptive LoRA, lighter/flexible            | conf/exp_20260509_212910/config_1.yaml         |
+| ia3      |      | Competitive and very parameter-efficient   | conf/exp_20260509_212910/config_2.yaml         |
 
-#### Deferred Axes
+- Current axis resolved?: no.
+- Winner / best-so-far summary: TBD after metrics.
+- Axis type: categorical (broadest practical set based on project constraints and runtime support).
+- Enumeration policy: "exhaust all major PEFT methods most often cited + supported by latest libraries."
+- Evidence links:
+    - LoRA: https://arxiv.org/abs/2106.09685, https://github.com/huggingface/peft
+    - AdaLoRA: https://arxiv.org/abs/2303.10512, https://github.com/huggingface/peft
+    - IA3: https://arxiv.org/abs/2205.05638, https://github.com/huggingface/peft
 
-- [ ] PEFT parameters
+---
+
+## Deferred Axes
+
+- [ ] PEFT method parameters (r, alpha, dropout, others)
 - [ ] Learning rate
-- [ ] optimizer
+- [ ] optimizer and related
 - [ ] warmup_steps
 - [ ] batch size
 - [ ] max_epochs
 
-#### Unlock Condition For Next Axis
-- Upon collection of stable, complete metrics for each method, advance to the top-performing method and tune its primary hyperparameters.
+---
 
-#### Which axis next?
-- Parameterization for the selected method, or explore PEFT hyperparameters.
+## Unlock Condition For Next Axis
 
-#### Source Reference
+- When all three main methods run successfully with stable metrics, proceed to hyperparameter tuning for the best (single) method.
+    - If failures: debug broken method(s) before expanding.
+    - If all run stably: advance to tuning e.g. r, alpha, etc. for the best performer.
+
+- Which axis after this? "PEFT method parameters" for the selected method.
+
+---
+
+## Source Reference
+
 - prompt source: `prompt.txt`
 - format reference: `search_plan_human.md`
 
-#### Accumulated Evidence
-- First exploration run to substantiate metrics and stability; no prior run results in experiments.csv.
+---
+
+## Accumulated Evidence
+
+Wave 1-2: No experiment results; approaching method axis exhaustively for infrastructure and method stability.
+Wave 2: Now explicitly covers LoRA, AdaLoRA, IA3 as required for modern PEFT baselines.
