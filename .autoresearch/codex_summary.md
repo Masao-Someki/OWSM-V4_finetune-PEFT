@@ -1,17 +1,16 @@
 # Wave Summary
-This wave aims to stabilize training and improve validation WER for Portuguese ASR using diverse PEFT methods. 
+This wave aims to ensure stability first before undergoing broader exploration of parameters. Due to the instability issues in the prior experiment, we are enforcing a smaller batch of configurations focusing on learning rate, method choice, and memory adjustments.
 
-## Why this config set
-Three configurations were chosen to explore small adjustments around previous findings, addressing known instabilities. The focus is on decreasing the learning rate and adjusting PEFT parameters to maintain training stability, responding to recent debug failures.
+**Why this config set**: Evidence from prior runs indicated high memory usage leading to failures. Each configuration aims to balance the learning rate and ranks in accordance with the identified parameters from the PEFT library.
 
-## Search-space coverage
-- Learning Rate: Adjusting the learning rates across configurations (1e-5, 2e-5, 3e-5) to find the optimal rate.
-- PEFT Methods: Exploring different PEFT methods including LoRA, AdaLoRA, and ESPnet.
-- Other hyperparameters: Testing dropout and alpha values.
+**Search-space coverage**: This wave covers:
+- Learning rate
+- Optimizer and method choices
+- PEFT-specific parameters
 
-## Checklist updates
-- C0: Marked as DONE after confirming `prompt.txt` aligns.
-- C4: Marked as DONE by limiting memory requests, ensuring stability was prioritized.
+**Checklist updates**:
+- `C0`: Updated to TODO as `prompt.txt` is confirmed.
+- `C1`: Updated to TODO as we are using configurations that were tested in the last wave.
+- `C2`: Updated to TODO as we aim for a mix of exploitation (narrowing down successful parameters) and exploration (testing variations in rank and methods).
 
-## Next action
-Future waves should focus on further exploring learning rates and other axes if stability is validated. If successful outcomes are achieved, attempts to broaden the search for hyperparameters may begin.
+**Next action**: If stability is assured, the next wave will focus on fine-tuning remaining hyperparameters, such as batch size and epochs, based on the observations from this set of results.

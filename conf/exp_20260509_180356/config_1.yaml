@@ -1,0 +1,10 @@
+defaults:
+  - ../owsm_peft_espnet.yaml
+
+lr: 5e-5
+exp_tag: exp_20260509_180356_espnet
+
+method:
+  type: peft_method
+  ranks: 4
+  param_a: 0.03

@@ -1,0 +1,10 @@
+defaults:
+  - ../owsm_peft_adalora.yaml
+
+lr: 3e-5
+exp_tag: exp_20260509_180356_adalora
+
+method:
+  type: peft_method
+  ranks: 6
+  param_a: 0.04
