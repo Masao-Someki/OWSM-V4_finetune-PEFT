@@ -84,3 +84,8 @@ Append one entry per wave after planning/execution attempt.
 - type: prompt_txt_updated
 - action: refresh search space and notes before next wave planning
 - prompt_sha256: `ea80bd3608500d60c5c9c633a78972cbb276090c73f2340f4353b5101c11c691`
+
+## Wave Prep Note (2026-05-09T19:13:01+00:00)
+- type: prompt_txt_updated
+- action: refresh search space and notes before next wave planning
+- prompt_sha256: `c68f12dfd28b449466bf89750f5c1531c7e46c83c1da1090090a4bd02acde137`
