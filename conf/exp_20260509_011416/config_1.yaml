@@ -1,0 +1,10 @@
+defaults:
+  - ../../owsm_peft_espnet
+
+lr: 5e-5
+exp_tag: exp_20260509_011416_espnet_lr5e-5
+
+peft:
+  type: espnet
+  r: 8
+  other_param: value

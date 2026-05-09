@@ -1,21 +1,14 @@
 # Wave Summary
-This wave aims to improve Portuguese ASR quality by exploring the PEFT configurations around known issues from the previous runs. It adopts a debug-first approach to ensure stability during model training.
 
-### Why this config set
-Given the need to address the recent issues of memory and training instability encountered in the previous wave, we have focused on configs that optimize both parameters and computational efficiency. Configurations have been selected based on previous evidence suggesting potential success in reducing validation WER.
+**Why this config set**: This wave focuses on a mixture of exploitation and slight exploration based on previous runs. Config 0 is a refinement of the best-performing Lora settings from prior experiments. Config 1 explores a different PEFT method for comparison, and Config 2 delves deeper into Adalora variations, intentionally using a lower learning rate to stabilize training.
 
-### Search-space coverage
-This wave covers the following axes defined in `prompt.txt`:
-- learning rate
-- max_epochs
-- warmup_steps
-- PEFT method choice
-- data ratio
+**Search-space coverage**: The axes covered in this wave include:
+- learning rate (5e-5 for Lora and ESPnet; reduced to 5e-6 for Adalora)
+- PEFT method choices (Lora, ESPnet, Adalora)
 
-### Checklist updates
-- C0: marked as DONE as all necessary parameters and constraints for config generation are defined.
-- C1: marked as TODO as there are still no complete recent experiment results available to reference.
-- C4: marked as TO DO since we are still validating the training stability due to memory issues.
+**Checklist updates**: 
+- C0 status remains `DOING` as no new evidence directly resolving prompt integrity has emerged.
+- C1 is now `DOING`, backed by past run outcomes, suggesting configurations that need further examination.
+- C2 moves to `DOING` with the inclusion of two variants (Lora and ESPnet) seeking to define the most effective PEFT method.
 
-### Next action
-The subsequent wave should aim to resolve C1 by incorporating results from these configurations. This will require evaluation of the experiments to identify valid next steps based on collected metrics.
+**Next action**: The subsequent wave should target a more focused exploration of learning rates and max_epochs to further optimize run stability, addressing memory concerns observed during earlier failures.
