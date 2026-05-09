@@ -1,16 +1,30 @@
-# Search Space Report
+# Search Space Report (exp_20260509_211638)
 
-## Active Candidate Configurations
-| method      | param_a | param_b | config path                                      |
-| ----------- | ------- | ------- | ------------------------------------------------ |
-| method_A    | 8       | 0.05    | conf/exp_20260509_205921/config_0.yaml         |
-| method_B    | 10      | 0.01    | conf/exp_20260509_205921/config_1.yaml         |
-| method_C    | 5       | 0.1     | conf/exp_20260509_205921/config_2.yaml         |
+## Current axis (active): Method type
 
-## Research Summary
-- The initial methods chosen are drawn from research indicating effective strategies in similar tasks with a focus on adaptability and performance optimization. 
+| method    | description                 | config                                     |
+|-----------|----------------------------|--------------------------------------------|
+| method_A  | Baseline, established      | conf/exp_20260509_211638/config_0.yaml     |
+| method_B  | Alternative, param shift   | conf/exp_20260509_211638/config_1.yaml     |
+| method_C  | Different params, explore  | conf/exp_20260509_211638/config_2.yaml     |
 
-### Evidence Sources
-1. [Research Paper 1 - Method A](https://link-to-study.com/methodA)
-2. [Research Paper 2 - Method B](https://link-to-study.com/methodB)
-3. [Research Paper 3 - Method C](https://link-to-study.com/methodC)
+*All three main methods covered in this wave.*
+
+## Deferred axes
+
+- PEFT parameters: Defer until method coverage is complete
+- Learning rate: Defer
+- optimizer: Defer
+- warmup_steps: Defer
+- batch size: Defer
+- max_epochs: Defer
+
+## Evidence and sources (web research summary)
+- No run results (experiments.csv empty) — necessary baseline method check.
+- See conf/exp_20260509_205921/ for initial template and prompt.txt for axis validity.
+
+## Next Steps
+- When metrics are available, select the most promising method or debug/skip broken ones.
+- Unlock tuning of key hyperparameters for the best method.
+
+Prepared for Slack or review: summarizes which methods are tried, rationale, and deferred search axes.

@@ -1,7 +1,19 @@
 # Wave Summary
-- **Why this config set**: The configurations are chosen to explore three different methods (method_A, method_B, and method_C), focusing on varying their parameters to investigate different performance outcomes. Each method is backed by existing literature indicating their potential effectiveness in similar contexts.
-- **Search-space coverage**: This wave focuses on the method selection axis and explores the configurations around three different methods.
-- **Checklist updates**: 
-  - [x] Initial wave planning complete.
-  - [ ] Further refinement of methods and parameters to follow.
-- **Next action**: The next wave should target hyperparameters such as learning rate and batch size following the results from this initial exploration.
+
+## Why this config set
+The initial wave established baseline variants for three different method settings, but there is no metric or error evidence reported yet (experiments.csv is still empty, and no errors are reported by checklist or metrics). Therefore, the most informative next-step is to re-run these baseline configurations under the new wave name (`exp_20260509_211638`) so that metric and stability evidence can be obtained for all the primary method variants. This allows us to:
+- Validate that all three method types (`method_A`, `method_B`, `method_C`) are functional and stable under default parameters.
+- Gather comparative performance results for the three approaches, which is necessary before extending search to fine-grained parameters or other axes.
+
+## Search-space coverage
+- Axis covered: Method type (`method_A`, `method_B`, `method_C`).
+- Other hyperparameter axes are intentionally deferred until there is stability and basic result coverage across these method variants.
+
+## Checklist updates
+- We are actively executing (but not yet resolving) "validate effectiveness of methods in configurations".
+- We continue to block on "Stability and performance metrics to be assessed" until results are available.
+
+## Next action
+After this wave, review metrics and stability for each method variant:
+- If any methods show critical errors, debug/refine them first.
+- If all run stably, select the best-performing method and move to the next axis (likely parameterization or key PEFT hyperparameter for the selected method).
