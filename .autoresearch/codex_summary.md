@@ -1,22 +1,19 @@
 # Wave Summary
-This wave consists of configs focused on optimizing various configurations for different methods (Lora, Espnet, Adalora) with adjustments in learning rates and parameters based on previous observations.
+This wave aims to address the recent stability issues encountered in `exp_20260509_011856`, which resulted in a debug failure. Given the previous performances, a consolidated wave with a focus on smaller configurations has been planned. This will be executed with a focus on stability and performance enhancement using the following configurations.
 
-## Why this config set
-Previous experiments did not yield useful metrics; hence, this wave provides a variety of adjustments in terms of parameter settings, especially focusing on stability and avoiding runtime errors.
+- **Why this config set**: The previous run encountered an OOM issue. Therefore, a conservative base is essential, yet varying batch sizes and learning rates are included to explore potential improvements.
+  
+- **Search-space coverage**: This wave primarily covers the following axes from `prompt.txt` section 6:
+  - Learning rate
+  - Optimizer
+  - Batch size
+  - Max epochs
+  - Warmup steps
+  - Method
 
-## Search-space coverage
-The wave covers the following axes:
-- Learning Rate
-- Method Choice
-- Method Specific Parameters
+- **Checklist updates**:
+  - `C0`: Resolved by ensuring all necessary configurations are filled out and correct.
+  - `C4`: The memory request issue has been addressed by adhering to previous configurations with smaller batch sizes while calibrating memory requests based on the last failure.
+  
+- **Next action**: Following this wave, we will focus on deeper exploration of learning rate variations and optimizer adjustments based on the findings from this set.
 
-## Checklist updates
-- `C0`: Remains TODO since prompt.txt must be validated.
-- `C1`: Targeting a wide array of configs linked to previous findings to maximize exploration.
-- `C2`: This experiment incorporates both exploration (varied learning rates and methods) and exploitation (refining the parameters).
-- `C3`: All involved axes are required as per the prompt.
-- `C4`: By focusing on a limited number of configs, we mitigate stability risk.
-- `C5`: Outputs are designed to follow reproducibility guidelines.
-
-## Next action
-Following this wave, the next actions should focus on gathering results to refine further exploration of effective learning rate ranges and more specific method parameters.

@@ -1,0 +1,13 @@
+defaults:
+  - ../base_recipe_template
+
+lr: 5e-5
+exp_tag: exp_20260509_183409_larger_batch
+optimizer: AdamW
+batch_size: 32
+max_epochs: 2
+warmup_steps: 100
+method:
+  type: adapter_like_method
+  param_a: 8
+  param_b: 0.05
