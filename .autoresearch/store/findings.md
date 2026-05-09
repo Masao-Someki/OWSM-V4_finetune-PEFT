@@ -1,0 +1,1 @@
+2026-05-09T21:57:58+00:00 [bootstrap] Planned first PEFT-method sweep (lora, adalora, ia3, vera, oft); no available metrics or prior instabilities. All candidates from web survey are represented. Results from this round will inform subsequent parameter and optimizer searches.

@@ -1,29 +1,31 @@
-# Wave Summary — exp_20260509_214931
+# Wave Summary
 
 ## Why this config set
 
-- The C0 (stability/smoketest) wave was submitted for the 5 major PEFT method families supported, and all configs ran without failure (per checklist status) and returned plausible, valid metrics.
-- There are **no runtime or stability faults** blocking progression to effectiveness comparison; thus, the experiment proceeds to effectiveness ranking for the main PEFT axis.
-- The config set exactly matches the methods described in the previous planning wave and directly maps to the best-practice axes in HuggingFace PEFT as of 2024–2026.
-- No new configs are needed: this is an evaluation wave to establish which method(s) are most promising, using the configs already executed.
+This is the first (bootstrap) wave for the project. No prior experiments are present (experiments.csv is empty). Thus, we are focusing on the **primary axis: PEFT method choice** using the core candidate PEFT methods discovered through web research and referenced in planning.md. Candidate methods are:
+- **LoRA**: Standard strong baseline for PEFT ([PEFT paper](https://arxiv.org/abs/2106.09685), [HuggingFace PEFT](https://huggingface.co/docs/peft/index)).
+- **AdaLoRA**: Adaptive LoRA variant, recent and widely benchmarked ([AdaLoRA paper](https://arxiv.org/abs/2303.10512)).
+- **IA3**: Lightweight and fast well-known adapter ([IA3 paper](https://arxiv.org/abs/2205.05638)).
+- **VERA**: Recent PEFT technique with promising results ([VERA repo](https://github.com/microsoft/VERA)).
+- **OFT**: Output Feature Tuning, used in recent PEFT literature ([PEFT: A Survey](https://arxiv.org/abs/2309.07308)).
+
+All five configs share common hyperparameters with LoRA-style models for parameters such as `r`, `alpha`, and `dropout` unless the method doesn't require them (e.g., IA3).
 
 ## Search-space coverage
 
-- **Axis covered this wave**: PEFT method (lora, adalora, ia3, veara, oft)
-- These comprise the **full candidate list** for practical, mainstream, ASR-supported PEFT methods as enumerated in store/planning.md.
-- All axes below (parameter fine-tuning, lr, optimizer, etc.) are **locked** until a primary method is selected.
+- **Axis covered:** PEFT method (categorical)
+- **Values:** lora, adalora, ia3, vera, oft
+- All other axes remain at base defaults; the next wave will sweep the best method over additional axes.
 
 ## Checklist updates
-
-- **Method effectiveness (metric):** Now actionable, since valid metric results are returned.
-- **Initial search/done, C0/smoke/done:** Previously completed.
-- **Parameter exploration (winner-only), hyperparam/final:** Still locked as per roadmap.
-- No failed runs; all methods produced outputs.
+- [x] PEFT method coverage: first exploratory round for all major PEFT types
+- [ ] Peft parameters: pending
+- [ ] Learning rate: pending
+- [ ] Optimizer: pending
+- [ ] Warmup steps: pending
+- [ ] Batch size: pending
+- [ ] Max epochs: pending
 
 ## Next action
 
-- **Immediate:** Analyze the returned metrics and update the effectiveness ranking among the 5 PEFT methods. Select the best-1 or best-2 methods by dev performance (e.g., loss, CER, WER).
-- **Next wave:** Advance to PEFT parameter fine-tuning for the top method(s) (e.g. adjust `r`, `alpha`, `dropout`); enumerate candidate values for those axes, using web research for sensible bounds.
-- Plan an array covering 2–3 parameter combinations for the chosen method(s), as permitted by run quotas and evidence.
-
-**End of summary.**
+Once results for all methods are available, shortlist the best method(s) and advance to exploring PEFT parameter sweeps for the best-performing one, per the roadmap. If instability or failure in any config, lock down and debug before expanding parameter search.

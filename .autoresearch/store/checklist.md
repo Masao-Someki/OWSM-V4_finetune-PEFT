@@ -1,0 +1,5 @@
+- [x] First-wave PEFT algorithms: all main candidates tested
+- [ ] Stable/best method found (gate wave 2 PEFT tuning)
+- [ ] Sweep method hyperparameters (winner only)
+- [ ] Sweep LR/optimizer
+- [ ] Sweep warmup, batch size, max epochs

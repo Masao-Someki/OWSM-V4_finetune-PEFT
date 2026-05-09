@@ -1,0 +1,6 @@
+defaults:
+  - ../base_recipe_template
+
+exp_tag: exp_20260509_215758_ia3
+method:
+  type: ia3
