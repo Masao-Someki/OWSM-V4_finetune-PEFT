@@ -332,6 +332,7 @@ def build_user_prompt(
     prompt_update_context = read_file_safe(store_dir / "prompt_update_context.md", max_chars=2000)
     human_search_plan = read_file_safe(prompts_dir / "search_plan_human.md", max_chars=12000)
     active_search_plan = read_file_safe(store_dir / "search_plan.md", max_chars=12000)
+    planning = read_file_safe(store_dir / "planning.md", max_chars=8000)
 
     error_section = ""
     if has_errors:
@@ -435,9 +436,14 @@ Plan and write the next experiment wave.
 
 ---
 
+## store/planning.md (Phase 1 research results — use these as the candidate list)
+{planning}
+
+---
+
 ## search_plan_human.md (format reference — structure only)
 The names below (method_A, method_B, ...) are dummy placeholders for format illustration.
-Do NOT use them in output. Use real method names discovered via web search.
+Do NOT use them in output. Use real method names from store/planning.md.
 {human_search_plan}
 
 ---
@@ -517,6 +523,102 @@ def select_model(
     if prompt_changed:
         return model_search_plan, "search_plan"
     return model_research, "research"
+
+
+# ---------------------------------------------------------------------------
+# OpenAI API call
+# ---------------------------------------------------------------------------
+
+def call_openai_api(
+    system_prompt: str,
+    user_prompt: str,
+    model: str,
+    max_tokens: int,
+    api_key: str,
+    use_web_search: bool,
+) -> tuple[str, dict]:
+    payload: dict = {
+        "model": model,
+        "max_output_tokens": max_tokens,
+        "input": [
+            {"role": "system", "content": [{"type": "input_text", "text": system_prompt}]},
+            {"role": "user", "content": [{"type": "input_text", "text": user_prompt}]},
+        ],
+    }
+    if use_web_search:
+        payload["tools"] = [{"type": "web_search_preview"}]
+
+    req = urllib.request.Request(
+        "https://api.openai.com/v1/responses",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as res:
+        body = json.loads(res.read().decode("utf-8"))
+
+    response_text = (body.get("output_text") or "").strip()
+    if not response_text:
+        parts: list[str] = []
+        for item in body.get("output", []):
+            for content in item.get("content", []):
+                if content.get("type") == "output_text":
+                    t = (content.get("text") or "").strip()
+                    if t:
+                        parts.append(t)
+        response_text = "\n".join(parts).strip()
+
+    usage = body.get("usage", {}) if isinstance(body, dict) else {}
+    return response_text, usage
+
+
+# ---------------------------------------------------------------------------
+# Phase 1: Research planning
+# ---------------------------------------------------------------------------
+
+def build_planning_system_prompt() -> str:
+    return (
+        "You are a research assistant. Your only job is to enumerate experiment search space candidates.\n"
+        "Use web search extensively to find complete, exhaustive lists.\n"
+        "Do NOT limit yourself to 'major' or 'common' options — list everything you find.\n"
+        "Output only a single <file path=\".autoresearch/store/planning.md\"> block. No other text."
+    )
+
+
+def build_planning_user_prompt(repo_root: Path, prompts_dir: Path) -> str:
+    prompt_txt = read_file_safe(repo_root / "prompt.txt")
+    config_fmt = read_file_safe(repo_root / "conf" / "base_recipe_template.yaml", max_chars=2000)
+    return f"""Read the experiment axes in prompt.txt section 6 and enumerate ALL candidate values for each axis.
+
+## prompt.txt
+{prompt_txt}
+
+## conf/base_recipe_template.yaml (config format reference)
+{config_fmt}
+
+## Instructions
+For each axis listed in section 6:
+- Use web search to find ALL available options, not just the most popular.
+- For PEFT methods: search the HuggingFace PEFT library documentation for the complete list of supported PeftType enum values.
+- Include source URLs for every candidate.
+- Do not pre-select or filter — list everything supported.
+
+Output ONLY this file:
+
+<file path=".autoresearch/store/planning.md">
+# Research Planning Report
+
+## Axis: <axis name>
+| candidate | notes | source |
+| --- | --- | --- |
+| ... | ... | ... |
+
+(repeat for each axis)
+</file>
+"""
 
 
 # ---------------------------------------------------------------------------
@@ -688,53 +790,43 @@ def main() -> int:
         f"- max_configs: `{args.max_configs}`",
     ])
 
+    # Phase 1: Research planning — enumerate all candidates via web search.
+    research_model = args.model_research.strip() or args.model
+    print(f"[INFO] Phase 1: research planning (model={research_model})")
     try:
-        payload = {
-            "model": selected_model,
-            "max_output_tokens": args.max_tokens,
-            "input": [
-                {
-                    "role": "system",
-                    "content": [{"type": "input_text", "text": system_prompt}],
-                },
-                {
-                    "role": "user",
-                    "content": [{"type": "input_text", "text": user_prompt}],
-                },
-            ],
-        }
-        if model_reason in ("research", "search_plan"):
-            payload["tools"] = [{"type": "web_search_preview"}]
-        req = urllib.request.Request(
-            "https://api.openai.com/v1/responses",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            method="POST",
+        p1_text, p1_usage = call_openai_api(
+            system_prompt=build_planning_system_prompt(),
+            user_prompt=build_planning_user_prompt(repo_root, prompts_dir),
+            model=research_model,
+            max_tokens=4096,
+            api_key=api_key,
+            use_web_search=True,
         )
-        with urllib.request.urlopen(req) as res:
-            body = json.loads(res.read().decode("utf-8"))
+        p1_written = apply_file_operations(p1_text, repo_root)
+        prewritten.extend(p1_written)
+        print(f"[INFO] Phase 1 done (in={p1_usage.get('input_tokens',0)} out={p1_usage.get('output_tokens',0)})")
+    except Exception as e:
+        print(f"[WARN] Phase 1 research failed: {e} — continuing without planning.md", file=sys.stderr)
+
+    # Phase 2: Main planning — propose configs using Phase 1 results.
+    print("[INFO] Phase 2: wave planning")
+    try:
+        response_text, usage = call_openai_api(
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            model=selected_model,
+            max_tokens=args.max_tokens,
+            api_key=api_key,
+            use_web_search=model_reason in ("research", "search_plan"),
+        )
     except Exception as e:
         print(f"[ERROR] OpenAI API call failed: {e}", file=sys.stderr)
         try_notify("AutoResearch: OpenAI API Failed", [f"- error: `{str(e)[:200]}`"])
         return 1
 
-    response_text = (body.get("output_text") or "").strip()
-    if not response_text:
-        parts: list[str] = []
-        for item in body.get("output", []):
-            for content in item.get("content", []):
-                if content.get("type") == "output_text":
-                    t = (content.get("text") or "").strip()
-                    if t:
-                        parts.append(t)
-        response_text = "\n".join(parts).strip()
-    usage = body.get("usage", {}) if isinstance(body, dict) else {}
     tokens_in = usage.get("input_tokens", 0)
     tokens_out = usage.get("output_tokens", 0)
-    print(f"[INFO] OpenAI response: {len(response_text)} chars "
+    print(f"[INFO] Phase 2 done: {len(response_text)} chars "
           f"(in={tokens_in} out={tokens_out})")
 
     # Runtime state is kept under .autoresearch/store (prompts/ is template-only).
