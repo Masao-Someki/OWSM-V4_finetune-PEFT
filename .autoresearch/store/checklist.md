@@ -1,0 +1,4 @@
+- [ ] Checklist item for algorithm selection: Work in progress.
+- [ ] Checklist item for learning rate: Pending exploration.
+- [ ] Checklist item for batch size: Pending experimentation.
+- [ ] Checklist item for max epochs: Waiting on results from current axis.

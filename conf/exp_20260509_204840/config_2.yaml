@@ -1,0 +1,8 @@
+defaults:
+  - ../base_recipe_template
+
+algorithm: adalora
+lr: 3e-5
+exp_tag: exp_20260509_204840_variant_c
+batch_size: 64
+max_epochs: 5

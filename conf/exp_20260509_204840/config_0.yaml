@@ -1,0 +1,8 @@
+defaults:
+  - ../base_recipe_template
+
+algorithm: lora
+lr: 1e-4
+exp_tag: exp_20260509_204840_variant_a
+batch_size: 32
+max_epochs: 5

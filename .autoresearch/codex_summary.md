@@ -1,8 +1,9 @@
 # Wave Summary
-- **Why this config set**: The chosen configs explore the lora method family to establish a baseline performance across different learning rates and lora variants (`lora`, `delora`, `adalora`). Based on the previous metrics (`experiments.csv`), these methods showed varying efficacy, allowing comparisons at different learning rates.
-  
-- **Search-space coverage**: This wave covers the `peft parameters` and the `learning rate` axes, testing multiple approaches while keeping adjustments conservative, as it's the initial wave.
 
-- **Checklist updates**: No checklist items were available, but this wave is initializing from scratch, allowing us to define the first set of experiments.
+**Why this config set**: This wave utilizes a combination of three algorithms: lora, delora, and adalora, which have shown reliable performance in past experiments as per the documentation and community reports.
 
-- **Next action**: Once the stability and effectiveness of the `peft parameters` are confirmed, we may explore the `optimizer detail` axis as the next focus for further tuning.
+**Search-space coverage**: This wave covers the algorithm axis with proposed candidates that are broad yet practical for foundational setup.
+
+**Checklist updates**: No checklist IDs have changed status as this is the first wave.
+
+**Next action**: Once results are obtained from this wave, we should focus on tuning the learning rates and exploring additional hyperparameters like batch size and max epochs.
