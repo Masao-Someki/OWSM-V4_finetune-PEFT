@@ -256,7 +256,7 @@ def write_next_goal(exp_name: str, array_job_id: str, metrics: dict) -> None:
         f"## Instruction\n"
         f"1. Read `.autoresearch/store/checklist.md` and prioritize unresolved IDs.\n"
         f"2. Read `experiments.csv` and summarize completed/failed results.\n"
-        f"3. Propose next wave within `.autoresearch/store/search_space.md`.\n"
+        f"3. Propose next wave within `.autoresearch/store/search_plan.md`.\n"
         f"4. If C0 is unresolved: max 3 configs, use minimal training epochs/steps.\n"
         f"5. Write all output files using `<file path=\"...\">...</file>` format.\n"
     )

@@ -41,6 +41,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--mode", choices=["auto", "bootstrap", "iterative"], default="auto")
     p.add_argument("--max-configs", type=int, default=10)
     p.add_argument("--max-tokens", type=int, default=8192)
+    p.add_argument("--cache-dirs", nargs="*", default=["conf", "src"],
+                   help="Directories to read and include as repo context in the system prompt.")
     return p.parse_args()
 
 
@@ -83,6 +85,39 @@ def read_csv_tail(csv_path: Path, n_rows: int = 20) -> str:
     header = lines[0]
     tail = lines[max(1, len(lines) - n_rows):]
     return "\n".join([header] + tail)
+
+
+# ---------------------------------------------------------------------------
+# Directory context
+# ---------------------------------------------------------------------------
+
+_CONTEXT_EXTS = {".yaml", ".py", ".sh", ".md", ".txt", ".toml"}
+
+
+def read_dirs_as_context(repo_root: Path, dirs: list[str], max_chars: int = 20000) -> str:
+    parts: list[str] = []
+    total = 0
+    for d in dirs:
+        dpath = repo_root / d
+        if not dpath.is_dir():
+            continue
+        for f in sorted(dpath.rglob("*")):
+            if not f.is_file() or f.suffix not in _CONTEXT_EXTS:
+                continue
+            try:
+                text = f.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                continue
+            rel = f.relative_to(repo_root)
+            entry = f"\n### {rel}\n```\n{text.rstrip()}\n```\n"
+            if total + len(entry) > max_chars:
+                parts.append(f"\n### (truncated — remaining files omitted)\n")
+                return "# Repository Context\n" + "".join(parts)
+            parts.append(entry)
+            total += len(entry)
+    if not parts:
+        return ""
+    return "# Repository Context\n" + "".join(parts)
 
 
 # ---------------------------------------------------------------------------
@@ -137,7 +172,7 @@ def detect_and_apply_prompt_updates(
                 f"- current_sha256: `{prompt_hash}`\n"
                 "- Treat this as an intentional search-space/policy update.\n"
                 "- Re-baseline notes/checklist interpretation before proposing configs.\n"
-                "- Regenerate `.autoresearch/store/search_space.md` via ChatGPT in this run.\n"
+                "- Regenerate `.autoresearch/store/search_plan.md` in this run.\n"
             ),
             encoding="utf-8",
         )
@@ -160,8 +195,8 @@ def detect_and_apply_prompt_updates(
     return prompt_changed, written
 
 
-def build_system_prompt(repo_root: Path, prompts_dir: Path) -> str:
-    search_space = read_file_safe(prompts_dir / "search_space.md")
+def build_system_prompt(repo_root: Path, prompts_dir: Path, repo_context: str = "") -> str:
+    search_plan = read_file_safe(prompts_dir / "search_plan.md")
     system_md = prompts_dir / "system.md"
     system_txt = prompts_dir / "system.txt"
     if system_md.exists():
@@ -171,15 +206,17 @@ def build_system_prompt(repo_root: Path, prompts_dir: Path) -> str:
     else:
         system_extra = ""
 
-    return f"""You are the experiment planner for iterative autoresearch.
+    repo_context_section = f"\n{repo_context}\n" if repo_context else ""
+
+    return f"""You are the experiment planner for iterative autoresearch.{repo_context_section}
 Your goal is to propose the next experiment wave to improve the target metric defined in `prompt.txt`.
 
 ## Search Space Policy (MUST follow)
-{search_space}
+{search_plan}
 
 ## Search Space Authoring (MUST write each run)
-- Use `.autoresearch/prompts/search_space.md` as reference context/template.
-- You must write `.autoresearch/store/search_space.md` in this run.
+- Use `.autoresearch/prompts/search_plan.md` as reference context/template.
+- You must write `.autoresearch/store/search_plan.md` in this run.
 - Build it from repository-root `prompt.txt` plus web research evidence.
 - Choose one current focus axis from `prompt.txt` section 6.
 - Enumerate explicit candidate values, trial order, and rationale links for that current focus axis only.
@@ -224,14 +261,14 @@ Do NOT include `</file>` anywhere inside file content.
 - `.autoresearch/array_conf.txt` — one config path per line (overwrite each wave)
 - `.autoresearch/store/next_exp_name.txt` — REQUIRED: single line, the next_exp_name value
 - `.autoresearch/codex_summary.md` — your summary of this wave
-- `.autoresearch/store/search_space.md` — active search-space checklist and value enumeration for next research
-- `.autoresearch/store/search_space_report.md` — search-space index plus web-research results summary table
+- `.autoresearch/store/search_plan.md` — active search-space checklist and value enumeration for next research
+- `.autoresearch/store/search_plan_report.md` — search-space index plus web-research results summary table
 - `.autoresearch/store/checklist.md` — update statuses only
 - `.autoresearch/store/findings.md` — append new entry only
 - `src/` — code changes for bug fixes, model implementation, and pipeline updates
 - `scripts/` — launcher/runtime bug fixes when needed
 - `tests/test_config_load.py` — update parametrized config list if new test cases needed
-- `tests/test_search_space.py` — update if needed
+- `tests/test_search_plan.py` — update if needed
 
 ## Files You Must NOT Edit
 - `exp/`, `dump/`, `data/`, `secrets/`, `.env`, `keys/`
@@ -288,8 +325,8 @@ def build_user_prompt(
     followup_md = read_file_safe(prompts_dir / "followup.md") if (prompts_dir / "followup.md").exists() else ""
     error_md = read_file_safe(prompts_dir / "error.md") if (prompts_dir / "error.md").exists() else ""
     prompt_update_context = read_file_safe(store_dir / "prompt_update_context.md", max_chars=2000)
-    human_search_space = read_file_safe(prompts_dir / "search_space_human.md", max_chars=12000)
-    active_search_space = read_file_safe(store_dir / "search_space.md", max_chars=12000)
+    human_search_plan = read_file_safe(prompts_dir / "search_plan_human.md", max_chars=12000)
+    active_search_plan = read_file_safe(store_dir / "search_plan.md", max_chars=12000)
 
     error_section = ""
     if has_errors:
@@ -393,13 +430,15 @@ Plan and write the next experiment wave.
 
 ---
 
-## search_space_human.md (format reference)
-{human_search_space}
+## search_plan_human.md (format reference — structure only)
+The names below (method_A, method_B, ...) are dummy placeholders for format illustration.
+Do NOT use them in output. Use real method names discovered via web search.
+{human_search_plan}
 
 ---
 
-## active search_space.md (append-only base)
-{active_search_space}
+## active search_plan.md (append-only base)
+{active_search_plan}
 
 ---
 
@@ -411,8 +450,8 @@ You MUST write these files (use `<file path="...">...</file>` format):
 2. `.autoresearch/array_conf.txt` — list of those config paths
 3. `.autoresearch/store/next_exp_name.txt` — must contain exactly: `{next_exp_name}`
 4. `.autoresearch/codex_summary.md` — your rationale and wave summary
-5. `.autoresearch/store/search_space.md` — regenerated from `prompt.txt` + web research (active file)
-6. `.autoresearch/store/search_space_report.md` — consolidated search-space index and research-results table
+5. `.autoresearch/store/search_plan.md` — regenerated from `prompt.txt` + web research (active file)
+6. `.autoresearch/store/search_plan_report.md` — consolidated search-space index and research-results table
 
 Include these sections in codex_summary.md:
 - **Why this config set**: evidence from experiments.csv
@@ -420,17 +459,17 @@ Include these sections in codex_summary.md:
 - **Checklist updates**: which IDs change status and why
 - **Next action**: what the wave after this should target
 
-For `.autoresearch/store/search_space.md`:
+For `.autoresearch/store/search_plan.md`:
 - Use checkboxes (`- [ ]`) for executable steps.
-- Treat the existing `.autoresearch/store/search_space.md` as append-only project memory.
+- Treat the existing `.autoresearch/store/search_plan.md` as append-only project memory.
 - Preserve prior sections, prior findings, and prior candidate tables unless they are clearly superseded and explicitly marked as updated.
 - Do not replace the whole file with a fresh short summary.
 - Update by appending new observations, new candidate rows, new decisions, and new unlock conditions.
 - Choose one active axis from `prompt.txt` section 6 and enumerate explicit candidate values only for that axis.
 - Include trial order and source links for the active axis.
 - Do not introduce extra axes unless explicitly allowed by `prompt.txt`.
-- Follow the structure/style of `search_space_human.md` as the primary format template.
-- Use `.autoresearch/prompts/search_space.md` as context baseline, then write improved content to `.autoresearch/store/search_space.md`.
+- Follow the structure/style of `search_plan_human.md` as the primary format template.
+- Use `.autoresearch/prompts/search_plan.md` as context baseline, then write improved content to `.autoresearch/store/search_plan.md`.
 - Make the search space explicitly sequential:
   - Say why the current axis is the right one to resolve now.
   - Keep non-active axes as deferred placeholders only.
@@ -439,7 +478,7 @@ For `.autoresearch/store/search_space.md`:
   - For finite/categorical axes, list the maximum practical candidate set, especially when the total set is small enough to enumerate.
   - For numeric axes, use coarse values that cover the plausible range efficiently; avoid dense adjacent values unless refining around evidence.
 
-For `.autoresearch/store/search_space_report.md`:
+For `.autoresearch/store/search_plan_report.md`:
 - Write a compact human-readable summary of the current search space.
 - Include a table of the active axis candidates and a table summarizing web-research findings/sources.
 - Make it suitable for pasting into Slack with minimal cleanup.
@@ -466,12 +505,12 @@ def select_model(
     model_research = args.model_research.strip() or args.model
     model_bugfix = args.model_bugfix.strip() or model_research
     model_prompt_refresh = args.model_prompt_refresh.strip() or model_research
-    model_search_space = args.model_search_space.strip() or model_prompt_refresh
+    model_search_plan = args.model_search_plan.strip() or model_prompt_refresh
 
     if has_errors:
         return model_bugfix, "bugfix"
     if prompt_changed:
-        return model_search_space, "search_space"
+        return model_search_plan, "search_plan"
     return model_research, "research"
 
 
@@ -623,14 +662,17 @@ def main() -> int:
     has_errors = has_recent_errors(store_dir)
     selected_model, model_reason = select_model(args, prompt_changed=prompt_changed, has_errors=has_errors)
     if prompt_changed:
-        print("[INFO] prompt.txt changed since last run; refreshed prompt/update notes and will regenerate search_space via ChatGPT.")
-    system_prompt = build_system_prompt(repo_root, prompts_dir)
+        print("[INFO] prompt.txt changed since last run; refreshed prompt/update notes and will regenerate search_plan.")
+    repo_context = read_dirs_as_context(repo_root, args.cache_dirs) if args.cache_dirs else ""
+    if repo_context:
+        print(f"[INFO] repo context loaded: {len(repo_context)} chars from {args.cache_dirs}")
+    system_prompt = build_system_prompt(repo_root, prompts_dir, repo_context)
     user_prompt = build_user_prompt(
         repo_root, autoresearch_dir, prompts_dir, csv_path, args.max_configs, next_exp_name, mode
     )
 
     print(
-        f"[INFO] calling ChatGPT API: model={selected_model} reason={model_reason} "
+        f"[INFO] calling OpenAI API: model={selected_model} reason={model_reason} "
         f"mode={mode} next_exp_name={next_exp_name}"
     )
     try_notify("AutoResearch: Wave Planning Started", [
@@ -656,7 +698,7 @@ def main() -> int:
                 },
             ],
         }
-        if model_reason in ("research", "search_space"):
+        if model_reason in ("research", "search_plan"):
             payload["tools"] = [{"type": "web_search_preview"}]
         req = urllib.request.Request(
             "https://api.openai.com/v1/responses",
@@ -670,8 +712,8 @@ def main() -> int:
         with urllib.request.urlopen(req) as res:
             body = json.loads(res.read().decode("utf-8"))
     except Exception as e:
-        print(f"[ERROR] ChatGPT API call failed: {e}", file=sys.stderr)
-        try_notify("AutoResearch: ChatGPT API Failed", [f"- error: `{str(e)[:200]}`"])
+        print(f"[ERROR] OpenAI API call failed: {e}", file=sys.stderr)
+        try_notify("AutoResearch: OpenAI API Failed", [f"- error: `{str(e)[:200]}`"])
         return 1
 
     response_text = (body.get("output_text") or "").strip()
@@ -687,7 +729,7 @@ def main() -> int:
     usage = body.get("usage", {}) if isinstance(body, dict) else {}
     tokens_in = usage.get("input_tokens", 0)
     tokens_out = usage.get("output_tokens", 0)
-    print(f"[INFO] ChatGPT response: {len(response_text)} chars "
+    print(f"[INFO] OpenAI response: {len(response_text)} chars "
           f"(in={tokens_in} out={tokens_out})")
 
     # Runtime state is kept under .autoresearch/store (prompts/ is template-only).
@@ -699,9 +741,9 @@ def main() -> int:
     written = prewritten + apply_file_operations(response_text, repo_root)
 
     if not written:
-        print("[ERROR] ChatGPT wrote no files. Check .autoresearch/store/last_response.txt")
+        print("[ERROR] model wrote no files. Check .autoresearch/store/last_response.txt")
         try_notify("AutoResearch: No Files Written", [
-            "- ChatGPT response produced no <file> tags",
+            "- model response produced no <file> tags",
             "- See .autoresearch/store/last_response.txt",
         ])
         return 1
@@ -754,13 +796,13 @@ def main() -> int:
         f"- files_written: `{len(written)}`",
         f"- tokens: `in={tokens_in} out={tokens_out}`",
     ] + (
-        ["- search_space_report:"] +
+        ["- search_plan_report:"] +
         compact_markdown_for_slack(
-            autoresearch_dir / "store" / "search_space_report.md",
+            autoresearch_dir / "store" / "search_plan_report.md",
             max_lines=10,
             max_chars=1500,
         )
-        if (autoresearch_dir / "store" / "search_space_report.md").exists()
+        if (autoresearch_dir / "store" / "search_plan_report.md").exists()
         else []
     ))
     return 0

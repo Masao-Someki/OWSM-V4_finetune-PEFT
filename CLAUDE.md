@@ -67,9 +67,9 @@ Cluster watcher (WAITING_FOR_PR_MERGE フェーズ)
 | `.autoresearch/submit-array.sh` | Slurm array 直接投入 (手動用) |
 | `.autoresearch/submit-local-with-debug.sh` | ローカル実行 (debug gate 付き) |
 | `.github/workflows/autoresearch.yml` | push trigger → Claude → PR 作成 |
-| `.github/workflows/ci.yml` | PR trigger → config/search_space テスト |
+| `.github/workflows/ci.yml` | PR trigger → config/search_plan テスト |
 | `tests/test_config_load.py` | config YAML load テスト (GPU 不要) |
-| `tests/test_search_space.py` | search space 制約テスト (GPU 不要) |
+| `tests/test_search_plan.py` | search space 制約テスト (GPU 不要) |
 
 ### 既存の重要ファイル (変更なし)
 
@@ -156,13 +156,13 @@ pytest tests/ -v --no-header
 ```
 
 - `tests/test_config_load.py`: YAML が omegaconf で読めること、必須キー存在確認
-- `tests/test_search_space.py`: lr/peft_type/max_epochs/warmup_steps が search_space.md の範囲内
+- `tests/test_search_plan.py`: lr/peft_type/max_epochs/warmup_steps が search_plan.md の範囲内
 
 ---
 
 ## 探索空間
 
-詳細は `.autoresearch/prompts/search_space.md` を参照。
+詳細は `.autoresearch/prompts/search_plan.md` を参照。
 
 1. **PEFT ファミリー**: lora / espnet_lora / adalora / randlora / vblora / delora
 2. **LR**: 1e-5, 3e-5, 5e-5, 1e-4, 2e-4

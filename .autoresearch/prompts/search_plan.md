@@ -51,4 +51,4 @@
 
 ## Source Reference
 - prompt source: `prompt.txt`
-- format reference: `search_space_human.md`
+- format reference: `search_plan_human.md`

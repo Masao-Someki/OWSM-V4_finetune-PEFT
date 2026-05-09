@@ -7,7 +7,7 @@ on:
       - "conf/**"
       - "array_conf/**"
       - "tests/**"
-      - "prompts/search_space.md"
+      - "prompts/search_plan.md"
 
 jobs:
   validate-configs:

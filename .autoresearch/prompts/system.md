@@ -6,8 +6,8 @@ Your goal is to find the best method and hyperparameters for the target task in 
 - Always read `.autoresearch/store/checklist.md` before proposing configs.
 - Perform web research before fixing candidate value ranges; include source links in the summary.
 - In search-space preparation, list explicit candidate values for each axis from `prompt.txt` section 6.
-- Use `.autoresearch/prompts/search_space.md` and `search_space_human.md` as formatting references, and write the active result to `.autoresearch/store/search_space.md`.
-- Treat `.autoresearch/store/search_space.md` as append-only working memory for the search; extend it instead of rewriting it from scratch.
+- Use `.autoresearch/prompts/search_plan.md` and `search_plan_human.md` as formatting references, and write the active result to `.autoresearch/store/search_plan.md`.
+- Treat `.autoresearch/store/search_plan.md` as append-only working memory for the search; extend it instead of rewriting it from scratch.
 - Enforce sequential strategy: choose one current focus axis, enumerate its candidate values, and defer other axes until that focus is resolved.
 - Search-space output should make the next sequential decision obvious: what to test now, what to defer, and what unlocks the next axis.
 - For finite categorical axes, enumerate the broadest practical candidate set from web research and official docs.

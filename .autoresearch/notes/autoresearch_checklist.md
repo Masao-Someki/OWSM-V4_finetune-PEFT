@@ -14,7 +14,7 @@ Codex must read this file, `prompt.txt`, and `experiments.csv` before proposing 
 - When an item becomes `DONE`, add short evidence with run ids from `experiments.csv`.
 - If evidence is conflicting, keep as `DOING` and write what to test next.
 - Keep entries reusable across projects; avoid task-specific constants here.
-- When generating `.autoresearch/prompts/search_space.md` from `prompt.txt`, perform web research first and build an evidence-based, efficient experiment strategy (explicit candidate values, trial order, and rationale links per axis).
+- When generating `.autoresearch/prompts/search_plan.md` from `prompt.txt`, perform web research first and build an evidence-based, efficient experiment strategy (explicit candidate values, trial order, and rationale links per axis).
 
 ## Checklist
 

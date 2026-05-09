@@ -28,7 +28,7 @@ clusterで実験 → 結果をGitHubへpush → GitHub Actions上のClaude/ChatG
       ↓ Claude API で次のconfig/code提案
       ↓ conf/{next_exp_name}/ と array_conf/{next_exp_name}/ を生成
       ↓ PR作成
-      ↓ CI: test_config_load + test_search_space (GPU不要)
+      ↓ CI: test_config_load + test_search_plan (GPU不要)
       ↓ CI pass → auto-merge (squash)
 
 [Cluster] (watcher, WAITING_FOR_PR_MERGE フェーズ)
@@ -55,7 +55,7 @@ clusterで実験 → 結果をGitHubへpush → GitHub Actions上のClaude/ChatG
 ├── .github/
 │   └── workflows/
 │       ├── autoresearch.yml         # push trigger → Claude → PR作成
-│       └── ci.yml                   # PR trigger → config/search_space test
+│       └── ci.yml                   # PR trigger → config/search_plan test
 │
 ├── scripts/
 │   ├── check_and_submit.slurm      # [新規] watcher job (self-resubmit)
@@ -73,7 +73,7 @@ clusterで実験 → 結果をGitHubへpush → GitHub Actions上のClaude/ChatG
 │
 ├── tests/
 │   ├── test_config_load.py         # [新規] config loadingテスト (CI用)
-│   └── test_search_space.py        # [新規] search space validationテスト (CI用)
+│   └── test_search_plan.py        # [新規] search space validationテスト (CI用)
 │
 ├── conf/
 │   ├── default.yaml                # ベースconfig
@@ -97,7 +97,7 @@ clusterで実験 → 結果をGitHubへpush → GitHub Actions上のClaude/ChatG
 │   ├── autoresearch_checklist.md  # C0〜C6 チェックリスト
 │   └── autoresearch_findings.md   # waveごとの知見ログ
 └── prompts/
-    ├── search_space.md             # 探索空間定義
+    ├── search_plan.md             # 探索空間定義
     ├── prompt.txt                  # Claude用: 新セッション
     ├── followup.txt                # Claude用: 継続セッション
     └── error.txt                   # Claude用: エラー分析
@@ -190,7 +190,7 @@ clusterが書き込み、Claudeが読む指示書。
 
 ## Instruction
 Propose next wave targeting C1 and C2.
-Do NOT expand beyond search_space.md.
+Do NOT expand beyond search_plan.md.
 ```
 
 ### `codex_summary.md`
@@ -421,7 +421,7 @@ def main():
             f"- See .autoresearch/latest_metrics.json for details.\n\n"
             f"## Instruction\n"
             f"Read notes/autoresearch_checklist.md and propose next wave.\n"
-            f"Stay within prompts/search_space.md.\n"
+            f"Stay within prompts/search_plan.md.\n"
         )
 
         # git push して GitHub Actions を起動
@@ -724,7 +724,7 @@ def read_file_safe(path: Path, max_chars: int = 8000) -> str:
 
 
 def build_system_prompt(repo_root: Path, prompts_dir: Path) -> str:
-    search_space = read_file_safe(prompts_dir / "search_space.md")
+    search_plan = read_file_safe(prompts_dir / "search_plan.md")
     return f"""You are the experiment planner for iterative autoresearch.
 
 Your job:
@@ -738,7 +738,7 @@ Your job:
 8. Append to notes/autoresearch_findings.md.
 
 ## Search Space Policy
-{search_space}
+{search_plan}
 
 ## File Edit Policy
 Allowed to edit:
@@ -761,7 +761,7 @@ Do NOT edit:
 ## Test Writing Policy
 When adding new configs under conf/{{next_exp_name}}/:
 - Each new YAML must be referenced in tests/test_config_load.py as a parametrized case.
-- Each new YAML's hyperparameter values must be checked in tests/test_search_space.py.
+- Each new YAML's hyperparameter values must be checked in tests/test_search_plan.py.
 - Tests must pass without GPU (config parsing only, no model loading).
 - Use pytest. See existing tests/ for format.
 
@@ -989,20 +989,20 @@ def test_required_keys_present(config_path):
         assert key in cfg_dict, f"Missing required key '{key}' in {config_path}"
 ```
 
-### `tests/test_search_space.py`
+### `tests/test_search_plan.py`
 
-生成configの値がsearch_space.mdの許容範囲内かを確認。
+生成configの値がsearch_plan.mdの許容範囲内かを確認。
 
 ```python
 """
 Search space validation tests. GPU-free. Runs in GitHub Actions CI.
-Values must stay within the ranges defined in prompts/search_space.md.
+Values must stay within the ranges defined in prompts/search_plan.md.
 """
 import glob
 import pytest
 from omegaconf import OmegaConf
 
-# 許容値 (prompts/search_space.md と同期させること)
+# 許容値 (prompts/search_plan.md と同期させること)
 ALLOWED_LRS = {1e-5, 3e-5, 5e-5, 1e-4, 2e-4}
 ALLOWED_MAX_EPOCHS = {1, 2, 3, 4, 6}
 ALLOWED_WARMUP_STEPS = {1000, 3000, 6000, 10000}
@@ -1021,7 +1021,7 @@ def _get(cfg_dict, dotted_key, default=None):
 
 
 @pytest.mark.parametrize("config_path", GENERATED_CONFIGS)
-def test_lr_in_search_space(config_path):
+def test_lr_in_search_plan(config_path):
     cfg = OmegaConf.to_container(OmegaConf.load(config_path), resolve=False)
     lr = _get(cfg, "lr")
     if lr is None:
@@ -1031,7 +1031,7 @@ def test_lr_in_search_space(config_path):
 
 
 @pytest.mark.parametrize("config_path", GENERATED_CONFIGS)
-def test_max_epochs_in_search_space(config_path):
+def test_max_epochs_in_search_plan(config_path):
     cfg = OmegaConf.to_container(OmegaConf.load(config_path), resolve=False)
     max_epochs = _get(cfg, "trainer.max_epochs")
     if max_epochs is None:
@@ -1080,7 +1080,7 @@ conf/exp_20260429_123456/config_1.yaml
 
 ### Phase 1: テスト基盤 (GitHub Actions CIの土台)
 - [ ] `tests/test_config_load.py` を作成
-- [ ] `tests/test_search_space.py` を作成
+- [ ] `tests/test_search_plan.py` を作成
 - [ ] `.github/workflows/ci.yml` を作成
 - [ ] PRを作って CIが動くか確認
 
