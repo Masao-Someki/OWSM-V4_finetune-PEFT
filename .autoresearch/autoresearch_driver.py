@@ -273,6 +273,11 @@ Do NOT include `</file>` anywhere inside file content.
 ## Files You Must NOT Edit
 - `exp/`, `dump/`, `data/`, `secrets/`, `.env`, `keys/`
 
+## CRITICAL: No Placeholder Names in Output
+`search_plan_human.md` uses dummy names like `method_A`, `method_B`, `method_C` only to illustrate file format.
+These are NOT real method names. NEVER write `method_A`, `method_B`, `method_C`, or any `method_*` placeholder into any config or search_plan.md.
+All method names in output must be real names (e.g. `lora`, `adalora`, `ia3`, `vera`, `oft`) discovered via web search.
+
 ## Config Format Rules
 Each config in `conf/{{next_exp_name}}/` must:
 1. Use `defaults: [- ../<template_stem>]` to inherit from a template under `conf/`
