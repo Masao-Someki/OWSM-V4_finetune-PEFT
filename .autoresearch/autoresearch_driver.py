@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--model-research", default="gpt-4.1")
     p.add_argument("--model-bugfix", default="")
     p.add_argument("--model-prompt-refresh", default="")
-    p.add_argument("--model-search-space", default="gpt-4.1")
+    p.add_argument("--model-search-plan", default="gpt-4.1")
     p.add_argument("--mode", choices=["auto", "bootstrap", "iterative"], default="auto")
     p.add_argument("--max-configs", type=int, default=10)
     p.add_argument("--max-tokens", type=int, default=8192)
