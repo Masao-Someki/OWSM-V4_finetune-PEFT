@@ -83,15 +83,58 @@ def sync_search_space_from_root_prompt(repo_root: Path, prompts_dir: Path, promp
     prompts_dir.mkdir(parents=True, exist_ok=True)
     prompt_hash = _sha256_text(prompt_text)
 
-    generated = f"""# Search Space Snapshot (Generated)
+    generated = f"""# Search Strategy Checklist (Generated)
 
 This file is auto-generated from repository-root `prompt.txt`.
 Prompt SHA256: `{prompt_hash}`
 
 ## Interpretation Policy
-- Follow search-space definitions and hard constraints from `prompt.txt`.
+- Follow constraints from `prompt.txt` first.
 - If this file conflicts with `prompt.txt`, prioritize `prompt.txt`.
-- Use `.autoresearch/notes/` and `experiments.csv` for evidence and prioritization only.
+- Use `.autoresearch/notes/` and `experiments.csv` for evidence/prioritization.
+
+## Execution Checklist (top-down)
+- [ ] 1. Preflight
+  - [ ] Confirm all base configs in `prompt.txt` exist.
+  - [ ] Confirm debug gate policy (`yes/no`) from `prompt.txt`.
+  - [ ] Confirm trial budget (max configs).
+- [ ] 2. Stability-first smoke (small)
+  - [ ] Start from conservative learning rate and small epoch/step budget.
+  - [ ] Validate OOM/instability before broader search.
+- [ ] 3. Primary axis sweep (coarse)
+  - [ ] Prioritize `learning rate` and `optimizer` first.
+  - [ ] Keep architecture/method-specific params conservative while selecting optimizer/LR region.
+- [ ] 4. Secondary axis sweep (coarse)
+  - [ ] Tune `batch size`, `warmup_steps`, `max_epochs` around stable region.
+- [ ] 5. Method-family compare
+  - [ ] Compare candidate adaptation/model method families under the best shared hyperparameter region.
+- [ ] 6. Method-specific parameter refine
+  - [ ] For top 1-2 method families, tune family-specific parameters.
+- [ ] 7. Local parameter search around current best
+  - [ ] Narrow around best config and run small neighborhood search.
+
+## Research-Backed Candidate Values (to fill before wave planning)
+- [ ] Use web search to collect current best practices for this task/model family.
+- [ ] Prefer primary sources: official docs, papers, and strong reproduction reports.
+- [ ] Record source links and short rationale for each proposed value range.
+- [ ] If a known heuristic exists (example: pretrained LR scaling conventions), include it explicitly.
+- [ ] For each axis from `prompt.txt`, add:
+  - [ ] candidate values/ranges
+  - [ ] search order (what to try first, second, ...)
+  - [ ] stop/expand condition
+
+### Required Web-Research Outputs
+- [ ] `learning rate`: candidate ranges + ordering + heuristic basis
+- [ ] `optimizer`: candidate set + ordering
+- [ ] `batch size`, `warmup_steps`, `max_epochs`: safe-to-aggressive ordering
+- [ ] `method family`: full candidate list from official docs and/or recent references
+- [ ] `method-specific parameters`: family-specific knobs and ranges
+
+## Practical Wave Policy
+- Wave 1: stability-first + minimum viable comparison set.
+- Wave 2: coarse search on highest-impact axes.
+- Wave 3: method-family breadth check (based on web-collected full list).
+- Wave 4+: local parameter search around the best method/config.
 
 ## prompt.txt (current)
 ```text
@@ -185,8 +228,8 @@ def build_system_prompt(repo_root: Path, prompts_dir: Path) -> str:
     else:
         system_extra = ""
 
-    return f"""You are the experiment planner for OWSM PEFT autoresearch.
-Your goal is to find the best PEFT method and hyperparameters for FLEURS ASR by proposing the next experiment wave.
+    return f"""You are the experiment planner for iterative autoresearch.
+Your goal is to propose the next experiment wave to improve the target metric defined in `prompt.txt`.
 
 ## Search Space Policy (MUST follow)
 {search_space}
@@ -196,18 +239,15 @@ All file writes MUST use this exact XML tag format:
 
 <file path="conf/exp_20260429_123456/config_0.yaml">
 defaults:
-  - ../owsm_peft_lora_basic
+  - ../base_recipe_template
 
 lr: 5e-5
-exp_tag: exp_20260429_123456_lora_lr5e-5
+exp_tag: exp_20260429_123456_variant_a
 
-peft:
-  type: lora
-  r: 8
-  lora_alpha: 8
-  lora_dropout: 0.05
-  task_type: seq_2_seq_lm
-  target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+method:
+  type: adapter_like_method
+  param_a: 8
+  param_b: 0.05
 </file>
 
 <file path=".autoresearch/array_conf.txt">
@@ -242,8 +282,8 @@ Do NOT include `</file>` anywhere inside file content.
 
 ## Config Format Rules
 Each config in `conf/{{next_exp_name}}/` must:
-1. Use `defaults: [- ../<peft_template_stem>]` to inherit from a PEFT template under `conf/`
-2. Set `lr`, `peft.type`, and at minimum override the fields being tested
+1. Use `defaults: [- ../<template_stem>]` to inherit from a template under `conf/`
+2. Set primary tuning fields (for example `lr`, method type, or equivalent) and override the fields being tested
 3. Use `exp_tag: {{next_exp_name}}_<descriptor>` (unique per config)
 4. NOT set `exp_dir` (inherited from default.yaml via exp_tag)
 
@@ -256,7 +296,7 @@ conf/exp_X/config_1.yaml
 
 ## Test Update Policy
 If you add configs to a new exp_name directory, the tests auto-discover them via `conf/exp_*/*.yaml` glob.
-You only need to manually edit tests if you need to add specific test logic for new PEFT types.
+You only need to manually edit tests if you add new validation logic for new method families/types.
 
 ## Checklist Policy
 - Prioritize C0 if DOING: max 3 configs, trainer.max_epochs≤3, trainer.max_steps≤100
