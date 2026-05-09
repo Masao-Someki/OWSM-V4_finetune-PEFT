@@ -332,7 +332,6 @@ def build_user_prompt(
     prompt_update_context = read_file_safe(store_dir / "prompt_update_context.md", max_chars=2000)
     human_search_plan = read_file_safe(prompts_dir / "search_plan_human.md", max_chars=12000)
     active_search_plan = read_file_safe(store_dir / "search_plan.md", max_chars=12000)
-    planning = read_file_safe(store_dir / "planning.md", max_chars=8000)
 
     error_section = ""
     if has_errors:
@@ -380,42 +379,17 @@ Use this base planning template as the primary instruction:
 {prompt_md}
 """
 
-    needs_roadmap = (mode == "bootstrap") or (
-        read_file_safe(store_dir / "prompt_update_context.md").startswith("prompt.txt was manually updated")
+    search_plan_required_line = (
+        "6. `.autoresearch/store/search_plan.md` — update status column only"
+        " (mark done/pending/skipped); do NOT rewrite the roadmap structure or candidate lists"
     )
-
-    if needs_roadmap:
-        search_plan_required_line = (
-            "6. `.autoresearch/store/search_plan.md` — full multi-wave roadmap"
-            " (bootstrap or prompt-changed run)"
-        )
-        search_plan_detail = (
-            "For `.autoresearch/store/search_plan.md` (FULL ROADMAP — bootstrap or prompt-changed):\n"
-            "- Write a comprehensive multi-wave research roadmap covering ALL axes from `prompt.txt` section 6.\n"
-            "- Use `store/planning.md` as the definitive candidate inventory — every candidate listed there must appear in the roadmap.\n"
-            "- IMPORTANT: the roadmap is a reference document, NOT a list of configs to run this wave."
-            " Do not filter candidates based on max_configs or practicality."
-            " List everything from planning.md. The configs you propose separately are just this wave's subset.\n"
-            "- Structure as a sequence of waves, each targeting one axis:\n"
-            "  - Every wave MUST use a markdown table — no bullet lists, no prose-only sections.\n"
-            "  - Table columns: candidate | status | comment | config | source\n"
-            "  - List ALL candidates from planning.md for that axis. All start as status=pending.\n"
-            "  - Include unlock condition: what result from this wave allows moving to the next.\n"
-            "- Follow the structure/style of `search_plan_human.md` as the format template.\n"
-            "- For numeric axes: use coarse, high-information values (e.g. `1e-5, 1e-4, 1e-3`) rather than dense increments."
-        )
-    else:
-        search_plan_required_line = (
-            "6. `.autoresearch/store/search_plan.md` — update status column only"
-            " (mark done/pending/skipped); do NOT rewrite the roadmap structure or candidate lists"
-        )
-        search_plan_detail = (
-            "For `.autoresearch/store/search_plan.md` (STATUS UPDATE ONLY — iterative run):\n"
-            "- Do NOT rewrite the roadmap structure or candidate lists.\n"
-            "- Only update the status column of candidates based on experiments.csv: pending → done or skipped.\n"
-            "- Add config path to the config column for completed runs.\n"
-            "- Do not add or remove candidates. Do not change wave order."
-        )
+    search_plan_detail = (
+        "For `.autoresearch/store/search_plan.md` (STATUS UPDATE ONLY):\n"
+        "- Do NOT rewrite the roadmap structure or candidate lists.\n"
+        "- Only update the status column of candidates based on experiments.csv: pending → done or skipped.\n"
+        "- Add config path to the config column for completed runs.\n"
+        "- Do not add or remove candidates. Do not change wave order."
+    )
 
     return f"""## Task
 
@@ -473,14 +447,9 @@ Plan and write the next experiment wave.
 
 ---
 
-## store/planning.md (Phase 1 research results — use these as the candidate list)
-{planning}
-
----
-
 ## search_plan_human.md (format reference — structure only)
 The names below (method_A, method_B, ...) are dummy placeholders for format illustration.
-Do NOT use them in output. Use real method names from store/planning.md.
+Do NOT use them in output. Use real method names.
 {human_search_plan}
 
 ---
@@ -601,17 +570,18 @@ def call_openai_api(
 
 def build_planning_system_prompt() -> str:
     return (
-        "You are a research assistant. Your only job is to enumerate experiment search space candidates.\n"
-        "Use web search extensively to find complete, exhaustive lists.\n"
-        "Do NOT limit yourself to 'major' or 'common' options — list everything you find.\n"
-        "Output only a single <file path=\".autoresearch/store/planning.md\"> block. No other text."
+        "You are a research assistant building a multi-wave experiment roadmap.\n"
+        "Use web search extensively to find complete, exhaustive candidate lists.\n"
+        "Do NOT limit yourself to 'major' or 'common' options — enumerate everything.\n"
+        "Output only a single <file path=\".autoresearch/store/search_plan.md\"> block. No other text."
     )
 
 
 def build_planning_user_prompt(repo_root: Path, prompts_dir: Path) -> str:
     prompt_txt = read_file_safe(repo_root / "prompt.txt")
     config_fmt = read_file_safe(repo_root / "conf" / "base_recipe_template.yaml", max_chars=2000)
-    return f"""Read the experiment axes in prompt.txt section 6 and enumerate ALL candidate values for each axis.
+    human_fmt = read_file_safe(prompts_dir / "search_plan_human.md", max_chars=4000)
+    return f"""Build a comprehensive multi-wave research roadmap from prompt.txt section 6.
 
 ## prompt.txt
 {prompt_txt}
@@ -619,28 +589,43 @@ def build_planning_user_prompt(repo_root: Path, prompts_dir: Path) -> str:
 ## conf/base_recipe_template.yaml (config format reference)
 {config_fmt}
 
+## search_plan_human.md (format reference — use this structure, ignore the dummy method names)
+{human_fmt}
+
 ## Instructions
-For each axis listed in section 6:
-- Use web search to find ALL available options, not just the most popular.
-- For PEFT methods:
-  - Search `https://huggingface.co/docs/peft/package_reference/peft_types` for the `PeftType` enum.
-  - List every value in that enum (e.g. LORA, LOHA, LOKR, ADALORA, IA3, LLAMA_ADAPTER, VERA, OFT, BOFT, LOFTQ, FOURIERFT, HRA, VBLORA, etc.).
-  - Do NOT stop at the most common ones — enumerate the complete enum.
-- For numeric axes (lr, warmup_steps, etc.): list coarse, log-scale candidates covering the plausible range.
-- Include source URLs for every candidate.
-- Do not pre-select or filter — list everything supported.
+1. For each axis in section 6, use web search to enumerate ALL candidate values:
+   - PEFT methods: fetch `https://huggingface.co/docs/peft/package_reference/peft_types` and list every PeftType enum value (LORA, LOHA, LOKR, ADALORA, IA3, VERA, OFT, BOFT, LOFTQ, FOURIERFT, HRA, VBLORA, etc.). Do NOT stop early.
+   - Numeric axes (lr, warmup_steps, etc.): coarse log-scale values covering the plausible range.
+   - Include source URLs for every candidate.
+
+2. Arrange axes into waves (one axis per wave) in a logical exploration order:
+   - Categorical axes (method family) first to establish stability.
+   - Then numeric axes (lr, warmup) once a stable method is found.
+   - State why each wave comes in that order.
+
+3. For each wave, write a markdown table of ALL candidates (status=pending for all).
+   Table columns: candidate | status | comment | config | source
+
+4. Add an unlock condition after each wave: what result allows moving to the next wave.
 
 Output ONLY this file:
 
-<file path=".autoresearch/store/planning.md">
-# Research Planning Report
+<file path=".autoresearch/store/search_plan.md">
+# Research Roadmap
 
-## Axis: <axis name>
-| candidate | notes | source |
-| --- | --- | --- |
-| ... | ... | ... |
+## Wave 1: <axis>
+**Why first**: ...
 
-(repeat for each axis)
+| candidate | status | comment | config | source |
+| --- | --- | --- | --- | --- |
+| ... | pending | ... | | |
+
+**Unlock condition**: ...
+
+---
+
+## Wave 2: <axis>
+...
 </file>
 """
 
@@ -814,23 +799,27 @@ def main() -> int:
         f"- max_configs: `{args.max_configs}`",
     ])
 
-    # Phase 1: Research planning — enumerate all candidates via web search.
+    # Phase 1: Generate search_plan.md roadmap (bootstrap or prompt changed only).
+    needs_roadmap = (mode == "bootstrap") or prompt_changed
     research_model = args.model_research.strip() or args.model
-    print(f"[INFO] Phase 1: research planning (model={research_model})")
-    try:
-        p1_text, p1_usage = call_openai_api(
-            system_prompt=build_planning_system_prompt(),
-            user_prompt=build_planning_user_prompt(repo_root, prompts_dir),
-            model=research_model,
-            max_tokens=4096,
-            api_key=api_key,
-            use_web_search=True,
-        )
-        p1_written = apply_file_operations(p1_text, repo_root)
-        prewritten.extend(p1_written)
-        print(f"[INFO] Phase 1 done (in={p1_usage.get('input_tokens',0)} out={p1_usage.get('output_tokens',0)})")
-    except Exception as e:
-        print(f"[WARN] Phase 1 research failed: {e} — continuing without planning.md", file=sys.stderr)
+    if needs_roadmap:
+        print(f"[INFO] Phase 1: generating search_plan.md roadmap (model={research_model})")
+        try:
+            p1_text, p1_usage = call_openai_api(
+                system_prompt=build_planning_system_prompt(),
+                user_prompt=build_planning_user_prompt(repo_root, prompts_dir),
+                model=research_model,
+                max_tokens=4096,
+                api_key=api_key,
+                use_web_search=True,
+            )
+            p1_written = apply_file_operations(p1_text, repo_root)
+            prewritten.extend(p1_written)
+            print(f"[INFO] Phase 1 done (in={p1_usage.get('input_tokens',0)} out={p1_usage.get('output_tokens',0)})")
+        except Exception as e:
+            print(f"[WARN] Phase 1 failed: {e} — continuing without updated search_plan.md", file=sys.stderr)
+    else:
+        print("[INFO] Phase 1 skipped (iterative run — search_plan.md roadmap unchanged)")
 
     # Phase 2: Main planning — propose configs using Phase 1 results.
     print("[INFO] Phase 2: wave planning")
