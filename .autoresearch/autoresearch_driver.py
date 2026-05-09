@@ -471,23 +471,17 @@ Include these sections in codex_summary.md:
 - **Next action**: what the wave after this should target
 
 For `.autoresearch/store/search_plan.md`:
-- Use checkboxes (`- [ ]`) for executable steps.
-- Treat the existing `.autoresearch/store/search_plan.md` as append-only project memory.
-- Preserve prior sections, prior findings, and prior candidate tables unless they are clearly superseded and explicitly marked as updated.
-- Do not replace the whole file with a fresh short summary.
-- Update by appending new observations, new candidate rows, new decisions, and new unlock conditions.
-- Choose one active axis from `prompt.txt` section 6 and enumerate explicit candidate values only for that axis.
-- Include trial order and source links for the active axis.
-- Do not introduce extra axes unless explicitly allowed by `prompt.txt`.
-- Follow the structure/style of `search_plan_human.md` as the primary format template.
-- Use `.autoresearch/prompts/search_plan.md` as context baseline, then write improved content to `.autoresearch/store/search_plan.md`.
-- Make the search space explicitly sequential:
-  - Say why the current axis is the right one to resolve now.
-  - Keep non-active axes as deferred placeholders only.
-  - State what result unlocks the next axis and name that next axis.
-- Candidate-value policy:
-  - For finite/categorical axes, list the maximum practical candidate set, especially when the total set is small enough to enumerate.
-  - For numeric axes, use coarse values that cover the plausible range efficiently; avoid dense adjacent values unless refining around evidence.
+- Write a comprehensive multi-wave research roadmap covering ALL axes from `prompt.txt` section 6.
+- Use `store/planning.md` as the definitive candidate inventory — every candidate listed there must appear in the roadmap.
+- Structure as a sequence of waves, each targeting one axis:
+  - Wave N: <axis name> — list ALL candidates from planning.md for that axis, with trial order and source links.
+  - Mark candidates done/pending/skipped based on experiments.csv evidence.
+  - Include unlock condition: what result from this wave allows moving to the next.
+- The current wave (being proposed now) is Wave N; future waves are planned but not yet started.
+- Do NOT limit to only the current wave's candidates — the full roadmap across all axes must be visible.
+- Update the roadmap each run: mark completed candidates, add new evidence, adjust future wave order if needed.
+- Follow the structure/style of `search_plan_human.md` as the format template.
+- For numeric axes: use coarse, high-information values (e.g. `1e-5, 1e-4, 1e-3`) rather than dense increments.
 
 For `.autoresearch/store/search_plan_report.md`:
 - Write a compact human-readable summary of the current search space.
