@@ -1,0 +1,409 @@
+[WARN] /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/scripts/load-keys.sh not found; continuing without it.
+[INFO] exp_name=exp_20260509_222054
+[INFO] job_id=18148019 array_job_id=na task_id=0
+[INFO] config_list=.autoresearch/array_conf.txt
+[INFO] selected_index=0 selected_config=conf/exp_20260509_222054/config_0.yaml
+[INFO] runtime_config=conf/exp_20260509_222054/generated/runtime_na_0.yaml
+INFO:espnet3.systems.base.system:Initialized BaseSystem with training_config=True inference_config=False metrics_config=False exp_dir=exp/exp_20260509_222054/exp_20260509_222054_config_0_a0
+INFO:espnet3:System: BaseSystem
+INFO:espnet3:Requested stages: ['train']
+INFO:espnet3:Resolved stages: ['train']
+INFO:espnet3:=== ESPnet3 run started: 2026-05-09T18:51:02.984044 ===
+INFO:espnet3:=== ESPnet3 run started: 2026-05-09T18:51:02.984697 ===
+INFO:espnet3:Command: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/bin/python run.py --stages train --training_config conf/exp_20260509_222054/generated/runtime_na_0.yaml
+INFO:espnet3:Python: 3.11.15 | packaged by conda-forge | (main, Mar  5 2026, 16:45:40) [GCC 14.3.0]
+INFO:espnet3:Working directory: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
+INFO:espnet3:Training config: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/conf/exp_20260509_222054/generated/runtime_na_0.yaml
+INFO:espnet3:Git: commit=c06d0b7d22747266ee9a3a2e52766f1bd357733a, short_commit=c06d0b7, branch=autosearch, worktree=dirty
+INFO:espnet3:Cluster env:
+OMPI_MCA_plm_slurm_args=--external-launcher
+SLURM_CLUSTER_NAME=delta
+SLURM_CONF=/var/spool/slurmd/conf-cache/slurm.conf
+SLURM_CPUS_ON_NODE=4
+SLURM_CPUS_PER_TASK=4
+SLURM_GPUS_ON_NODE=1
+SLURM_GTIDS=0
+SLURM_JOBID=18148019
+SLURM_JOB_ACCOUNT=bbjs-delta-gpu
+SLURM_JOB_CPUS_PER_NODE=4
+SLURM_JOB_END_TIME=1778374217
+SLURM_JOB_GID=202
+SLURM_JOB_GPUS=2
+SLURM_JOB_ID=18148019
+SLURM_JOB_NAME=exp_20260509_222054_debug
+SLURM_JOB_NODELIST=gpub051
+SLURM_JOB_NUM_NODES=1
+SLURM_JOB_PARTITION=gpuA40x4
+SLURM_JOB_QOS=bbjs-delta-gpu
+SLURM_JOB_START_TIME=1778370617
+SLURM_JOB_UID=68569
+SLURM_JOB_USER=someki1
+SLURM_LOCALID=0
+SLURM_MEM_PER_NODE=32768
+SLURM_MPI_TYPE=cray_shasta
+SLURM_NNODES=1
+SLURM_NODEID=0
+SLURM_NODELIST=gpub051
+SLURM_NPROCS=1
+SLURM_NTASKS=1
+SLURM_NTASKS_PER_NODE=1
+SLURM_OOM_KILL_STEP=0
+SLURM_PRIO_PROCESS=0
+SLURM_PROCID=0
+SLURM_SUBMIT_DIR=/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
+SLURM_SUBMIT_HOST=dt-login03.delta.ncsa.illinois.edu
+SLURM_TASKS_PER_NODE=1
+SLURM_TASK_PID=1374661
+SLURM_TOPOLOGY_ADDR=ss00.ss11.gpub051
+SLURM_TOPOLOGY_ADDR_PATTERN=switch.switch.node
+SLURM_TRES_PER_TASK=cpu=4
+INFO:espnet3:Cluster env:
+OMPI_MCA_plm_slurm_args=--external-launcher
+SLURM_CLUSTER_NAME=delta
+SLURM_CONF=/var/spool/slurmd/conf-cache/slurm.conf
+SLURM_CPUS_ON_NODE=4
+SLURM_CPUS_PER_TASK=4
+SLURM_GPUS_ON_NODE=1
+SLURM_GTIDS=0
+SLURM_JOBID=18148019
+SLURM_JOB_ACCOUNT=bbjs-delta-gpu
+SLURM_JOB_CPUS_PER_NODE=4
+SLURM_JOB_END_TIME=1778374217
+SLURM_JOB_GID=202
+SLURM_JOB_GPUS=2
+SLURM_JOB_ID=18148019
+SLURM_JOB_NAME=exp_20260509_222054_debug
+SLURM_JOB_NODELIST=gpub051
+SLURM_JOB_NUM_NODES=1
+SLURM_JOB_PARTITION=gpuA40x4
+SLURM_JOB_QOS=bbjs-delta-gpu
+SLURM_JOB_START_TIME=1778370617
+SLURM_JOB_UID=68569
+SLURM_JOB_USER=someki1
+SLURM_LOCALID=0
+SLURM_MEM_PER_NODE=32768
+SLURM_MPI_TYPE=cray_shasta
+SLURM_NNODES=1
+SLURM_NODEID=0
+SLURM_NODELIST=gpub051
+SLURM_NPROCS=1
+SLURM_NTASKS=1
+SLURM_NTASKS_PER_NODE=1
+SLURM_OOM_KILL_STEP=0
+SLURM_PRIO_PROCESS=0
+SLURM_PROCID=0
+SLURM_SUBMIT_DIR=/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
+SLURM_SUBMIT_HOST=dt-login03.delta.ncsa.illinois.edu
+SLURM_TASKS_PER_NODE=1
+SLURM_TASK_PID=1374661
+SLURM_TOPOLOGY_ADDR=ss00.ss11.gpub051
+SLURM_TOPOLOGY_ADDR_PATTERN=switch.switch.node
+SLURM_TRES_PER_TASK=cpu=4
+INFO:espnet3:Runtime env:
+CUDA_HOME=/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/cuda/12.8
+CUDA_VISIBLE_DEVICES=0
+LD_LIBRARY_PATH=/u/someki1/.pixi/envs/readline/lib:/u/someki1/.pixi/envs/icu/lib:/u/someki1/.pixi/envs/ffmpeg/lib:/u/someki1/.pixi/envs/readline/lib:/u/someki1/.pixi/envs/icu/lib:/u/someki1/.pixi/envs/ffmpeg/lib:/opt/cray/pe/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/math_libs/12.8/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/cuda/12.8/extras/CUPTI/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/cuda/12.8/nvvm/lib64:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/cuda/12.8/lib64:/opt/cray/libfabric/1.22.0/lib64
+PATH=/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/bin:/u/someki1/.pixi/bin:/u/someki1/.pixi/envs/nodejs/bin/:/u/someki1/utils:/u/someki1/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand:/u/someki1/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli:/u/someki1/.vscode-server/cli/servers/Stable-8b640eef5a6c6089c029249d48efa5c99adf7d51/server/bin/remote-cli:/u/someki1/.pixi/bin:/u/someki1/.pixi/envs/nodejs/bin/:/u/someki1/utils:/u/someki1/.pixi/bin:/u/someki1/.pixi/envs/nodejs/bin/:/u/someki1/utils:/u/someki1/.local/bin:/u/someki1/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/cuda/12.8/compute-sanitizer:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/cuda/12.8/bin:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/cuda/12.8/libnvvp:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/profilers/Nsight_Compute:/opt/nvidia/hpc_sdk/Linux_x86_64/25.3/profilers/Nsight_Systems/bin:/opt/cray/pe/mpich/8.1.32/ofi/gnu/11.2/bin:/opt/cray/pe/mpich/8.1.32/bin:/opt/cray/libfabric/1.22.0/bin:/opt/cray/pe/craype/2.7.34/bin:/opt/rh/gcc-toolset-13/root/usr/bin:/sw/rh9.4/user/scripts:/sw/user/scripts:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/puppetlabs/bin:/opt/cray/pe/bin:/u/someki1/.vscode-server/extensions/ms-python.debugpy-2026.6.0-linux-x64/bundled/scripts/noConfigScripts
+PYTHONPATH=/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test:/u/someki1/workspace/20_other_project/10_autoresearch_test:
+INFO:espnet3:PyTorch: version=2.8.0+cu128, cuda.available=True, cudnn.version=91002, cudnn.benchmark=False, cudnn.deterministic=False
+INFO:espnet3:Training config content:
+num_device: 1
+num_nodes: 1
+task: null
+recipe_dir: .
+data_dir: ./data
+exp_tag: exp_20260509_222054_config_0_a0
+exp_dir: ./exp/exp_20260509_222054/exp_20260509_222054_config_0_a0
+stats_dir: ./exp/stats
+dataset_dir: /path/to/your/dataset
+create_dataset:
+  func: src.creating_dataset.create_dataset
+  dataset_dir: /path/to/your/dataset
+dataset:
+  _target_: espnet3.components.data.data_organizer.DataOrganizer
+  recipe_dir: .
+  train: null
+  valid: null
+  test: null
+  preprocessor: null
+  _convert_: all
+tokenizer: null
+model: null
+optimizer:
+  _target_: torch.optim.Adam
+  lr: 0.002
+  weight_decay: 1.0e-06
+  name: adamw
+  _convert_: all
+scheduler:
+  _target_: espnet2.schedulers.warmup_lr.WarmupLR
+  warmup_steps: 15000
+  _convert_: all
+scheduler_interval: step
+scheduler_monitor: null
+best_model_criterion:
+- - valid/loss
+  - 3
+  - min
+seed: null
+init: null
+parallel:
+  env: local
+  n_workers: 1
+dataloader:
+  collate_fn:
+    _target_: espnet2.train.collate_fn.CommonCollateFn
+    int_pad_value: -1
+    _convert_: all
+  train:
+    total_shards: 1
+    dist_world_size: 1
+    iter_factory:
+      _target_: espnet2.iterators.sequence_iter_factory.SequenceIterFactory
+      shuffle: true
+      collate_fn:
+        _target_: espnet2.train.collate_fn.CommonCollateFn
+        int_pad_value: -1
+        _convert_: all
+      batches:
+        type: unsorted
+        shape_files:
+        - ./exp/stats/train/feats_shape
+        batch_size: 4
+        batch_bins: 4000000
+      _convert_: all
+  valid:
+    total_shards: 1
+    dist_world_size: 1
+    iter_factory:
+      _target_: espnet2.iterators.sequence_iter_factory.SequenceIterFactory
+      shuffle: false
+      collate_fn:
+        _target_: espnet2.train.collate_fn.CommonCollateFn
+        int_pad_value: -1
+        _convert_: all
+      batches:
+        type: unsorted
+        shape_files:
+        - ./exp/stats/valid/feats_shape
+        batch_size: 4
+        batch_bins: 4000000
+      _convert_: all
+trainer:
+  accelerator: auto
+  devices: 1
+  num_nodes: 1
+  accumulate_grad_batches: 1
+  check_val_every_n_epoch: 1
+  gradient_clip_val: 1.0
+  log_every_n_steps: 100
+  max_epochs: 3
+  logger:
+  - _target_: lightning.pytorch.loggers.TensorBoardLogger
+    save_dir: ./exp/exp_20260509_222054/exp_20260509_222054_config_0_a0/tensorboard
+    name: tb_logger
+    _convert_: all
+  strategy: auto
+  max_steps: 100
+  fast_dev_run: 10
+fit: {}
+lr: 0.0001
+batch_size: 2
+max_epochs: 1
+warmup_steps: 0
+method:
+  type: lora
+  r: 8
+  alpha: 16
+  dropout: 0.05
+recipedir: .
+wandb:
+  group: exp_20260509_222054
+max_samples_per_subset_train: 10
+max_samples_per_subset_valid: 10
+max_samples_per_subset_test: 10
+
+INFO:espnet3:=== [START] stage: train ===
+INFO:espnet3.systems.base.system:Training start | exp_dir=./exp/exp_20260509_222054/exp_20260509_222054_config_0_a0 model=<unknown>
+INFO: Data organizer: espnet3.components.data.data_organizer.DataOrganizer
+INFO:lightning:Data organizer: espnet3.components.data.data_organizer.DataOrganizer
+INFO: train dataset: None
+INFO:lightning:train dataset: None
+INFO: valid dataset: None
+INFO:lightning:valid dataset: None
+INFO: test datasets: None
+INFO:lightning:test datasets: None
+INFO:espnet3.components.callbacks.default_callbacks:Callback[0] class: lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint
+INFO:espnet3.components.callbacks.default_callbacks:Callback[0]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f61e647bed0>
+INFO:espnet3.components.callbacks.default_callbacks:  auto_insert_metric_name: False
+INFO:espnet3.components.callbacks.default_callbacks:  best_k_models: dict(len=0)
+INFO:espnet3.components.callbacks.default_callbacks:  best_model_path: ''
+INFO:espnet3.components.callbacks.default_callbacks:  best_model_score: None
+INFO:espnet3.components.callbacks.default_callbacks:  current_score: None
+INFO:espnet3.components.callbacks.default_callbacks:  dirpath: '/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/exp/exp_20260509_222054/exp_20260509_222054_config_0_a0'
+INFO:espnet3.components.callbacks.default_callbacks:  filename: 'step{step}'
+INFO:espnet3.components.callbacks.default_callbacks:  kth_best_model_path: ''
+INFO:espnet3.components.callbacks.default_callbacks:  kth_value: torch.Tensor
+INFO:espnet3.components.callbacks.default_callbacks:  last_model_path: ''
+INFO:espnet3.components.callbacks.default_callbacks:  mode: 'min'
+INFO:espnet3.components.callbacks.default_callbacks:  monitor: None
+INFO:espnet3.components.callbacks.default_callbacks:  save_last: 'link'
+INFO:espnet3.components.callbacks.default_callbacks:  save_on_exception: False
+INFO:espnet3.components.callbacks.default_callbacks:  save_top_k: 1
+INFO:espnet3.components.callbacks.default_callbacks:  save_weights_only: False
+INFO:espnet3.components.callbacks.default_callbacks:  verbose: False
+INFO:espnet3.components.callbacks.default_callbacks:Callback[1] class: lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint
+INFO:espnet3.components.callbacks.default_callbacks:Callback[1]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f61e6fd3c90>
+INFO:espnet3.components.callbacks.default_callbacks:  auto_insert_metric_name: False
+INFO:espnet3.components.callbacks.default_callbacks:  best_k_models: dict(len=0)
+INFO:espnet3.components.callbacks.default_callbacks:  best_model_path: ''
+INFO:espnet3.components.callbacks.default_callbacks:  best_model_score: None
+INFO:espnet3.components.callbacks.default_callbacks:  current_score: None
+INFO:espnet3.components.callbacks.default_callbacks:  dirpath: '/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/exp/exp_20260509_222054/exp_20260509_222054_config_0_a0'
+INFO:espnet3.components.callbacks.default_callbacks:  filename: 'epoch{epoch}_step{step}_valid.loss'
+INFO:espnet3.components.callbacks.default_callbacks:  kth_best_model_path: ''
+INFO:espnet3.components.callbacks.default_callbacks:  kth_value: torch.Tensor
+INFO:espnet3.components.callbacks.default_callbacks:  last_model_path: ''
+INFO:espnet3.components.callbacks.default_callbacks:  mode: 'min'
+INFO:espnet3.components.callbacks.default_callbacks:  monitor: 'valid/loss'
+INFO:espnet3.components.callbacks.default_callbacks:  save_last: False
+INFO:espnet3.components.callbacks.default_callbacks:  save_on_exception: False
+INFO:espnet3.components.callbacks.default_callbacks:  save_top_k: 3
+INFO:espnet3.components.callbacks.default_callbacks:  save_weights_only: True
+INFO:espnet3.components.callbacks.default_callbacks:  verbose: False
+INFO:espnet3.components.callbacks.default_callbacks:Callback[2] class: espnet3.components.callbacks.default_callbacks.AverageCheckpointsCallback
+INFO:espnet3.components.callbacks.default_callbacks:Callback[2]: <espnet3.components.callbacks.default_callbacks.AverageCheckpointsCallback object at 0x7f61e646c150>
+INFO:espnet3.components.callbacks.default_callbacks:  best_ckpt_callbacks: list(len=1)
+INFO:espnet3.components.callbacks.default_callbacks:  output_dir: './exp/exp_20260509_222054/exp_20260509_222054_config_0_a0'
+INFO:espnet3.components.callbacks.default_callbacks:Callback[3] class: lightning.pytorch.callbacks.lr_monitor.LearningRateMonitor
+INFO:espnet3.components.callbacks.default_callbacks:Callback[3]: <lightning.pytorch.callbacks.lr_monitor.LearningRateMonitor object at 0x7f61e64d0a10>
+INFO:espnet3.components.callbacks.default_callbacks:  last_momentum_values: dict(len=0)
+INFO:espnet3.components.callbacks.default_callbacks:  last_weight_decay_values: dict(len=0)
+INFO:espnet3.components.callbacks.default_callbacks:  log_momentum: False
+INFO:espnet3.components.callbacks.default_callbacks:  log_weight_decay: False
+INFO:espnet3.components.callbacks.default_callbacks:  logging_interval: None
+INFO:espnet3.components.callbacks.default_callbacks:  lrs: dict(len=0)
+INFO:espnet3.components.callbacks.default_callbacks:Callback[4] class: espnet3.components.callbacks.default_callbacks.MetricsLogger
+INFO:espnet3.components.callbacks.default_callbacks:Callback[4]: <espnet3.components.callbacks.default_callbacks.MetricsLogger object at 0x7f61e64d3750>
+INFO:espnet3.components.callbacks.default_callbacks:  log_every_n_steps: 100
+INFO:espnet3.components.callbacks.default_callbacks:Callback[5] class: lightning.pytorch.callbacks.progress.tqdm_progress.TQDMProgressBar
+INFO:espnet3.components.callbacks.default_callbacks:Callback[5]: <lightning.pytorch.callbacks.progress.tqdm_progress.TQDMProgressBar object at 0x7f61e64d0b50>
+INFO: GPU available: True (cuda), used: True
+INFO:lightning.pytorch.utilities.rank_zero:GPU available: True (cuda), used: True
+INFO: TPU available: False, using: 0 TPU cores
+INFO:lightning.pytorch.utilities.rank_zero:TPU available: False, using: 0 TPU cores
+INFO: 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+INFO:lightning.pytorch.utilities.rank_zero:💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+INFO: Running in `fast_dev_run` mode: will run the requested loop using 10 batch(es). Logging and checkpointing is suppressed.
+INFO:lightning.pytorch.utilities.rank_zero:Running in `fast_dev_run` mode: will run the requested loop using 10 batch(es). Logging and checkpointing is suppressed.
+WARNING:py.warnings:/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/callbacks/model_checkpoint.py:881: Checkpoint directory /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/exp/exp_20260509_222054/exp_20260509_222054_config_0_a0 exists and is not empty.
+
+INFO: LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+INFO:lightning.pytorch.accelerators.cuda:LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+ERROR:espnet3:Stage 'train' failed after 0.39s
+Traceback (most recent call last):
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target
+    return _target_(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Adam.__init__() got an unexpected keyword argument 'name'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/utils/stages_utils.py", line 207, in run_stages
+    fn()
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/systems/base/system.py", line 265, in train
+    return train(self.training_config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/systems/base/training.py", line 100, in train
+    trainer.fit(**fit_kwargs)
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/components/trainers/trainer.py", line 249, in fit
+    self.trainer.fit(
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 584, in fit
+    call._call_and_handle_interrupt(
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/call.py", line 49, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 630, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path, weights_only=weights_only)
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 1053, in _run
+    self.strategy.setup(self)
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/strategies/strategy.py", line 159, in setup
+    self.setup_optimizers(trainer)
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/strategies/strategy.py", line 139, in setup_optimizers
+    self.optimizers, self.lr_scheduler_configs = _init_optimizers_and_lr_schedulers(self.lightning_module)
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/core/optimizer.py", line 180, in _init_optimizers_and_lr_schedulers
+    optim_conf = call._call_lightning_module_hook(model.trainer, "configure_optimizers", pl_module=model)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/call.py", line 177, in _call_lightning_module_hook
+    output = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/components/modeling/lightning_module.py", line 563, in configure_optimizers
+    optimizer = instantiate(
+                ^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 226, in instantiate
+    return instantiate_node(
+           ^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 347, in instantiate_node
+    return _call_target(_target_, partial, args, kwargs, full_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 97, in _call_target
+    raise InstantiationException(msg) from e
+hydra.errors.InstantiationException: Error in call to target 'torch.optim.adam.Adam':
+TypeError("Adam.__init__() got an unexpected keyword argument 'name'")
+Traceback (most recent call last):
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target
+    return _target_(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Adam.__init__() got an unexpected keyword argument 'name'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/run.py", line 58, in <module>
+    main(
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/egs3/TEMPLATE/asr/run.py", line 206, in main
+    run_stages(
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/utils/stages_utils.py", line 207, in run_stages
+    fn()
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/systems/base/system.py", line 265, in train
+    return train(self.training_config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/systems/base/training.py", line 100, in train
+    trainer.fit(**fit_kwargs)
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/components/trainers/trainer.py", line 249, in fit
+    self.trainer.fit(
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 584, in fit
+    call._call_and_handle_interrupt(
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/call.py", line 49, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 630, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path, weights_only=weights_only)
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 1053, in _run
+    self.strategy.setup(self)
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/strategies/strategy.py", line 159, in setup
+    self.setup_optimizers(trainer)
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/strategies/strategy.py", line 139, in setup_optimizers
+    self.optimizers, self.lr_scheduler_configs = _init_optimizers_and_lr_schedulers(self.lightning_module)
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/core/optimizer.py", line 180, in _init_optimizers_and_lr_schedulers
+    optim_conf = call._call_lightning_module_hook(model.trainer, "configure_optimizers", pl_module=model)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/lightning/pytorch/trainer/call.py", line 177, in _call_lightning_module_hook
+    output = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/espnet3/components/modeling/lightning_module.py", line 563, in configure_optimizers
+    optimizer = instantiate(
+                ^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 226, in instantiate
+    return instantiate_node(
+           ^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 347, in instantiate_node
+    return _call_target(_target_, partial, args, kwargs, full_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 97, in _call_target
+    raise InstantiationException(msg) from e
+hydra.errors.InstantiationException: Error in call to target 'torch.optim.adam.Adam':
+TypeError("Adam.__init__() got an unexpected keyword argument 'name'")
