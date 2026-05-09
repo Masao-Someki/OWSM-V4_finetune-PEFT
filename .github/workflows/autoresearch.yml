@@ -52,13 +52,16 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          python .autoresearch/claude_autoresearch_driver.py \
+          python .autoresearch/autoresearch_driver.py \
             --repo-root . \
             --prompts-dir .autoresearch/prompts \
-            --csv-path .autoresearch/store/experiments.csv \
+            --csv-path experiments.csv \
             --autoresearch-dir .autoresearch \
             --mode "${{ steps.mode.outputs.mode }}" \
             --model gpt-4o-mini \
+            --model-research gpt-4o-mini \
+            --model-bugfix gpt-4o-mini \
+            --model-prompt-refresh gpt-4o-mini \
             --max-configs 10 \
             --max-tokens 8192
 

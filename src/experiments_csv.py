@@ -68,7 +68,8 @@ def now_iso() -> str:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Upsert experiment tracking rows in CSV.")
     p.add_argument("--mode", choices=["start", "finish"], required=True)
-    p.add_argument("--csv-path", default=".autoresearch/store/experiments.csv")
+    p.add_argument("--csv-path", default="experiments.csv")
+    p.add_argument("--lock-path", default=".autoresearch/store/experiments.csv.lock")
     p.add_argument("--run-uid", required=True)
     p.add_argument("--exit-code", type=int, default=None)
 
@@ -193,7 +194,7 @@ def main() -> int:
     csv_path = Path(args.csv_path)
     csv_path.parent.mkdir(parents=True, exist_ok=True)
 
-    lock_path = csv_path.with_suffix(csv_path.suffix + ".lock")
+    lock_path = Path(args.lock_path)
     lock_path.parent.mkdir(parents=True, exist_ok=True)
 
     with lock_path.open("a+") as lockf:

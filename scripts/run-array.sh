@@ -48,9 +48,16 @@ debug_partition="gpuA40x4,gpuA100x4,gpuA40x4-preempt,gpuA100x4-preempt,gpuA40x4-
 debug_account="bbjs-delta-gpu"
 debug_gres="gpu:1"
 debug_cpus=4
+array_partition="gpuA40x4,gpuA100x4,gpuA40x4-preempt,gpuA100x4-preempt,gpuA40x4-interactive,gpuA100x4-interactive"
+array_account="bbjs-delta-gpu"
+array_gres="gpu:1"
+array_cpus=4
+array_mem="32G"
+array_time="06:00:00"
 keep_runtime_config=true
 experiment_comment=""
-experiments_csv=".autoresearch/store/experiments.csv"
+experiments_csv="experiments.csv"
+experiments_csv_lock=".autoresearch/store/experiments.csv.lock"
 infer_config=""
 measure_config=""
 quick_train=false
@@ -183,6 +190,12 @@ if [ "${submit_with_debug}" = "true" ]; then
     --job-name "${exp_name}" \
     --array "${effective_array_range}" \
     --dependency "afterok:${debug_job_id}" \
+    --cpus-per-task "${array_cpus}" \
+    --mem "${array_mem}" \
+    --time "${array_time}" \
+    --partition "${array_partition}" \
+    --account "${array_account}" \
+    --gres "${array_gres}" \
     --output "logs/${exp_name}/%A_%a.log" \
     --error "logs/${exp_name}/%A_%a.log" \
     "${REPO_ROOT}/scripts/run-array.sh" \
@@ -451,6 +464,7 @@ run_cmd_text="$(printf '%q ' "${run_args[@]}")"
 
 track_common=(
   --csv-path "${experiments_csv}"
+  --lock-path "${experiments_csv_lock}"
   --run-uid "${run_uid}"
   --exp-name "${exp_name}"
   --experiment-comment "${experiment_comment}"

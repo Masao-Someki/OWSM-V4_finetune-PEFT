@@ -9,7 +9,7 @@ Identify root causes and propose the minimum safe next step.
 - `.autoresearch/store/latest_error.log`
 - `.autoresearch/store/latest_status.json`
 - `.autoresearch/store/latest_metrics.json`
-- Relevant rows in `.autoresearch/store/experiments.csv`
+- Relevant rows in `experiments.csv` (project root)
 
 ## Output Expectations
 - Failure taxonomy (what failed, where, how often)

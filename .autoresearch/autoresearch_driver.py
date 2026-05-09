@@ -11,6 +11,7 @@ via regex.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -30,9 +31,12 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--repo-root", default=".")
     p.add_argument("--prompts-dir", default=".autoresearch/prompts")
-    p.add_argument("--csv-path", default=".autoresearch/store/experiments.csv")
+    p.add_argument("--csv-path", default="experiments.csv")
     p.add_argument("--autoresearch-dir", default=".autoresearch")
     p.add_argument("--model", default="gpt-4o-mini")
+    p.add_argument("--model-research", default="")
+    p.add_argument("--model-bugfix", default="")
+    p.add_argument("--model-prompt-refresh", default="")
     p.add_argument("--mode", choices=["auto", "bootstrap", "iterative"], default="auto")
     p.add_argument("--max-configs", type=int, default=10)
     p.add_argument("--max-tokens", type=int, default=8192)
@@ -67,23 +71,22 @@ def read_csv_tail(csv_path: Path, n_rows: int = 20) -> str:
 # Prompt building
 # ---------------------------------------------------------------------------
 
-def sync_search_space_from_root_prompt(repo_root: Path, prompts_dir: Path) -> None:
+def _sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def sync_search_space_from_root_prompt(repo_root: Path, prompts_dir: Path, prompt_text: str) -> bool:
     """
     Generate `.autoresearch/prompts/search_space.md` from repo-root `prompt.txt`.
     """
-    root_prompt_path = repo_root / "prompt.txt"
     out_path = prompts_dir / "search_space.md"
     prompts_dir.mkdir(parents=True, exist_ok=True)
-
-    if root_prompt_path.exists():
-        root_prompt = root_prompt_path.read_text(encoding="utf-8", errors="replace").strip()
-    else:
-        root_prompt = "(prompt.txt not found at repository root)"
+    prompt_hash = _sha256_text(prompt_text)
 
     generated = f"""# Search Space Snapshot (Generated)
 
 This file is auto-generated from repository-root `prompt.txt`.
-Generated at: {now_iso()}
+Prompt SHA256: `{prompt_hash}`
 
 ## Interpretation Policy
 - Follow search-space definitions and hard constraints from `prompt.txt`.
@@ -92,10 +95,83 @@ Generated at: {now_iso()}
 
 ## prompt.txt (current)
 ```text
-{root_prompt}
+{prompt_text}
 ```
 """
+    before = out_path.read_text(encoding="utf-8", errors="replace") if out_path.exists() else ""
+    if before == generated:
+        return False
     out_path.write_text(generated, encoding="utf-8")
+    return True
+
+
+def detect_and_apply_prompt_updates(
+    repo_root: Path,
+    prompts_dir: Path,
+    store_dir: Path,
+) -> tuple[bool, list[str]]:
+    written: list[str] = []
+    root_prompt_path = repo_root / "prompt.txt"
+    if root_prompt_path.exists():
+        prompt_text = root_prompt_path.read_text(encoding="utf-8", errors="replace").strip()
+    else:
+        prompt_text = "(prompt.txt not found at repository root)"
+
+    prompt_hash = _sha256_text(prompt_text)
+    state_path = store_dir / "prompt_state.json"
+    prev_hash = ""
+    if state_path.exists():
+        try:
+            prev_hash = json.loads(state_path.read_text(encoding="utf-8")).get("prompt_sha256", "")
+        except Exception:
+            prev_hash = ""
+
+    prompt_changed = bool(prev_hash and prev_hash != prompt_hash)
+    first_seen = not bool(prev_hash)
+
+    if sync_search_space_from_root_prompt(repo_root, prompts_dir, prompt_text):
+        written.append(".autoresearch/prompts/search_space.md")
+
+    update_ctx_path = store_dir / "prompt_update_context.md"
+    if prompt_changed:
+        findings_path = repo_root / ".autoresearch" / "notes" / "autoresearch_findings.md"
+        findings_path.parent.mkdir(parents=True, exist_ok=True)
+        existing = findings_path.read_text(encoding="utf-8", errors="replace") if findings_path.exists() else ""
+        entry = (
+            f"\n## Wave Prep Note ({now_iso()})\n"
+            f"- type: prompt_txt_updated\n"
+            f"- action: refresh search space and notes before next wave planning\n"
+            f"- prompt_sha256: `{prompt_hash}`\n"
+        )
+        findings_path.write_text(existing.rstrip() + "\n" + entry, encoding="utf-8")
+        written.append(".autoresearch/notes/autoresearch_findings.md")
+        update_ctx_path.write_text(
+            (
+                "prompt.txt was manually updated since the last planning run.\n"
+                f"- previous_sha256: `{prev_hash}`\n"
+                f"- current_sha256: `{prompt_hash}`\n"
+                "- Treat this as an intentional search-space/policy update.\n"
+                "- Re-baseline notes/checklist interpretation before proposing configs.\n"
+            ),
+            encoding="utf-8",
+        )
+    else:
+        update_ctx_path.write_text(
+            (
+                "prompt.txt did not change since the last planning run.\n"
+                f"- current_sha256: `{prompt_hash}`\n"
+                f"- first_seen: `{first_seen}`\n"
+            ),
+            encoding="utf-8",
+        )
+    written.append(".autoresearch/store/prompt_update_context.md")
+
+    state_path.write_text(json.dumps({
+        "prompt_sha256": prompt_hash,
+        "updated_at": now_iso(),
+    }, indent=2, ensure_ascii=False), encoding="utf-8")
+    written.append(".autoresearch/store/prompt_state.json")
+    return prompt_changed, written
 
 
 def build_system_prompt(repo_root: Path, prompts_dir: Path) -> str:
@@ -134,7 +210,7 @@ peft:
   target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
 </file>
 
-<file path="array_conf/exp_20260429_123456/array.txt">
+<file path=".autoresearch/array_conf.txt">
 conf/exp_20260429_123456/config_0.yaml
 conf/exp_20260429_123456/config_1.yaml
 </file>
@@ -151,7 +227,7 @@ Do NOT include `</file>` anywhere inside file content.
 ## Files You May Write
 - `conf/{{next_exp_name}}/` — new YAML configs (create directory)
 - `conf/` — shared configs when needed for bug fixes or feature updates
-- `array_conf/{{next_exp_name}}/array.txt` — one config path per line
+- `.autoresearch/array_conf.txt` — one config path per line (overwrite each wave)
 - `.autoresearch/store/next_exp_name.txt` — REQUIRED: single line, the next_exp_name value
 - `.autoresearch/codex_summary.md` — your summary of this wave
 - `.autoresearch/notes/autoresearch_checklist.md` — update statuses only
@@ -171,7 +247,7 @@ Each config in `conf/{{next_exp_name}}/` must:
 3. Use `exp_tag: {{next_exp_name}}_<descriptor>` (unique per config)
 4. NOT set `exp_dir` (inherited from default.yaml via exp_tag)
 
-## array.txt Format
+## array_conf.txt Format
 One relative path per line (from repo root), no blank lines, no comments:
 ```
 conf/exp_X/config_0.yaml
@@ -215,6 +291,7 @@ def build_user_prompt(
     prompt_md = read_file_safe(prompts_dir / "prompt.md") if (prompts_dir / "prompt.md").exists() else ""
     followup_md = read_file_safe(prompts_dir / "followup.md") if (prompts_dir / "followup.md").exists() else ""
     error_md = read_file_safe(prompts_dir / "error.md") if (prompts_dir / "error.md").exists() else ""
+    prompt_update_context = read_file_safe(store_dir / "prompt_update_context.md", max_chars=2000)
 
     error_section = ""
     if has_errors:
@@ -277,6 +354,11 @@ Plan and write the next experiment wave.
 {template_section}
 ---
 
+## prompt_update_context.md
+{prompt_update_context}
+
+---
+
 ## next_goal.md
 {next_goal}
 
@@ -318,7 +400,7 @@ Plan and write the next experiment wave.
 You MUST write these files (use `<file path="...">...</file>` format):
 
 1. `conf/{next_exp_name}/config_N.yaml` — one per proposed config (max {max_configs})
-2. `.autoresearch/array_conf/{next_exp_name}/array.txt` — list of those config paths
+2. `.autoresearch/array_conf.txt` — list of those config paths
 3. `.autoresearch/store/next_exp_name.txt` — must contain exactly: `{next_exp_name}`
 4. `.autoresearch/codex_summary.md` — your rationale and wave summary
 
@@ -335,6 +417,27 @@ def resolve_mode(args_mode: str, store_dir: Path) -> str:
         return args_mode
     marker = store_dir / "bootstrap_done.json"
     return "iterative" if marker.exists() else "bootstrap"
+
+
+def has_recent_errors(store_dir: Path) -> bool:
+    err = store_dir / "latest_error.log"
+    return err.exists() and err.stat().st_size > 0
+
+
+def select_model(
+    args: argparse.Namespace,
+    prompt_changed: bool,
+    has_errors: bool,
+) -> tuple[str, str]:
+    model_research = args.model_research.strip() or args.model
+    model_bugfix = args.model_bugfix.strip() or model_research
+    model_prompt_refresh = args.model_prompt_refresh.strip() or model_research
+
+    if has_errors:
+        return model_bugfix, "bugfix"
+    if prompt_changed:
+        return model_prompt_refresh, "prompt_refresh"
+    return model_research, "research"
 
 
 # ---------------------------------------------------------------------------
@@ -387,6 +490,30 @@ def apply_file_operations(response_text: str, repo_root: Path) -> list[str]:
         target.write_text(content, encoding="utf-8")
         written.append(rel_path)
         print(f"[INFO] wrote: {rel_path} ({len(content)} chars)")
+
+    return written
+
+
+def normalize_array_conf_file(repo_root: Path, written: list[str], exp_name: str) -> list[str]:
+    """Prefer flat .autoresearch/array_conf.txt and clean old per-exp list if present."""
+    canonical = repo_root / ".autoresearch" / "array_conf.txt"
+    legacy = repo_root / ".autoresearch" / "array_conf" / exp_name / "array.txt"
+
+    if canonical.exists():
+        # If both exist, remove legacy to avoid stale references.
+        if legacy.exists():
+            legacy.unlink()
+        if ".autoresearch/array_conf.txt" not in written:
+            written.append(".autoresearch/array_conf.txt")
+        return written
+
+    if legacy.exists():
+        canonical.parent.mkdir(parents=True, exist_ok=True)
+        canonical.write_text(legacy.read_text(encoding="utf-8"), encoding="utf-8")
+        legacy.unlink()
+        if ".autoresearch/array_conf.txt" not in written:
+            written.append(".autoresearch/array_conf.txt")
+        return written
 
     return written
 
@@ -457,15 +584,23 @@ def main() -> int:
         print("[ERROR] OPENAI_API_KEY not set")
         return 1
 
-    sync_search_space_from_root_prompt(repo_root, prompts_dir)
+    prompt_changed, prewritten = detect_and_apply_prompt_updates(repo_root, prompts_dir, store_dir)
+    has_errors = has_recent_errors(store_dir)
+    selected_model, model_reason = select_model(args, prompt_changed=prompt_changed, has_errors=has_errors)
+    if prompt_changed:
+        print("[INFO] prompt.txt changed since last run; refreshed search space and notes before planning.")
     system_prompt = build_system_prompt(repo_root, prompts_dir)
     user_prompt = build_user_prompt(
         repo_root, autoresearch_dir, prompts_dir, csv_path, args.max_configs, next_exp_name, mode
     )
 
-    print(f"[INFO] calling ChatGPT API: model={args.model} mode={mode} next_exp_name={next_exp_name}")
+    print(
+        f"[INFO] calling ChatGPT API: model={selected_model} reason={model_reason} "
+        f"mode={mode} next_exp_name={next_exp_name}"
+    )
     try_notify("AutoResearch: Wave Planning Started", [
-        f"- model: `{args.model}`",
+        f"- model: `{selected_model}`",
+        f"- model_reason: `{model_reason}`",
         f"- mode: `{mode}`",
         f"- next_exp_name: `{next_exp_name}`",
         f"- max_configs: `{args.max_configs}`",
@@ -473,7 +608,7 @@ def main() -> int:
 
     try:
         payload = {
-            "model": args.model,
+            "model": selected_model,
             "max_output_tokens": args.max_tokens,
             "input": [
                 {
@@ -524,7 +659,7 @@ def main() -> int:
     (prompts_dir / "last_response.txt").write_text(response_text, encoding="utf-8")
 
     # Apply file operations from model output.
-    written = apply_file_operations(response_text, repo_root)
+    written = prewritten + apply_file_operations(response_text, repo_root)
 
     if not written:
         print("[ERROR] ChatGPT wrote no files. Check .autoresearch/store/last_response.txt")
@@ -537,14 +672,18 @@ def main() -> int:
     # Verify next_exp_name output.
     next_exp_name_path = autoresearch_dir / "store" / "next_exp_name.txt"
     if not next_exp_name_path.exists():
-        print("[ERROR] .autoresearch/store/next_exp_name.txt not written by Claude")
+        print("[ERROR] .autoresearch/store/next_exp_name.txt not written by planner")
         return 1
     confirmed_exp_name = next_exp_name_path.read_text().strip()
 
-    # Verify array.txt.
-    array_txt = repo_root / ".autoresearch" / "array_conf" / confirmed_exp_name / "array.txt"
+    written = normalize_array_conf_file(repo_root, written, confirmed_exp_name)
+
+    # Verify array config list (new flat file first, then legacy fallback).
+    array_txt = repo_root / ".autoresearch" / "array_conf.txt"
     if not array_txt.exists():
-        print(f"[ERROR] array.txt not found: {array_txt}")
+        array_txt = repo_root / ".autoresearch" / "array_conf" / confirmed_exp_name / "array.txt"
+    if not array_txt.exists():
+        print("[ERROR] array config list not found (.autoresearch/array_conf.txt or legacy path)")
         return 1
 
     bootstrap_marker_path = store_dir / "bootstrap_done.json"

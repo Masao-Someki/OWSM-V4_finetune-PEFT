@@ -165,8 +165,9 @@ def git_push_results(exp_name: str = "") -> None:
         ".autoresearch/store/latest_status.json",
         ".autoresearch/store/latest_metrics.json",
         ".autoresearch/store/latest_error.log",
+        ".autoresearch/store/experiments.csv.lock",
         ".autoresearch/store/next_goal.md",
-        ".autoresearch/store/experiments.csv",
+        "experiments.csv",
         check=False)
 
     git("add", ".autoresearch/notes/", check=False)
@@ -204,7 +205,8 @@ def collect_metrics(exp_name: str, array_job_id: str) -> dict:
         sys.executable, str(REPO_ROOT / ".autoresearch" / "collect_metrics.py"),
         "--exp-name", exp_name,
         "--array-job-id", array_job_id,
-        "--csv-path", str(REPO_ROOT / ".autoresearch" / "store" / "experiments.csv"),
+        "--csv-path", str(REPO_ROOT / "experiments.csv"),
+        "--lock-path", str(REPO_ROOT / ".autoresearch" / "store" / "experiments.csv.lock"),
         "--output", str(REPO_ROOT / ".autoresearch" / "store" / "latest_metrics.json"),
         "--error-output", str(REPO_ROOT / ".autoresearch" / "store" / "latest_error.log"),
     ], cwd=str(REPO_ROOT))
@@ -282,9 +284,12 @@ def submit_next_experiment(state: dict) -> Optional[str]:
         print("[ERROR] next_exp_name.txt is empty")
         return None
 
-    config_list = REPO_ROOT / ".autoresearch" / "array_conf" / next_exp_name / "array.txt"
+    config_list = REPO_ROOT / ".autoresearch" / "array_conf.txt"
     if not config_list.exists():
-        print(f"[ERROR] array.txt not found: {config_list}")
+        # Backward compatibility
+        config_list = REPO_ROOT / ".autoresearch" / "array_conf" / next_exp_name / "array.txt"
+    if not config_list.exists():
+        print("[ERROR] array config list not found (.autoresearch/array_conf.txt or legacy path)")
         return None
 
     lines = [

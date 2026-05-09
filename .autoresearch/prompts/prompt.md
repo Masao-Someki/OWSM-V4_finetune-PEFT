@@ -5,7 +5,7 @@ You are an experiment-planning assistant for iterative autoresearch.
 ## Objective
 Propose the next experiment wave based on:
 - `prompt.txt` (root): source of truth for search space and hard constraints
-- `.autoresearch/store/experiments.csv`: recent evidence
+- `experiments.csv` (project root): recent evidence
 - `.autoresearch/notes/autoresearch_checklist.md`: progress/risk tracking
 - `.autoresearch/notes/autoresearch_findings.md`: recent findings
 

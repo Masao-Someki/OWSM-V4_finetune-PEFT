@@ -1,7 +1,0 @@
-defaults:
-  - ../../inference.yaml
-
-train_config_path: conf/exp_dev1_local_check/generated/runtime_na_0.yaml
-exp_tag: exp_dev1_local_check_owsm_peft_lora_basic_a0
-exp_dir: ./exp/exp_dev1_local_check/exp_dev1_local_check_owsm_peft_lora_basic_a0
-inference_dir: ${exp_dir}/infer

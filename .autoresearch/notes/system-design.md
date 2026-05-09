@@ -66,7 +66,7 @@ clusterで実験 → 結果をGitHubへpush → GitHub Actions上のClaude/ChatG
 │
 ├── src/
 │   ├── bin/
-│   │   ├── claude_autoresearch_driver.py  # [新規] Claude API呼び出し
+│   │   ├── autoresearch_driver.py  # [新規] Claude API呼び出し
 │   │   └── autoresearch_loop.py           # [旧] 廃止予定
 │   ├── experiments_csv.py          # [既存] CSV記録
 │   └── slack_notify.py             # [既存] Slack通知
@@ -617,7 +617,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          python src/bin/claude_autoresearch_driver.py \
+          python src/bin/autoresearch_driver.py \
             --repo-root . \
             --prompts-dir prompts \
             --csv-path experiments.csv \
@@ -629,7 +629,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # claude_autoresearch_driver.py が出力した branch名を読む
+          # autoresearch_driver.py が出力した branch名を読む
           BRANCH=$(cat .autoresearch/next_branch.txt 2>/dev/null || echo "")
           if [ -z "$BRANCH" ]; then
             echo "No branch to create PR for."
@@ -684,7 +684,7 @@ jobs:
 
 ## Claude API ドライバー
 
-### `src/bin/claude_autoresearch_driver.py`
+### `src/bin/autoresearch_driver.py`
 
 GitHub Actions から呼ばれる。Claude API でプロンプトを送り、生成されたconfig/codeを新ブランチにcommitする。
 
@@ -692,7 +692,7 @@ GitHub Actions から呼ばれる。Claude API でプロンプトを送り、生
 #!/usr/bin/env python3
 """
 GitHub Actions から呼ばれる Claude API ドライバー。
-.autoresearch/ の state を読み、Claude に次の wave config を提案させ、
+.autoresearch/ の state を読み、LLM に次の wave config を提案させ、
 新ブランチに commit する。
 """
 import argparse
@@ -930,7 +930,7 @@ def main():
     # next_exp_name を確認
     next_exp_name_path = autoresearch_dir / "next_exp_name.txt"
     if not next_exp_name_path.exists():
-        print("[ERROR] .autoresearch/next_exp_name.txt not written by Claude")
+        print("[ERROR] .autoresearch/next_exp_name.txt not written by planner")
         return 1
     next_exp_name = next_exp_name_path.read_text().strip()
 
@@ -1106,7 +1106,7 @@ conf/exp_20260429_123456/config_1.yaml
 - [ ] PRを作って CIが動くか確認
 
 ### Phase 2: Claude API ドライバー
-- [ ] `src/bin/claude_autoresearch_driver.py` を作成
+- [ ] `src/bin/autoresearch_driver.py` を作成
 - [ ] `prompts/prompt.txt` に `<file path="...">` 出力フォーマット指示を追記
 - [ ] `prompts/followup.txt` に同様に追記
 - [ ] `secrets.ANTHROPIC_API_KEY` を GitHub Actions secrets に登録

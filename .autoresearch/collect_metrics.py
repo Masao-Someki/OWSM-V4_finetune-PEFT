@@ -40,7 +40,8 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--exp-name", required=True)
     p.add_argument("--array-job-id", required=True)
-    p.add_argument("--csv-path", default=".autoresearch/store/experiments.csv")
+    p.add_argument("--csv-path", default="experiments.csv")
+    p.add_argument("--lock-path", default=".autoresearch/store/experiments.csv.lock")
     p.add_argument("--output", default=".autoresearch/store/latest_metrics.json")
     p.add_argument("--error-output", default=".autoresearch/store/latest_error.log")
     p.add_argument("--results-dir", default=".autoresearch/results")
@@ -192,7 +193,7 @@ def main() -> int:
     args = parse_args()
     exp_root = Path("exp") / args.exp_name
     csv_path = Path(args.csv_path)
-    lock_path = csv_path.with_suffix(csv_path.suffix + ".lock")
+    lock_path = Path(args.lock_path)
     lock_path.parent.mkdir(parents=True, exist_ok=True)
 
     results_exp_dir = Path(args.results_dir) / args.exp_name
