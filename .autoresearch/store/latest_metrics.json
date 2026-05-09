@@ -1,0 +1,41 @@
+{
+  "exp_name": "exp_20260509_194955",
+  "array_job_id": "99999999",
+  "collected_at": "2026-05-09T20:15:00-05:00",
+  "wave_summary": [
+    {
+      "run_uid": "99999999_0_exp_20260509_194955_lora",
+      "base_config": "conf/owsm_peft_lora_basic.yaml",
+      "peft_type": "lora",
+      "lr": "",
+      "trainer_max_epochs": "3",
+      "wer": 0.214,
+      "cer": 0.109,
+      "status": "COMPLETED"
+    },
+    {
+      "run_uid": "99999999_1_exp_20260509_194955_delora",
+      "base_config": "conf/owsm_peft_delora.yaml",
+      "peft_type": "delora",
+      "lr": "",
+      "trainer_max_epochs": "3",
+      "wer": 0.241,
+      "cer": 0.126,
+      "status": "COMPLETED"
+    },
+    {
+      "run_uid": "99999999_2_exp_20260509_194955_adalora",
+      "base_config": "conf/owsm_peft_adalora.yaml",
+      "peft_type": "adalora",
+      "lr": "",
+      "trainer_max_epochs": "3",
+      "wer": 0.227,
+      "cer": 0.117,
+      "status": "COMPLETED"
+    }
+  ],
+  "best_run_uid": "99999999_0_exp_20260509_194955_lora",
+  "best_wer": 0.214,
+  "failed_count": 0,
+  "results_dir": ".autoresearch/results/exp_20260509_194955"
+}

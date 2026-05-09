@@ -80,12 +80,9 @@ clusterで実験 → 結果をGitHubへpush → GitHub Actions上のClaude/ChatG
 │   ├── dataset.yaml
 │   ├── inference.yaml
 │   ├── metrics.yaml
-│   ├── owsm_peft_lora_basic.yaml  # PEFTテンプレート
-│   ├── owsm_peft_espnet.yaml
-│   ├── owsm_peft_adalora.yaml
-│   ├── owsm_peft_randlora.yaml
-│   ├── owsm_peft_vblora.yaml
-│   ├── owsm_peft_delora.yaml
+│   ├── {base_template_1}.yaml     # レシピ側のベーステンプレート
+│   ├── {base_template_2}.yaml
+│   ├── ...
 │   └── {exp_name}/                 # Claudeが生成する実験config群
 │       ├── config_0.yaml
 │       ├── config_1.yaml
@@ -156,8 +153,8 @@ watcherのフェーズ管理。watcherはこれを読み書きして状態遷移
   "wave_summary": [
     {
       "run_uid": "17915098_0_exp_..._a0",
-      "base_config": "conf/owsm_peft_lora_basic.yaml",
-      "peft_type": "lora",
+      "base_config": "conf/{base_template}.yaml",
+      "method_type": "method_a",
       "lr": "5e-5",
       "trainer_max_epochs": "3",
       "wer": 0.312,
@@ -184,12 +181,12 @@ clusterが書き込み、Claudeが読む指示書。
 - Previous wave: exp_20260429_123456 (array_job_id=17915098)
 - Mode: slurm
 - Max configs for next wave: 10
-- Checklist priority: C1 (PEFT family comparison)
+- Checklist priority: C1 (method-family comparison)
 
 ## Evidence from latest wave
-- lora (lr=5e-5): WER=0.312
-- espnet_lora (lr=5e-5): FAILED (OOM)
-- adalora (lr=5e-5): WER=0.298
+- method_a: metric=...
+- method_b: failed
+- method_c: metric=...
 
 ## Instruction
 Propose next wave targeting C1 and C2.
@@ -524,13 +521,13 @@ def main():
                     row["cer"] = str(cer)
                 run_uid = row.get("run_uid", "")
                 lr = row.get("learning_rate", "")
-                peft_type = row.get("peft_type", "")
+                method_type = row.get("method_type", "")
                 max_epochs = row.get("trainer_max_epochs", "")
                 base_config = row.get("base_config", "")
                 wave_summary.append({
                     "run_uid": run_uid,
                     "base_config": base_config,
-                    "peft_type": peft_type,
+                    "method_type": method_type,
                     "lr": lr,
                     "trainer_max_epochs": max_epochs,
                     "wer": wer,
@@ -728,7 +725,7 @@ def read_file_safe(path: Path, max_chars: int = 8000) -> str:
 
 def build_system_prompt(repo_root: Path, prompts_dir: Path) -> str:
     search_space = read_file_safe(prompts_dir / "search_space.md")
-    return f"""You are the experiment planner for OWSM PEFT autoresearch.
+    return f"""You are the experiment planner for iterative autoresearch.
 
 Your job:
 1. Read the state files provided.
@@ -772,18 +769,15 @@ When adding new configs under conf/{{next_exp_name}}/:
 New experiment configs must use this structure:
 ```yaml
 defaults:
-  - ../../owsm_peft_lora_basic  # or other PEFT template
+  - ../../base_template  # or other recipe template
 
 lr: 5e-5
-exp_tag: ${{exp_name}}_lora_lr5e-5
+exp_tag: ${{exp_name}}_variant_lr5e-5
 
-peft:
-  type: lora
-  r: 8
-  lora_alpha: 8
-  lora_dropout: 0.05
-  task_type: seq_2_seq_lm
-  target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+method:
+  type: method_a
+  param_a: 8
+  param_b: 0.05
 ```
 
 ## array.txt Format
@@ -969,12 +963,8 @@ REQUIRED_KEYS = ["lr", "trainer", "model"]
 
 # 固定テンプレート
 TEMPLATE_CONFIGS = [
-    "conf/owsm_peft_lora_basic.yaml",
-    "conf/owsm_peft_espnet.yaml",
-    "conf/owsm_peft_adalora.yaml",
-    "conf/owsm_peft_randlora.yaml",
-    "conf/owsm_peft_vblora.yaml",
-    "conf/owsm_peft_delora.yaml",
+    "conf/{base_template_1}.yaml",
+    "conf/{base_template_2}.yaml",
 ]
 
 # Claudeが生成したconfを自動検出 (conf/exp_*/配下)
@@ -1015,7 +1005,6 @@ from omegaconf import OmegaConf
 # 許容値 (prompts/search_space.md と同期させること)
 ALLOWED_LRS = {1e-5, 3e-5, 5e-5, 1e-4, 2e-4}
 ALLOWED_MAX_EPOCHS = {1, 2, 3, 4, 6}
-ALLOWED_PEFT_TYPES = {"lora", "espnet_lora", "adalora", "randlora", "vblora", "delora"}
 ALLOWED_WARMUP_STEPS = {1000, 3000, 6000, 10000}
 
 GENERATED_CONFIGS = sorted(glob.glob("conf/exp_*/*.yaml"))
@@ -1042,16 +1031,6 @@ def test_lr_in_search_space(config_path):
 
 
 @pytest.mark.parametrize("config_path", GENERATED_CONFIGS)
-def test_peft_type_in_search_space(config_path):
-    cfg = OmegaConf.to_container(OmegaConf.load(config_path), resolve=False)
-    peft_type = _get(cfg, "peft.type")
-    if peft_type is None:
-        pytest.skip("peft.type not set")
-    assert peft_type in ALLOWED_PEFT_TYPES, \
-        f"{config_path}: peft.type={peft_type} not in {ALLOWED_PEFT_TYPES}"
-
-
-@pytest.mark.parametrize("config_path", GENERATED_CONFIGS)
 def test_max_epochs_in_search_space(config_path):
     cfg = OmegaConf.to_container(OmegaConf.load(config_path), resolve=False)
     max_epochs = _get(cfg, "trainer.max_epochs")
@@ -1074,7 +1053,7 @@ When creating or modifying files, output them in this exact format:
 
 <file path="conf/exp_20260429_123456/config_0.yaml">
 defaults:
-  - ../../owsm_peft_lora_basic
+  - ../../base_template
 
 lr: 5e-5
 ...

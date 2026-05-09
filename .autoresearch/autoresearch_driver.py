@@ -119,7 +119,7 @@ def detect_and_apply_prompt_updates(
 
     update_ctx_path = store_dir / "prompt_update_context.md"
     if prompt_changed:
-        findings_path = repo_root / ".autoresearch" / "notes" / "autoresearch_findings.md"
+        findings_path = store_dir / "findings.md"
         findings_path.parent.mkdir(parents=True, exist_ok=True)
         existing = findings_path.read_text(encoding="utf-8", errors="replace") if findings_path.exists() else ""
         entry = (
@@ -129,7 +129,7 @@ def detect_and_apply_prompt_updates(
             f"- prompt_sha256: `{prompt_hash}`\n"
         )
         findings_path.write_text(existing.rstrip() + "\n" + entry, encoding="utf-8")
-        written.append(".autoresearch/notes/autoresearch_findings.md")
+        written.append(".autoresearch/store/findings.md")
         update_ctx_path.write_text(
             (
                 "prompt.txt was manually updated since the last planning run.\n"
@@ -226,8 +226,8 @@ Do NOT include `</file>` anywhere inside file content.
 - `.autoresearch/codex_summary.md` — your summary of this wave
 - `.autoresearch/store/search_space.md` — active search-space checklist and value enumeration for next research
 - `.autoresearch/store/search_space_report.md` — search-space index plus web-research results summary table
-- `.autoresearch/notes/autoresearch_checklist.md` — update statuses only
-- `.autoresearch/notes/autoresearch_findings.md` — append new entry only
+- `.autoresearch/store/checklist.md` — update statuses only
+- `.autoresearch/store/findings.md` — append new entry only
 - `src/` — code changes for bug fixes, model implementation, and pipeline updates
 - `scripts/` — launcher/runtime bug fixes when needed
 - `tests/test_config_load.py` — update parametrized config list if new test cases needed
@@ -255,8 +255,8 @@ If you add configs to a new exp_name directory, the tests auto-discover them via
 You only need to manually edit tests if you add new validation logic for new method families/types.
 
 ## Checklist Policy
-- Prioritize C0 if DOING: max 3 configs, trainer.max_epochs≤3, trainer.max_steps≤100
-- Do not expand to new axes while C6 (stability) is DOING
+- Prioritize C0 if DOING: max 3 configs, use minimal training epochs/steps
+- Do not expand to new axes while stability is unresolved
 - Mark items DONE only when you have concrete metric evidence
 
 {system_extra}
@@ -277,8 +277,8 @@ def build_user_prompt(
     latest_metrics = read_file_safe(store_dir / "latest_metrics.json")
     latest_status = read_file_safe(store_dir / "latest_status.json")
     latest_error = read_file_safe(store_dir / "latest_error.log", max_chars=3000)
-    checklist = read_file_safe(repo_root / ".autoresearch" / "notes" / "autoresearch_checklist.md")
-    findings = read_file_safe(repo_root / ".autoresearch" / "notes" / "autoresearch_findings.md", max_chars=4000)
+    checklist = read_file_safe(store_dir / "checklist.md")
+    findings = read_file_safe(store_dir / "findings.md", max_chars=4000)
     csv_text = read_csv_tail(csv_path, n_rows=20)
 
     has_errors = (store_dir / "latest_error.log").exists() and \
@@ -289,6 +289,7 @@ def build_user_prompt(
     error_md = read_file_safe(prompts_dir / "error.md") if (prompts_dir / "error.md").exists() else ""
     prompt_update_context = read_file_safe(store_dir / "prompt_update_context.md", max_chars=2000)
     human_search_space = read_file_safe(repo_root / "search_space_human.md", max_chars=12000)
+    active_search_space = read_file_safe(store_dir / "search_space.md", max_chars=12000)
 
     error_section = ""
     if has_errors:
@@ -375,12 +376,12 @@ Plan and write the next experiment wave.
 {error_section}
 ---
 
-## autoresearch_checklist.md (current state)
+## store/checklist.md (current state)
 {checklist}
 
 ---
 
-## autoresearch_findings.md (recent entries)
+## store/findings.md (recent entries)
 {findings}
 
 ---
@@ -394,6 +395,11 @@ Plan and write the next experiment wave.
 
 ## search_space_human.md (format reference)
 {human_search_space}
+
+---
+
+## active search_space.md (append-only base)
+{active_search_space}
 
 ---
 
@@ -416,6 +422,10 @@ Include these sections in codex_summary.md:
 
 For `.autoresearch/store/search_space.md`:
 - Use checkboxes (`- [ ]`) for executable steps.
+- Treat the existing `.autoresearch/store/search_space.md` as append-only project memory.
+- Preserve prior sections, prior findings, and prior candidate tables unless they are clearly superseded and explicitly marked as updated.
+- Do not replace the whole file with a fresh short summary.
+- Update by appending new observations, new candidate rows, new decisions, and new unlock conditions.
 - Choose one active axis from `prompt.txt` section 6 and enumerate explicit candidate values only for that axis.
 - Include trial order and source links for the active axis.
 - Do not introduce extra axes unless explicitly allowed by `prompt.txt`.

@@ -2,6 +2,7 @@
 
 ## Rules
 - [ ] All axes must come from `prompt.txt` section 6.
+- [ ] This file is cumulative: append updates and preserve prior evidence/history.
 - [ ] Enumerate explicit candidate values only for the current active axis.
 - [ ] Include source links for proposed values.
 - [ ] Keep non-active axes deferred until the current active axis is resolved.
@@ -39,13 +40,10 @@
 
 ## Deferred Axes
 
-- [ ] learning rate
-- [ ] optimizer
-- [ ] batch size
-- [ ] max_epochs
-- [ ] warmup_steps
-- [ ] PEFT method choice (please check all method available on PEFT library)
-- [ ] Best PEFT parameter set for each of the PEFT method, such as ranks, etc.
+<!-- List axes from prompt.txt section 6 that are NOT the current focus -->
+- [ ] axis_B
+- [ ] axis_C
+- [ ] axis_D
 
 ## Unlock Condition For Next Axis
 - [ ] What result from the current axis allows moving on:
