@@ -33,11 +33,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--prompts-dir", default=".autoresearch/prompts")
     p.add_argument("--csv-path", default="experiments.csv")
     p.add_argument("--autoresearch-dir", default=".autoresearch")
-    p.add_argument("--model", default="gpt-4o-mini")
-    p.add_argument("--model-research", default="")
+    p.add_argument("--model", default="gpt-4.1-mini")
+    p.add_argument("--model-research", default="gpt-4.1")
     p.add_argument("--model-bugfix", default="")
     p.add_argument("--model-prompt-refresh", default="")
-    p.add_argument("--model-search-space", default="gpt-5")
+    p.add_argument("--model-search-space", default="gpt-4.1")
     p.add_argument("--mode", choices=["auto", "bootstrap", "iterative"], default="auto")
     p.add_argument("--max-configs", type=int, default=10)
     p.add_argument("--max-tokens", type=int, default=8192)
@@ -656,6 +656,8 @@ def main() -> int:
                 },
             ],
         }
+        if model_reason in ("research", "search_space"):
+            payload["tools"] = [{"type": "web_search_preview"}]
         req = urllib.request.Request(
             "https://api.openai.com/v1/responses",
             data=json.dumps(payload).encode("utf-8"),

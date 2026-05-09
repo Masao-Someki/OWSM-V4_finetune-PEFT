@@ -1,8 +1,0 @@
-defaults:
-  - ../base_recipe_template
-
-method:
-  type: adalora
-  param_a: 8
-  param_b: 0.05
-exp_tag: exp_20260509_194955_adalora
