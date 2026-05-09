@@ -1,21 +1,17 @@
 # Wave Summary
+This wave aims to stabilize training and improve validation WER for Portuguese ASR using diverse PEFT methods. 
 
 ## Why this config set
-This set is designed to refine conditions from the previous debug failures. Each configuration aims to adjust learning rates, explore varying PEFT methods, and manage dropout rates to ensure stability and performance improvements based on previous evidence. The choice of parameters is informed by maintenance of model integrity while searching for better WER outcomes, particularly in Portuguese ASR.
+Three configurations were chosen to explore small adjustments around previous findings, addressing known instabilities. The focus is on decreasing the learning rate and adjusting PEFT parameters to maintain training stability, responding to recent debug failures.
 
 ## Search-space coverage
-This wave covers:
-- learning rate
-- PEFT method choice
-- dropout rate
-- max_epochs 
-
-We ensure we are not expanding on any axes beyond those listed in `prompt.txt`, in response to the recent instability and debug failures.
+- Learning Rate: Adjusting the learning rates across configurations (1e-5, 2e-5, 3e-5) to find the optimal rate.
+- PEFT Methods: Exploring different PEFT methods including LoRA, AdaLoRA, and ESPnet.
+- Other hyperparameters: Testing dropout and alpha values.
 
 ## Checklist updates
-- **C0**: Updated from `TODO` to `DONE` as the prompt has been reviewed and conforms to requirements.
-- **C1**: In progress as we utilize evidence from the previous failures to inform this wave.
-- **C4**: Updated from `TODO` to `DONE` since adjustments to configurations have been made to mitigate resource risks.
+- C0: Marked as DONE after confirming `prompt.txt` aligns.
+- C4: Marked as DONE by limiting memory requests, ensuring stability was prioritized.
 
 ## Next action
-The next wave should focus on continued exploration of configurations that provide worse-than-expected outcomes. Given the pending status on evidence utilization, I suggest iterating on the learning rates and PEFT method configurations, along with observing training stability under the new setups.
+Future waves should focus on further exploring learning rates and other axes if stability is validated. If successful outcomes are achieved, attempts to broaden the search for hyperparameters may begin.

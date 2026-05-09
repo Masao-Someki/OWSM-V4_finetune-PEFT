@@ -1,7 +1,7 @@
 # Search Space Snapshot (Generated)
 
 This file is auto-generated from repository-root `prompt.txt`.
-Prompt SHA256: `8622c51b1c3d3c58fb154059d613bae450159765804c59bd04e9200d7b658351`
+Prompt SHA256: `ea80bd3608500d60c5c9c633a78972cbb276090c73f2340f4353b5101c11c691`
 
 ## Interpretation Policy
 - Follow search-space definitions and hard constraints from `prompt.txt`.
@@ -53,10 +53,12 @@ How to fill:
 - The planner will propose concrete value ranges when generating search space.
 - Write:
   - learning rate
+  - optimizer
+  - batch size
   - max_epochs
   - warmup_steps
-  - PEFT method choice
-  - data ratio
+  - PEFT method choice (please check all method available on PEFT library)
+  - Best PEFT parameter set for each of the PEFT method, such as ranks, etc.
 
 7) Debug gate required
 - Should we run a small debug job first, and only run the full parallel wave if debug passes?

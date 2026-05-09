@@ -1,0 +1,13 @@
+defaults:
+  - ../owsm_peft_adalora
+
+lr: 3e-5
+exp_tag: exp_20260509_173817_adalora_lr3e-5
+
+peft:
+  type: adalora
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  task_type: seq_2_seq_lm
+  target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]

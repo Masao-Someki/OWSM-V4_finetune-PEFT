@@ -79,3 +79,8 @@ Append one entry per wave after planning/execution attempt.
 ### Next Action
 - continue / narrow / fix-blocker: fix-blocker; rerun exact debug-first command once Slurm control plane is reachable.
 - candidate axes for next wave: keep same 3-config smoke set to validate stability first; only then resume C1/C2 exploration.
+
+## Wave Prep Note (2026-05-09T17:38:17+00:00)
+- type: prompt_txt_updated
+- action: refresh search space and notes before next wave planning
+- prompt_sha256: `ea80bd3608500d60c5c9c633a78972cbb276090c73f2340f4353b5101c11c691`
