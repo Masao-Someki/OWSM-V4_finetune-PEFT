@@ -37,6 +37,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--model-research", default="")
     p.add_argument("--model-bugfix", default="")
     p.add_argument("--model-prompt-refresh", default="")
+    p.add_argument("--model-search-space", default="gpt-5")
     p.add_argument("--mode", choices=["auto", "bootstrap", "iterative"], default="auto")
     p.add_argument("--max-configs", type=int, default=10)
     p.add_argument("--max-tokens", type=int, default=8192)
@@ -411,11 +412,12 @@ def select_model(
     model_research = args.model_research.strip() or args.model
     model_bugfix = args.model_bugfix.strip() or model_research
     model_prompt_refresh = args.model_prompt_refresh.strip() or model_research
+    model_search_space = args.model_search_space.strip() or model_prompt_refresh
 
     if has_errors:
         return model_bugfix, "bugfix"
     if prompt_changed:
-        return model_prompt_refresh, "prompt_refresh"
+        return model_search_space, "search_space"
     return model_research, "research"
 
 
