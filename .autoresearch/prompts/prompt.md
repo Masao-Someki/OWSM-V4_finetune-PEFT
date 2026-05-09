@@ -20,6 +20,8 @@ Propose the next experiment wave based on:
 - Use high-reasoning/thinking mode behavior: compare multiple sources, resolve conflicts, and explain assumptions.
 - For method-family choice, gather a broad candidate list from official documentation, then prioritize by practicality.
 - In `search_space.md`, enumerate concrete candidate values per axis (not only generic ranges).
+- Mirror the output structure in `search_space_human.md`.
+- Use sequential progression: finish algorithm-family sweep first, then expand other axes in order.
 
 ## Required Outputs
 Write using `<file path="...">...</file>` blocks:

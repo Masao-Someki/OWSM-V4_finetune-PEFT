@@ -265,6 +265,7 @@ def build_user_prompt(
     followup_md = read_file_safe(prompts_dir / "followup.md") if (prompts_dir / "followup.md").exists() else ""
     error_md = read_file_safe(prompts_dir / "error.md") if (prompts_dir / "error.md").exists() else ""
     prompt_update_context = read_file_safe(store_dir / "prompt_update_context.md", max_chars=2000)
+    human_search_space = read_file_safe(repo_root / "search_space_human.md", max_chars=12000)
 
     error_section = ""
     if has_errors:
@@ -368,6 +369,11 @@ Plan and write the next experiment wave.
 
 ---
 
+## search_space_human.md (format reference)
+{human_search_space}
+
+---
+
 ## Required Output
 
 You MUST write these files (use `<file path="...">...</file>` format):
@@ -389,6 +395,10 @@ For `.autoresearch/prompts/search_space.md`:
 - For each axis listed in `prompt.txt` section 6, enumerate explicit candidate values.
 - Include per-axis trial order and source links.
 - Do not introduce extra axes unless explicitly allowed by `prompt.txt`.
+- Follow the structure/style of `search_space_human.md` as the primary format template.
+- Run sequentially after phase-1 completion:
+  - Phase 1: method/algorithm family comparison first.
+  - Phase 2+: only after Phase 1 is complete, expand other axes one-by-one in sequential order.
 """
 
 
