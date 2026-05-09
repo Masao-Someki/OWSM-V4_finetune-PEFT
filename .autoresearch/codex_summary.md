@@ -1,18 +1,21 @@
 # Wave Summary
-This wave aims to address the training stability concerns observed in the previous wave, focusing on dialing in effective configurations with known PEFT methods and careful adjustments of hyperparameters.
 
-**Why this config set**: 
-The choice of configurations is informed by the debug failures observed in `exp_20260509_011856`, where configurations did not successfully initiate due to potential memory constraints and instability. Maintaining a focus on key PEFT types that were previously shown to yield more stable results informs our configuration choices.
+## Why this config set
+This set is designed to refine conditions from the previous debug failures. Each configuration aims to adjust learning rates, explore varying PEFT methods, and manage dropout rates to ensure stability and performance improvements based on previous evidence. The choice of parameters is informed by maintenance of model integrity while searching for better WER outcomes, particularly in Portuguese ASR.
 
-**Search-space coverage**: 
-This wave explores:
-- Learning rate (using `5e-5`, `1e-4`, `3e-5`).
-- PEFT method choice (using `lora`, `espnet`, and `adalora`).
+## Search-space coverage
+This wave covers:
+- learning rate
+- PEFT method choice
+- dropout rate
+- max_epochs 
 
-**Checklist updates**: 
-- `C0`: Updated to DONE as the prompts are now complete and configurations have been generated correctly.
-- `C1`: In progress as configs are based on previous failures, looking for improvements in WER.
-- `C4`: Still TODO, as we are prioritizing debugging and stability given previous instability issues.
+We ensure we are not expanding on any axes beyond those listed in `prompt.txt`, in response to the recent instability and debug failures.
 
-**Next action**: 
-Plan to validate the configurations through successful debug runs, and once stability is confirmed, proceed to explore the maximum extent of the parameter space for further improvements on the batch size and epochs in subsequent waves.
+## Checklist updates
+- **C0**: Updated from `TODO` to `DONE` as the prompt has been reviewed and conforms to requirements.
+- **C1**: In progress as we utilize evidence from the previous failures to inform this wave.
+- **C4**: Updated from `TODO` to `DONE` since adjustments to configurations have been made to mitigate resource risks.
+
+## Next action
+The next wave should focus on continued exploration of configurations that provide worse-than-expected outcomes. Given the pending status on evidence utilization, I suggest iterating on the learning rates and PEFT method configurations, along with observing training stability under the new setups.

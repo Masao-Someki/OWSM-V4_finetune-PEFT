@@ -1,60 +1,99 @@
-# OWSM PEFT Autoresearch Search Space
+# Search Space Snapshot (Generated)
 
-This file defines the allowed experiment search space for Codex.
-Do not propose configs outside this scope unless explicitly justified.
-Track progress in `notes/autoresearch_checklist.md` and `notes/autoresearch_findings.md`.
+This file is auto-generated from repository-root `prompt.txt`.
+Prompt SHA256: `8622c51b1c3d3c58fb154059d613bae450159765804c59bd04e9200d7b658351`
 
-## Objective
-- Determine the best PEFT method and robust hyperparameters for FLEURS ASR.
-- Prioritize stable improvement on validation metrics and low failure rate.
+## Interpretation Policy
+- Follow search-space definitions and hard constraints from `prompt.txt`.
+- If this file conflicts with `prompt.txt`, prioritize `prompt.txt`.
+- Use `.autoresearch/notes/` and `experiments.csv` for evidence and prioritization only.
 
-## Primary Axes
-1. PEFT method family (from existing templates)
-- `conf/owsm_peft_lora_basic.yaml`
-- `conf/owsm_peft_espnet.yaml`
-- `conf/owsm_peft_adalora.yaml`
-- `conf/owsm_peft_randlora.yaml`
-- `conf/owsm_peft_vblora.yaml`
-- `conf/owsm_peft_delora.yaml`
+## prompt.txt (current)
+```text
+# AutoResearch Input Form (Simple)
 
-2. Learning rate (`lr`)
-- Coarse sweep: `1e-5, 3e-5, 5e-5, 1e-4, 2e-4`
-- Fine sweep near best region: include up/down one step around winner.
+Write only this form. Keep it short.
+This file is the source of truth for planning the next wave.
 
-3. Trainer budget (`trainer.max_epochs`, optional `trainer.max_steps`)
-- `max_epochs`: `1, 2, 4, 6`
-- For fast debug only, keep small `max_steps` via existing debug scripts.
-- For full runs, avoid overly aggressive `max_steps` overrides unless needed.
+How to fill:
+- Replace `WRITE_HERE`.
+- If unsure, use the suggested default.
+- Keep bullets concise.
 
-4. Scheduler / warmup
-- Default scheduler class remains `espnet2.schedulers.warmup_lr.WarmupLR`.
-- Sweep `scheduler.warmup_steps`:
-  - coarse: `1000, 3000, 6000, 10000`
-  - fine: centered around best coarse value.
+---
 
-5. Data-related robustness / augmentation proxy (via dataset + preprocessor config)
-- `dataset.train[*].dataset.ratio`: `0.25, 0.5, 1.0` (for ablation/curriculum checks)
-- `dataset.preprocessor.time_apply_prob`: `0.0, 0.25, 0.5, 0.75`
-- `dataset.preprocessor.text_prev_apply_prob`: `0.0, 0.25, 0.5, 0.75`
-- Keep `fleurs_subsets=all` as baseline unless a subset study is intentional.
+## Required (Fill these)
 
-## Method-specific Suggested Ranges
-- LoRA (`type=lora`): `r in {8,16,32}`, `lora_alpha in {8,16,32}`, `lora_dropout in {0.0,0.05,0.1}`
-- ESPnet LoRA (`type=espnet_lora`): `rank in {8,16,32}`, `alpha in {8,16,32}`, `dropout_rate in {0.0,0.05,0.1}`
-- AdaLoRA: `init_r in {8,12,16}`, `target_r in {4,8,12}`, keep `target_r <= init_r`
-- RandLoRA: `r in {16,32,64}`, `randlora_dropout in {0.0,0.05,0.1}`
-- VBLoRA: `r in {2,4,8}`, `topk in {1,2,4}`, `vblora_dropout in {0.0,0.05}`
-- DeLoRA: baseline only first; expand only after at least one stable run.
+1) Goal for this wave
+- What do you want to improve most?
+- Write: Improve Portuguese ASR quality (validation WER) for OWSM PEFT finetuning.
 
-## Wave Policy
-1. Early waves: broad but shallow across method families.
-2. Mid waves: focus top 2 families and tune LR/warmup/epochs.
-3. Late waves: narrow local search around best config and verify reproducibility.
+2) Most important metric
+- Which metric should decide success?
+- Write: validation WER (Portuguese split)
 
-## Hard Constraints
-- Max configs per wave must respect caller-provided limit (`max_configs`).
-- Each wave must include:
-  - at least one exploitation config (best-so-far neighborhood),
-  - at least one exploration config (new axis combination),
-  - clear rationale tied to `experiments.csv`.
-- Always run debug-first flow before full submission.
+3) Number of trials in this wave
+- How many configs to run in the main wave.
+- Write: 10
+
+4) Current concern
+- What is the main risk now?
+- Write: training instability and occasional memory-related failures when expanding search too quickly.
+
+5) Base configs
+- List the base config files the planner is allowed to expand for this wave.
+- Write:
+  - conf/owsm_peft_lora_basic.yaml
+  - conf/owsm_peft_espnet.yaml
+  - conf/owsm_peft_adalora.yaml
+
+6) What to explore in this wave (axes, not values)
+- List the tuning axes you want to explore.
+- Do NOT write numeric candidate values here.
+- The planner will propose concrete value ranges when generating search space.
+- Write:
+  - learning rate
+  - max_epochs
+  - warmup_steps
+  - PEFT method choice
+  - data ratio
+
+7) Debug gate required
+- Should we run a small debug job first, and only run the full parallel wave if debug passes?
+- Write: yes/no
+- Suggested default: yes
+
+---
+
+## Don'ts (Do not do in this wave)
+
+A) Hard prohibitions
+- Write explicit things the planner must not do.
+- Write:
+  - do not use lr above WRITE_HERE
+  - do not increase training budget beyond WRITE_HERE
+  - do not introduce new axes beyond WRITE_HERE
+
+B) Forbidden combinations
+- Write combinations that are not allowed.
+- Write:
+  - WRITE_HERE
+
+---
+
+## References (Optional but recommended)
+
+- Add URLs, papers, docs, or notes the planner should consider.
+- The planner should use these as guidance, while still obeying this form.
+
+A) URLs
+- WRITE_HERE
+
+B) Papers / reports
+- WRITE_HERE
+
+C) Local files in this repo
+- WRITE_HERE
+
+---
+```
