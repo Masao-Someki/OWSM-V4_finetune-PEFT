@@ -57,6 +57,23 @@ def read_file_safe(path: Path, max_chars: int = 8000) -> str:
     return text
 
 
+def compact_markdown_for_slack(path: Path, max_lines: int = 12, max_chars: int = 1800) -> list[str]:
+    if not path.exists():
+        return []
+    text = path.read_text(encoding="utf-8", errors="replace")
+    lines = [line.rstrip() for line in text.splitlines() if line.strip()]
+    picked: list[str] = []
+    total = 0
+    for line in lines[:max_lines]:
+        line = re.sub(r"^#+\s*", "", line)
+        line = re.sub(r"\|", " | ", line)
+        if total + len(line) > max_chars:
+            break
+        picked.append(f"- {line}")
+        total += len(line)
+    return picked
+
+
 def read_csv_tail(csv_path: Path, n_rows: int = 20) -> str:
     if not csv_path.exists() or csv_path.stat().st_size == 0:
         return "(empty)"
@@ -167,6 +184,9 @@ Your goal is to propose the next experiment wave to improve the target metric de
 - Choose one current focus axis from `prompt.txt` section 6.
 - Enumerate explicit candidate values, trial order, and rationale links for that current focus axis only.
 - Keep the remaining axes deferred until the current focus axis is resolved.
+- If the active axis is finite/categorical, enumerate the broadest practical candidate set you can justify.
+- If the active axis is numeric, choose coarse, information-efficient values first rather than dense low-signal increments.
+- Prefer patterns like `1e-5, 5e-5, 1e-4` over `1e-5, 2e-5, 3e-5` unless prior evidence justifies local refinement.
 
 ## Output Format
 All file writes MUST use this exact XML tag format:
@@ -205,6 +225,7 @@ Do NOT include `</file>` anywhere inside file content.
 - `.autoresearch/store/next_exp_name.txt` — REQUIRED: single line, the next_exp_name value
 - `.autoresearch/codex_summary.md` — your summary of this wave
 - `.autoresearch/store/search_space.md` — active search-space checklist and value enumeration for next research
+- `.autoresearch/store/search_space_report.md` — search-space index plus web-research results summary table
 - `.autoresearch/notes/autoresearch_checklist.md` — update statuses only
 - `.autoresearch/notes/autoresearch_findings.md` — append new entry only
 - `src/` — code changes for bug fixes, model implementation, and pipeline updates
@@ -385,6 +406,7 @@ You MUST write these files (use `<file path="...">...</file>` format):
 3. `.autoresearch/store/next_exp_name.txt` — must contain exactly: `{next_exp_name}`
 4. `.autoresearch/codex_summary.md` — your rationale and wave summary
 5. `.autoresearch/store/search_space.md` — regenerated from `prompt.txt` + web research (active file)
+6. `.autoresearch/store/search_space_report.md` — consolidated search-space index and research-results table
 
 Include these sections in codex_summary.md:
 - **Why this config set**: evidence from experiments.csv
@@ -403,6 +425,14 @@ For `.autoresearch/store/search_space.md`:
   - Say why the current axis is the right one to resolve now.
   - Keep non-active axes as deferred placeholders only.
   - State what result unlocks the next axis and name that next axis.
+- Candidate-value policy:
+  - For finite/categorical axes, list the maximum practical candidate set, especially when the total set is small enough to enumerate.
+  - For numeric axes, use coarse values that cover the plausible range efficiently; avoid dense adjacent values unless refining around evidence.
+
+For `.autoresearch/store/search_space_report.md`:
+- Write a compact human-readable summary of the current search space.
+- Include a table of the active axis candidates and a table summarizing web-research findings/sources.
+- Make it suitable for pasting into Slack with minimal cleanup.
 """
 
 
@@ -711,7 +741,16 @@ def main() -> int:
         f"- exp_name: `{confirmed_exp_name}`",
         f"- files_written: `{len(written)}`",
         f"- tokens: `in={tokens_in} out={tokens_out}`",
-    ])
+    ] + (
+        ["- search_space_report:"] +
+        compact_markdown_for_slack(
+            autoresearch_dir / "store" / "search_space_report.md",
+            max_lines=10,
+            max_chars=1500,
+        )
+        if (autoresearch_dir / "store" / "search_space_report.md").exists()
+        else []
+    ))
     return 0
 
 

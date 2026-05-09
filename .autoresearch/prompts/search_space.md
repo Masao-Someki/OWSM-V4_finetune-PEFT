@@ -5,6 +5,8 @@
 - [ ] Enumerate explicit candidate values only for the current active axis.
 - [ ] Include source links for proposed values.
 - [ ] Keep non-active axes deferred until the current active axis is resolved.
+- [ ] If the active axis is finite/categorical, enumerate the broadest practical candidate set.
+- [ ] If the active axis is numeric, use coarse, information-efficient values first and avoid low-signal tiny increments.
 
 ## Sequential Policy
 - [ ] Choose one current focus axis.
@@ -29,6 +31,10 @@
 
 - [ ] Current axis resolved?: yes/no
 - [ ] Winner / best-so-far summary:
+- [ ] Axis type: `categorical` / `numeric`
+- [ ] Enumeration policy used:
+- [ ] If `categorical`: note that the list aims to be as complete as practical.
+- [ ] If `numeric`: note the coarse search logic (for example logarithmic or bracketed spacing).
 - [ ] Evidence links:
 
 ## Deferred Axes

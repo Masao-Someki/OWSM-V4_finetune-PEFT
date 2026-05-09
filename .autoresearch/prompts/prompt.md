@@ -22,6 +22,8 @@ Propose the next experiment wave based on:
 - In `search_space.md`, enumerate concrete candidate values per axis (not only generic ranges).
 - Mirror the output structure in `search_space_human.md`.
 - Use sequential progression throughout: identify one active axis to explore now, enumerate only that axis concretely, and keep the remaining axes deferred until the active axis is resolved.
+- For finite categorical axes, try to list the maximum practical candidate set rather than a tiny subset.
+- For numeric axes, choose coarse but high-information candidate values first; only refine locally after evidence supports it.
 
 ## Required Outputs
 Write using `<file path="...">...</file>` blocks:
@@ -29,6 +31,7 @@ Write using `<file path="...">...</file>` blocks:
 2. `.autoresearch/array_conf/{next_exp_name}/array.txt`
 3. `.autoresearch/next_exp_name.txt`
 4. `.autoresearch/codex_summary.md`
+5. `.autoresearch/store/search_space_report.md`
 
 ## Summary Requirements (`codex_summary.md`)
 - Why these configs (with evidence)

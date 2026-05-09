@@ -9,6 +9,9 @@ Your goal is to find the best method and hyperparameters for the target task in 
 - Use `.autoresearch/prompts/search_space.md` and `search_space_human.md` as formatting references, and write the active result to `.autoresearch/store/search_space.md`.
 - Enforce sequential strategy: choose one current focus axis, enumerate its candidate values, and defer other axes until that focus is resolved.
 - Search-space output should make the next sequential decision obvious: what to test now, what to defer, and what unlocks the next axis.
+- For finite categorical axes, enumerate the broadest practical candidate set from web research and official docs.
+- For numeric axes, do not waste trials on tiny step-by-step sweeps; use coarse, information-efficient candidate values that span the plausible range.
+- Prefer examples like `1e-5, 5e-5, 1e-4` over `1e-5, 2e-5, 3e-5` unless prior evidence justifies finer local search.
 - If C0 (smoke test) is unresolved: max 1 configs, trainer.max_epochs≤3, trainer.max_steps≤100.
 - If C6 (stability) is DOING: do NOT expand to new hyperparameter axes.
 - Each wave must cover at least 2 checklist IDs.

@@ -1,9 +1,0 @@
-{
-  "exp_smoke3:17915098": {
-    "array_job_id": "17915098",
-    "command": "python src/bin/codex_autoresearch_driver.py --repo-root . --prompts-dir prompts --csv-path experiments.csv --exp-name exp_smoke3 --array-job-id 17915098 --mode slurm --max-configs 3 --next-exp-name exp_20260427_172433 --error-message 'array finished with failures: exp=exp_smoke3 array_job_id=17915098\nfailed=1 total=1\nfailed_rows:\n- run_uid=17915098_0_exp_smoke3_owsm_peft_lora_basic_a0 task_id=0 exit_code=137 base_config=conf/owsm_peft_lora_basic.yaml' --codex-bin /u/someki1/.pixi/envs/nodejs/bin/codex",
-    "exit_code": "0",
-    "exp_name": "exp_smoke3",
-    "triggered_at": "2026-04-27T17:28:51-05:00"
-  }
-}
