@@ -3,119 +3,77 @@
 ## Axis: learning rate
 | candidate | notes | source |
 | --- | --- | --- |
-| 1e-5 | Commonly used for fine-tuning large models | |
-| 3e-5 | Often used in NLP tasks | |
-| 5e-5 | Standard for many transformer models | |
-| 1e-4 | Default in many configurations | |
-| 3e-4 | Used in some ASR tasks | |
-| 5e-4 | Higher learning rate for faster convergence | |
-| 1e-3 | Suitable for smaller models or initial training | |
+| 1e-5 | Commonly used for fine-tuning transformer models | |
+| 2e-5 | Standard learning rate for many NLP tasks | |
+| 3e-5 | Often used in ASR tasks for balanced convergence | |
+| 5e-5 | Suitable for larger batch sizes | |
+| 1e-4 | Higher learning rate for faster convergence; may require careful tuning | |
+| 2e-4 | Used in some ASR models for rapid training | |
+| 5e-4 | Aggressive learning rate; risk of instability | |
+| 1e-3 | High learning rate; typically used with caution | |
 
 ## Axis: optimizer
 | candidate | notes | source |
 | --- | --- | --- |
-| SGD | Stochastic Gradient Descent | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| Adam | Adaptive Moment Estimation | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| AdamW | Adam with weight decay correction | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| RMSprop | Root Mean Square Propagation | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| Adagrad | Adaptive Gradient Algorithm | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| Adadelta | Extension of Adagrad to reduce learning rate decay | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| Adamax | Variant of Adam based on infinity norm | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| ASGD | Averaged Stochastic Gradient Descent | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| LBFGS | Limited-memory Broyden–Fletcher–Goldfarb–Shanno algorithm | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| NAdam | Adam with Nesterov momentum | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| RAdam | Rectified Adam | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
-| Rprop | Resilient backpropagation | [PyTorch Optimizers](https://docs.pytorch.org/stable/optim.html) |
+| AdamW | Standard optimizer with weight decay fix | [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers/optimizers) |
+| AdaFactor | Memory-efficient optimizer suitable for large models | [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers/optimizers) |
+| SGD | Stochastic Gradient Descent; requires careful tuning | [PyTorch Documentation](https://pytorch.org/docs/stable/optim.html) |
+| RMSprop | Adaptive learning rate method; often used in RNNs | [PyTorch Documentation](https://pytorch.org/docs/stable/optim.html) |
+| Adagrad | Adaptive learning rate method; suitable for sparse data | [PyTorch Documentation](https://pytorch.org/docs/stable/optim.html) |
+| APOLLO | Memory-efficient optimizer for full-parameter learning | [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers/optimizers) |
+| GrokAdamW | Optimizer designed for models benefiting from grokking | [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers/optimizers) |
+| LOMO | Low-Memory Optimization for full-parameter fine-tuning | [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers/optimizers) |
+| Schedule Free | Eliminates the need for learning rate annealing | [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers/optimizers) |
+| StableAdamW | Hybrid between AdamW and AdaFactor; removes need for gradient clipping | [Hugging Face Transformers Documentation](https://huggingface.co/docs/transformers/optimizers) |
 
 ## Axis: batch size
 | candidate | notes | source |
 | --- | --- | --- |
-| 16 | Common for ASR tasks | |
-| 32 | Standard in many training setups | |
-| 64 | Larger batch size for faster training | |
-| 128 | Requires more memory, faster convergence | |
-| 256 | High batch size, suitable for large datasets | |
+| 2 | Suitable for memory-constrained environments | |
+| 4 | Commonly used in ASR tasks | |
+| 8 | Balances memory usage and training speed | |
+| 16 | Requires more memory; faster training | |
+| 32 | High batch size; may improve convergence stability | |
+| 64 | Large batch size; suitable for powerful hardware | |
+| 128 | Very large batch size; may require gradient accumulation | |
 
 ## Axis: max_epochs
 | candidate | notes | source |
 | --- | --- | --- |
-| 10 | Standard for many tasks | |
-| 20 | Allows more training for convergence | |
-| 30 | Extended training for complex models | |
-| 50 | Long training for thorough learning | |
-| 100 | Very long training, risk of overfitting | |
+| 1 | Useful for quick testing and debugging | |
+| 3 | Commonly used for initial training phases | |
+| 5 | Balances training time and performance | |
+| 10 | Standard for many ASR training routines | |
+| 20 | Extended training; may lead to better performance | |
+| 50 | Long training; suitable for large datasets | |
+| 100 | Very long training; risk of overfitting | |
 
 ## Axis: warmup_steps
 | candidate | notes | source |
 | --- | --- | --- |
-| 0 | No warmup | |
-| 500 | Gradual increase in learning rate | |
-| 1000 | Common in transformer training | |
-| 2000 | Longer warmup for stability | |
-| 5000 | Extended warmup for large models | |
+| 0 | No warmup; immediate full learning rate | |
+| 500 | Short warmup period | |
+| 1000 | Commonly used in ASR tasks | |
+| 2000 | Extended warmup; stabilizes training | |
+| 5000 | Long warmup; suitable for large models | |
+| 10000 | Very long warmup; may be excessive | |
 
 ## Axis: PEFT method choice
 | candidate | notes | source |
 | --- | --- | --- |
-| PROMPT_TUNING | Fine-tuning by adding prompt vectors | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| MULTITASK_PROMPT_TUNING | Prompt tuning for multiple tasks | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| P_TUNING | Parameter-efficient tuning method | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| PREFIX_TUNING | Adding prefix parameters to model inputs | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| LORA | Low-Rank Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| ADALORA | Adaptive LORA | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| BOFT | Bottleneck Fine-Tuning | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| ADAPTION_PROMPT | Adaptation through prompt tuning | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| IA3 | Infused Adapter by Inhibiting and Amplifying Inner Activations | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| LOHA | Low-Rank Orthogonal Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| LOKR | Low-Rank Kronecker Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| OFT | Orthogonal Fine-Tuning | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| XLORA | Extended LORA | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| POLY | Polynomial Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| LN_TUNING | LayerNorm Tuning | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| VERA | Variational Efficient Rank Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| FOURIERFT | Fourier Fine-Tuning | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| HRA | Hierarchical Rank Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| BONE | Bottleneck Neural Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| MISS | Minimalist Subspace Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| RANDLORA | Randomized LORA | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| SHIRA | Shared Hierarchical Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| C3A | Compact Contextualized Cross-layer Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| ROAD | Robust Optimization-based Adaptation | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| WAVEFT | Wavelet-based Fine-Tuning | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| OSF | Orthogonal Subspace Fine-Tuning | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| DELORA | Decoupled LORA | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| GRALORA | Gradient-based LORA | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| ADAMSS | Adaptive Moment Subspace Scaling | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
+| LoraConfig | Low-Rank Adaptation | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/lora) |
+| AdaLoraConfig | Adaptive Low-Rank Adaptation | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/adalora) |
+| PrefixTuningConfig | Prefix Tuning | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/prefix_tuning) |
+| PromptTuningConfig | Prompt Tuning | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/prompt_tuning) |
+| PeftType.LORA | Enum for LORA method | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/peft_types) |
+| PeftType.ADALORA | Enum for ADALORA method | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/peft_types) |
+| PeftType.PREFIX_TUNING | Enum for PREFIX_TUNING method | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/peft_types) |
+| PeftType.PROMPT_TUNING | Enum for PROMPT_TUNING method | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/peft_types) |
 
-## Axis: Best PEFT parameter set for each of the PEFT method
+## Axis: Best PEFT parameter set for each of the PEFT method, such as ranks, etc.
 | candidate | notes | source |
 | --- | --- | --- |
-| PROMPT_TUNING: prompt_length | Length of the prompt vectors | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| MULTITASK_PROMPT_TUNING: prompt_length | Length of the prompt vectors for multitask | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| P_TUNING: prompt_length | Length of the prompt vectors | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| PREFIX_TUNING: prefix_length | Length of the prefix parameters | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| LORA: r, alpha, dropout | Rank, scaling factor, dropout rate | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| ADALORA: r, alpha, dropout | Rank, scaling factor, dropout rate | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| BOFT: bottleneck_size | Size of the bottleneck layer | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| ADAPTION_PROMPT: prompt_length | Length of the adaptation prompt | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| IA3: adapter_dim | Dimension of the adapter | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| LOHA: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| LOKR: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| OFT: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| XLORA: r, alpha, dropout | Rank, scaling factor, dropout rate | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| POLY: degree | Degree of the polynomial | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| LN_TUNING: layer_norm_eps | Epsilon for layer normalization | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| VERA: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| FOURIERFT: frequency | Frequency parameter | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| HRA: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| BONE: bottleneck_size | Size of the bottleneck layer | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| MISS: subspace_dim | Dimension of the subspace | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| RANDLORA: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| SHIRA: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| C3A: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| ROAD: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| WAVEFT: wavelet_level | Level of wavelet decomposition | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| OSF: subspace_dim | Dimension of the subspace | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| DELORA: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| GRALORA: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
-| ADAMSS: r, alpha | Rank, scaling factor | [PEFT types](https://huggingface.co/docs/peft/en/package_reference/peft_types) |
+| LoraConfig: r=8, alpha=16, dropout=0.05 | Standard configuration for LORA | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/lora) |
+| AdaLoraConfig: r=8, alpha=16, dropout=0.05, target_r=4, init_r=12, beta1=0.85, beta2=0.85, tinit=200, tfinal=1000, deltaT=10 | Standard configuration for ADALORA | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/adalora) |
+| PrefixTuningConfig: num_virtual_tokens=20, encoder_hidden_size=768 | Standard configuration for Prefix Tuning | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/prefix_tuning) |
+| PromptTuningConfig: num_virtual_tokens=20, encoder_hidden_size=768 | Standard configuration for Prompt Tuning | [Hugging Face PEFT Documentation](https://huggingface.co/docs/peft/package_reference/prompt_tuning) |

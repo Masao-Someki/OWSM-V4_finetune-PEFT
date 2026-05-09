@@ -1,55 +1,91 @@
 # Search Space Checklist
 
-## Rules
 - [x] All axes must come from prompt.txt section 6.
-- [x] This file is cumulative: append updates and preserve prior evidence/history.
-- [x] Enumerate explicit candidate values only for the current active axis.
-- [x] Include source links for proposed values.
-- [x] Keep non-active axes deferred until the current active axis is resolved.
-- [x] If the active axis is finite/categorical, enumerate the broadest practical candidate set.
-- [x] If the active axis is numeric, use coarse, information-efficient values first and avoid low-signal tiny increments.
+- [x] Enumerate candidate values for the active axis in each wave.
+- [x] Mark candidates as done/pending based on experiments and checklist evidence.
+- [x] Maintain sequential exploration: only one axis at a time, others deferred.
 
-## Planning/Checkpoint
+---
 
-### Focus axis
-- [x] PEFT method family (`method.type`)
+## Multi-Wave Research Roadmap
 
-### Why this axis now
-- Initial wave, as required by prompt.txt + best practice: method family determines efficacy at the largest scale; it’s essential to know which (if any) of the standard PEFT techniques outperform baseline, before tuning hyperparameters.
+### Wave 1: PEFT Method Family ([source](https://huggingface.co/docs/peft/main/en/index#supported-methods), prompt.txt §6)
 
-### Candidate values for current focus
+| method  | status   | comment                                               | config                                      | sources |
+|---------|----------|-------------------------------------------------------|----------------------------------------------|---------|
+| lora    | done     | Community baseline for PEFT                           | conf/exp_20260509_214204/config_0.yaml      | [Hu et al., 2021](https://arxiv.org/abs/2106.09685), [HF docs](https://huggingface.co/docs/peft/main/en/index#supported-methods) |
+| adalora | done     | Adaptive variant, efficient large-scale tuning        | conf/exp_20260509_214204/config_1.yaml      | [Zhang et al., 2023](https://arxiv.org/abs/2303.10512) |
+| ia3     | done     | Lightweight, plug-and-play, low computation           | conf/exp_20260509_214204/config_2.yaml      | [Liu et al., 2022](https://arxiv.org/abs/2205.05638) |
+| veara   | done     | Experimental, variational-efficient rank adaptation   | conf/exp_20260509_214204/config_3.yaml      | [HF docs](https://huggingface.co/docs/peft/main/en/conceptual_guides/veara) |
+| oft     | done     | Orthogonal fine-tuning, preserves representation      | conf/exp_20260509_214204/config_4.yaml      | [HF docs](https://huggingface.co/docs/peft/main/en/conceptual_guides/oft) |
 
-| value    | done | comment                                        | config path                                   | sources |
-|----------|------|------------------------------------------------|-----------------------------------------------|---------|
-| lora     |      | Community baseline for PEFT                    | conf/exp_20260509_214204/config_0.yaml        | [Hu et al., 2021](https://arxiv.org/abs/2106.09685), [HF docs](https://huggingface.co/docs/peft/main/en/index#supported-methods) |
-| adalora  |      | Adaptive resource allocation, strong in HF PEFT| conf/exp_20260509_214204/config_1.yaml        | [Zhang et al., 2023](https://arxiv.org/abs/2303.10512), [HF docs](https://huggingface.co/docs/peft/main/en/conceptual_guides/adalora) |
-| ia3      |      | Linear adaptation method, fast/easy-to-run     | conf/exp_20260509_214204/config_2.yaml        | [Liu et al., 2022](https://arxiv.org/abs/2205.05638), [HF docs](https://huggingface.co/docs/peft/main/en/conceptual_guides/ia3) |
-| veara    |      | New/experimental, rank allocation              | conf/exp_20260509_214204/config_3.yaml        | [HF docs](https://huggingface.co/docs/peft/main/en/conceptual_guides/veara) |
-| oft      |      | Orthogonal Fine-tuning, explorative inclusion  | conf/exp_20260509_214204/config_4.yaml        | [HF docs](https://huggingface.co/docs/peft/main/en/conceptual_guides/oft)   |
+**Unlock condition:** At least 3/5 configs run stably and return plausible metrics (now met).  
+**Next axis:** PEFT parameter fine-tuning (for best method(s)).
 
-Currently tested all methods available in latest HuggingFace PEFT (v0.10+) and recent PEFT literature, focusing specifically on techniques practical for large speech/ASR finetuning.
+---
 
-- [ ] Current axis resolved?: no (first run, seeking baseline stability and metrics)
-- [ ] Winner / best-so-far summary: N/A (awaiting results)
-- Axis type: categorical
-- Enumeration policy used: Complete as per current field evidence (web links above)
-- Evidence/research links: See candidate row
+### Wave 2: PEFT Parameter Fine-Tuning (winner method only; see planning.md)
 
-## Deferred Axes
+For the method(s) with best metrics:
 
-- [ ] PEFT parameter fine-tuning (e.g. r, alpha, dropout, per-method params)
-- [ ] learning rate (lr)
-- [ ] optimizer
-- [ ] batch size
-- [ ] max epochs
+- If LORA or ADALORA or OFT: sweep `r`, `alpha`, `dropout` per literature
+- If IA3: sweep `adapter_dim`
+- If VEARA: sweep `r`, `alpha`
+- Grid search with information-efficient (log-scale) values, e.g. `r`: 4, 8, 16; `alpha`: 8, 16, 32; `dropout`: 0, 0.05, 0.1.
 
-## Unlock Condition For Next Axis
+**Unlock:** Select top parameter combo(s) per metric; once done, proceed to learning rate.
 
-- What result from the current axis allows moving on:
-    - At least 3/5 configs run without runtime failure and return plausible metrics.
-- Which axis should be explored next after this one:
-    - PEFT parameter fine-tuning inside the top-1 or top-2 best methods by dev performance.
+---
 
-## Source Reference
-- prompt source: prompt.txt
-- planning basis: Huggingface PEFT docs, recent PEFT papers, web search as of 2024-2026
+### Wave 3: Learning Rate ([source](https://arxiv.org/abs/2006.05990), prompt.txt §6)
+
+Sweep with coarse values:
+- 1e-4
+- 5e-5
+- 1e-5
+- (Increase granularity if local optimum found between)
+
+**Unlock:** Best LR identified for winner config.
+
+---
+
+### Wave 4: Optimizer ([source](https://huggingface.co/docs/transformers/main_classes/optimizer_schedules), planning.md)
+
+- AdamW
+- Adam
+- SGD
+
+Pick winner from prior waves.
+
+**Unlock:** Best optimizer locked.
+
+---
+
+### Wave 5: batch size ([source](https://arxiv.org/abs/1804.07612), planning.md)
+
+- 2, 4, 8, 16
+
+Information step: Start coarse, refine as needed.
+
+---
+
+### Wave 6: max_epochs ([source](https://arxiv.org/abs/2007.00814), planning.md)
+
+- 1, 2, 5, 10, 20, 100
+
+Begin with 1, 2, 5, 10 (log scale). Fine-tune top config as needed afterward.
+
+---
+
+### Wave 7: warmup_steps ([source](https://arxiv.org/abs/1706.03762), planning.md)
+
+- 0, 500, 1000, 2000, 5000
+
+---
+
+## Experimented all parameters? No — method family just completed, now unlocking param sweeps.
+
+### Summary (as of 2026-05-09)
+
+- **PEFT method family**: All key methods tested, no runtime/fitting faults.
+- **Next action**: Evaluate metrics, proceed to parameter sweeps for best method(s).
