@@ -1,5 +1,3 @@
-# Search Space Document
-
 - [ ] Use web search to collect current best practices for this task/model family.
 - [ ] Learning Rate
     - Candidate values: `5e-5, 1e-4`
@@ -42,4 +40,3 @@
     - Stop condition: when incorrect configurations emerge.
     - Rationale: Results show promise across similar tasks.
     - Sources: official PEFT library documentation.
-

@@ -1,19 +1,18 @@
 # Wave Summary
-This wave aims to address the recent stability issues encountered in `exp_20260509_011856`, which resulted in a debug failure. Given the previous performances, a consolidated wave with a focus on smaller configurations has been planned. This will be executed with a focus on stability and performance enhancement using the following configurations.
+This wave aims to stabilize recent configurations and explore slightly higher learning rates to determine their effects on model performance.
 
-- **Why this config set**: The previous run encountered an OOM issue. Therefore, a conservative base is essential, yet varying batch sizes and learning rates are included to explore potential improvements.
-  
-- **Search-space coverage**: This wave primarily covers the following axes from `prompt.txt` section 6:
-  - Learning rate
-  - Optimizer
-  - Batch size
-  - Max epochs
-  - Warmup steps
-  - Method
+## Why this config set
+Given the previous configurations resulted in `Killed` processes due to memory issues, we are keeping `lr` values as per the allowed range from last experimentation, prioritizing stability. Config `0` maintains the lower learning rate (`5e-5`) for safe convergence, while `1` tests the upper limit (`1e-4`) in a controlled manner to gauge its effect.
 
-- **Checklist updates**:
-  - `C0`: Resolved by ensuring all necessary configurations are filled out and correct.
-  - `C4`: The memory request issue has been addressed by adhering to previous configurations with smaller batch sizes while calibrating memory requests based on the last failure.
-  
-- **Next action**: Following this wave, we will focus on deeper exploration of learning rate variations and optimizer adjustments based on the findings from this set.
+## Search-space coverage
+This wave covers:
+- Learning Rate (5e-5, 1e-4)
+- Optimizer (AdamW) - using the same across configs.
+- Batch Size (16, 32) - implicitly covered since both configs can be adjusted later depending on memory issues.
 
+## Checklist updates
+- **C1**: Marked as `TODO` because of no recent evidence.
+- **C4**: Remains `TODO` due to risk of OOM; ensuring the configurations are set to avoid it.
+
+## Next action
+After this wave, the objective would be to examine if any other configurations can be tweaked without increasing the OOM risks. Further exploration could involve looking into different batch sizes if resource limits allow it.
