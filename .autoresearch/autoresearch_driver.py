@@ -75,137 +75,6 @@ def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def _extract_axes_from_prompt(prompt_text: str) -> list[str]:
-    """
-    Extract axis bullets from section:
-    "6) What to explore in this wave (axes, not values)".
-    Falls back to an empty list if not detected.
-    """
-    lines = prompt_text.splitlines()
-    axes: list[str] = []
-    in_axes_section = False
-    for raw in lines:
-        line = raw.strip()
-        if not in_axes_section:
-            if line.startswith("6) "):
-                in_axes_section = True
-            continue
-
-        # stop at next numbered section
-        if line.startswith("7) "):
-            break
-
-        if line.startswith("- "):
-            item = line[2:].strip()
-            # Skip instruction bullets and keep actual candidate axis bullets.
-            lower = item.lower()
-            if (
-                not item
-                or "list the tuning axes" in lower
-                or "do not write numeric" in lower
-                or "planner will propose" in lower
-                or item == "Write:"
-            ):
-                continue
-            axes.append(item)
-    return axes
-
-
-def sync_search_space_from_root_prompt(repo_root: Path, prompts_dir: Path, prompt_text: str) -> bool:
-    """
-    Generate `.autoresearch/prompts/search_space.md` from repo-root `prompt.txt`.
-    """
-    out_path = prompts_dir / "search_space.md"
-    prompts_dir.mkdir(parents=True, exist_ok=True)
-    prompt_hash = _sha256_text(prompt_text)
-    axes = _extract_axes_from_prompt(prompt_text)
-    axes_md = "\n".join([f"- [ ] `{a}`" for a in axes]) if axes else "- [ ] (No axes detected. Fill `prompt.txt` section 6 explicitly.)"
-    if axes:
-        axis_blocks = []
-        for axis in axes:
-            axis_blocks.append(
-                "\n".join([
-                    f"#### Axis: `{axis}`",
-                    "- [ ] Candidate values (explicit list): `v1`, `v2`, `v3`",
-                    "- [ ] Trial order: `1) ... 2) ... 3) ...`",
-                    "- [ ] Fixed/paired settings for fair comparison:",
-                    "- [ ] Expand condition:",
-                    "- [ ] Stop condition:",
-                    "- [ ] Rationale (1-2 lines):",
-                    "- [ ] Sources (URLs):",
-                ])
-            )
-        axis_detail_md = "\n\n".join(axis_blocks)
-    else:
-        axis_detail_md = "#### Axis details\n- [ ] No axes detected from `prompt.txt` section 6."
-
-    generated = f"""# Search Strategy Checklist (Generated)
-
-This file is auto-generated from repository-root `prompt.txt`.
-Prompt SHA256: `{prompt_hash}`
-
-## Interpretation Policy
-- Follow constraints from `prompt.txt` first.
-- If this file conflicts with `prompt.txt`, prioritize `prompt.txt`.
-- Use `.autoresearch/notes/` and `experiments.csv` for evidence/prioritization.
-
-## Execution Checklist (top-down)
-- [ ] 1. Preflight
-  - [ ] Confirm all base configs in `prompt.txt` exist.
-  - [ ] Confirm debug gate policy (`yes/no`) from `prompt.txt`.
-  - [ ] Confirm trial budget (max configs).
-- [ ] 2. Stability-first smoke (small)
-  - [ ] Start from conservative values on highest-risk axes defined in `prompt.txt`.
-  - [ ] Validate OOM/instability before broader search.
-- [ ] 3. Primary axis sweep (coarse)
-  - [ ] Choose initial high-impact axes only from `prompt.txt` section 6.
-  - [ ] Keep method-specific params conservative while selecting stable regions.
-- [ ] 4. Secondary axis sweep (coarse)
-  - [ ] Expand to remaining axes from `prompt.txt` section 6 around stable regions.
-- [ ] 5. Method-family compare
-  - [ ] Compare candidate adaptation/model method families under the best shared hyperparameter region.
-- [ ] 6. Method-specific parameter refine
-  - [ ] For top 1-2 method families, tune family-specific parameters.
-- [ ] 7. Local parameter search around current best
-  - [ ] Narrow around best config and run small neighborhood search.
-
-## Research-Backed Candidate Values (to fill before wave planning)
-- [ ] Use web search to collect current best practices for this task/model family.
-- [ ] Prefer primary sources: official docs, papers, and strong reproduction reports.
-- [ ] Record source links and short rationale for each proposed value range.
-- [ ] If a known heuristic exists (example: pretrained LR scaling conventions), include it explicitly.
-- [ ] For each axis from `prompt.txt`, add:
-  - [ ] candidate values/ranges
-  - [ ] search order (what to try first, second, ...)
-  - [ ] stop/expand condition
-
-### Required Web-Research Outputs
-- [ ] Build this section ONLY from axes listed in `prompt.txt` section 6.
-- [ ] Do not add extra axes not present in `prompt.txt` unless explicitly allowed there.
-- [ ] For each axis below, provide: candidates/range, trial order, rationale links, and stop/expand condition.
-{axes_md}
-
-### Axis Value Enumeration (must fill before planning)
-{axis_detail_md}
-
-## Practical Wave Policy
-- Wave 1: stability-first + minimum viable comparison set.
-- Wave 2: coarse search on high-impact axes from `prompt.txt`.
-- Wave 3: method-family breadth check (based on web-collected full list).
-- Wave 4+: local parameter search around the best method/config.
-
-## Source Reference
-- Source file: repository-root `prompt.txt`
-- Prompt SHA256: `{prompt_hash}`
-- To inspect details, read `prompt.txt` directly (do not duplicate full text here).
-"""
-    before = out_path.read_text(encoding="utf-8", errors="replace") if out_path.exists() else ""
-    if before == generated:
-        return False
-    out_path.write_text(generated, encoding="utf-8")
-    return True
-
-
 def detect_and_apply_prompt_updates(
     repo_root: Path,
     prompts_dir: Path,
@@ -230,9 +99,6 @@ def detect_and_apply_prompt_updates(
     prompt_changed = bool(prev_hash and prev_hash != prompt_hash)
     first_seen = not bool(prev_hash)
 
-    if sync_search_space_from_root_prompt(repo_root, prompts_dir, prompt_text):
-        written.append(".autoresearch/prompts/search_space.md")
-
     update_ctx_path = store_dir / "prompt_update_context.md"
     if prompt_changed:
         findings_path = repo_root / ".autoresearch" / "notes" / "autoresearch_findings.md"
@@ -253,6 +119,7 @@ def detect_and_apply_prompt_updates(
                 f"- current_sha256: `{prompt_hash}`\n"
                 "- Treat this as an intentional search-space/policy update.\n"
                 "- Re-baseline notes/checklist interpretation before proposing configs.\n"
+                "- Regenerate `.autoresearch/prompts/search_space.md` via ChatGPT in this run.\n"
             ),
             encoding="utf-8",
         )
@@ -292,6 +159,12 @@ Your goal is to propose the next experiment wave to improve the target metric de
 ## Search Space Policy (MUST follow)
 {search_space}
 
+## Search Space Authoring (MUST write each run)
+- You must write `.autoresearch/prompts/search_space.md` in this run.
+- Build it from repository-root `prompt.txt` plus web research evidence.
+- Enumerate explicit candidate values per axis from `prompt.txt` section 6.
+- Include trial order and rationale links for each axis.
+
 ## Output Format
 All file writes MUST use this exact XML tag format:
 
@@ -328,6 +201,7 @@ Do NOT include `</file>` anywhere inside file content.
 - `.autoresearch/array_conf.txt` — one config path per line (overwrite each wave)
 - `.autoresearch/store/next_exp_name.txt` — REQUIRED: single line, the next_exp_name value
 - `.autoresearch/codex_summary.md` — your summary of this wave
+- `.autoresearch/prompts/search_space.md` — regenerated search-space checklist and value enumeration
 - `.autoresearch/notes/autoresearch_checklist.md` — update statuses only
 - `.autoresearch/notes/autoresearch_findings.md` — append new entry only
 - `src/` — code changes for bug fixes, model implementation, and pipeline updates
@@ -501,12 +375,19 @@ You MUST write these files (use `<file path="...">...</file>` format):
 2. `.autoresearch/array_conf.txt` — list of those config paths
 3. `.autoresearch/store/next_exp_name.txt` — must contain exactly: `{next_exp_name}`
 4. `.autoresearch/codex_summary.md` — your rationale and wave summary
+5. `.autoresearch/prompts/search_space.md` — regenerated from `prompt.txt` + web research
 
 Include these sections in codex_summary.md:
 - **Why this config set**: evidence from experiments.csv
 - **Search-space coverage**: which axes this wave covers
 - **Checklist updates**: which IDs change status and why
 - **Next action**: what the wave after this should target
+
+For `.autoresearch/prompts/search_space.md`:
+- Use checkboxes (`- [ ]`) for executable steps.
+- For each axis listed in `prompt.txt` section 6, enumerate explicit candidate values.
+- Include per-axis trial order and source links.
+- Do not introduce extra axes unless explicitly allowed by `prompt.txt`.
 """
 
 
@@ -686,7 +567,7 @@ def main() -> int:
     has_errors = has_recent_errors(store_dir)
     selected_model, model_reason = select_model(args, prompt_changed=prompt_changed, has_errors=has_errors)
     if prompt_changed:
-        print("[INFO] prompt.txt changed since last run; refreshed search space and notes before planning.")
+        print("[INFO] prompt.txt changed since last run; refreshed prompt/update notes and will regenerate search_space via ChatGPT.")
     system_prompt = build_system_prompt(repo_root, prompts_dir)
     user_prompt = build_user_prompt(
         repo_root, autoresearch_dir, prompts_dir, csv_path, args.max_configs, next_exp_name, mode

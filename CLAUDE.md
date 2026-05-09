@@ -24,7 +24,7 @@ Cluster
 
 GitHub Actions (.github/workflows/autoresearch.yml)
   push trigger (.autoresearch/latest_status.json 等の変化)
-    ↓ .autoresearch/claude_autoresearch_driver.py
+    ↓ .autoresearch/autoresearch_driver.py
     ↓ Claude API (claude-opus-4-7) が次の wave config を提案
     ↓ conf/{next_exp_name}/ + .autoresearch/array_conf/{next_exp_name}/array.txt を生成
     ↓ PR 作成 → CI (.github/workflows/ci.yml)
@@ -55,7 +55,7 @@ Cluster watcher (WAITING_FOR_PR_MERGE フェーズ)
 | `.autoresearch/check_and_submit.slurm` | watcher Slurm job (self-resubmit, CPU partition) |
 | `.autoresearch/watcher.py` | watcher メインロジック (state machine) |
 | `.autoresearch/collect_metrics.py` | metrics.json 収集 → experiments.csv 更新 |
-| `.autoresearch/claude_autoresearch_driver.py` | GitHub Actions 上で Claude API を呼ぶ |
+| `.autoresearch/autoresearch_driver.py` | GitHub Actions 上で Claude API を呼ぶ |
 | `.autoresearch/prompts/` | Claude へのプロンプト群 |
 | `.autoresearch/array_conf/` | array job の config リスト |
 | `.autoresearch/experiments.csv` | 全実験のメタデータ (fcntl locked) |
@@ -93,7 +93,7 @@ Cluster watcher (WAITING_FOR_PR_MERGE フェーズ)
 | `next_goal.md` | watcher | GitHub Actions (Claude prompt) |
 | `codex_summary.md` | Claude (GitHub Actions) | 人間 |
 | `next_exp_name.txt` | Claude (GitHub Actions) | watcher (git pull後) |
-| `next_branch.txt` | claude_autoresearch_driver.py | autoresearch.yml (PR作成) |
+| `next_branch.txt` | autoresearch_driver.py | autoresearch.yml (PR作成) |
 | `stop.json` | Claude | watcher / 人間 |
 
 ---
