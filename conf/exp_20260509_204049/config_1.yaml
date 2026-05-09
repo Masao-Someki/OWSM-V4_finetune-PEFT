@@ -1,0 +1,10 @@
+defaults:
+  - ../base_recipe_template
+
+lr: 5e-5
+exp_tag: exp_20260509_204049_delora
+
+method:
+  type: delora
+  param_a: 8
+  param_b: 0.05

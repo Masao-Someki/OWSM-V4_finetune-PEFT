@@ -1,11 +1,8 @@
 # Wave Summary
+- **Why this config set**: The chosen configs explore the lora method family to establish a baseline performance across different learning rates and lora variants (`lora`, `delora`, `adalora`). Based on the previous metrics (`experiments.csv`), these methods showed varying efficacy, allowing comparisons at different learning rates.
+  
+- **Search-space coverage**: This wave covers the `peft parameters` and the `learning rate` axes, testing multiple approaches while keeping adjustments conservative, as it's the initial wave.
 
-- **Why this config set**: This wave targets different learning rates while maintaining the same `lora` settings to explore their effect on performance. Research indicates that higher learning rates can lead to faster convergence but with the risk of overshooting minima. Conversely, lower rates allow for finer updates but require more epochs.
+- **Checklist updates**: No checklist items were available, but this wave is initializing from scratch, allowing us to define the first set of experiments.
 
-- **Search-space coverage**: This wave focuses exclusively on the learning rate (`lr`) axis while keeping other parameters constant. The chosen method is `lora`.
-
-- **Checklist updates**: 
-  - [x] Confirmed that `lr` is a viable axis for exploration.
-  - [ ] Awaiting results from the current learning rate variations.
-
-- **Next action**: After resolving the learning rate axis, the next focus will shift to the `method` axis to explore variations within it, such as `delora` and `adalora`.
+- **Next action**: Once the stability and effectiveness of the `peft parameters` are confirmed, we may explore the `optimizer detail` axis as the next focus for further tuning.

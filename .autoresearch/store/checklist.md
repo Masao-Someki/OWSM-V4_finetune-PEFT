@@ -1,0 +1,2 @@
+- [ ] Initial experiments planned and documented
+- [ ] Search space established for first wave 
