@@ -1,9 +1,9 @@
 [WARN] /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/scripts/load-keys.sh not found; continuing without it.
-[INFO] exp_name=exp_20260509_011546
-[INFO] job_id=18136051 array_job_id=na task_id=0
-[INFO] config_list=.autoresearch/array_conf/exp_20260509_011546/array.txt
-[INFO] selected_index=0 selected_config=conf/exp_20260509_011546/config_0.yaml
-[INFO] runtime_config=conf/exp_20260509_011546/generated/runtime_na_0.yaml
+[INFO] exp_name=exp_20260509_011856
+[INFO] job_id=18136074 array_job_id=na task_id=0
+[INFO] config_list=.autoresearch/array_conf/exp_20260509_011856/array.txt
+[INFO] selected_index=0 selected_config=conf/exp_20260509_011856/config_0.yaml
+[INFO] runtime_config=conf/exp_20260509_011856/generated/runtime_na_0.yaml
 Traceback (most recent call last):
   File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/run.py", line 58, in <module>
     main(
