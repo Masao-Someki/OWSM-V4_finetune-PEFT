@@ -1,11 +1,16 @@
 # Wave Summary
-- **Why this config set**: The choice of configurations focuses on the `lora` method as a baseline for stable performance and the `adalora` method for exploring variations in approach. Given that no reliable prior metrics exist, we favor configurations that are well-founded in existing literature regarding tuning strategies.
-- **Search-space coverage**: This wave covers the `PEFT method choice` axis (active) by testing varying PEFT methods (`lora` and `adalora`), while deferring other crucial axes (learning rate, optimizer, batch size, etc.) for future waves once baseline performance is established.
-- **Checklist updates**: 
-  - C0: [x] Confirmed `prompt.txt` integrity; it's complete and consistent.
-  - C1: [x] Configs are grounded in experimental methodology; they reflect existing evidence surrounding `lora` and `adalora`.
-  - C2: [x] The wave includes both exploitative (lora) and exploratory (adalora) configurations.
-  - C3: [x] Only one axis is actively examined, as others are deferred.
-  - C4: [x] Runtime risks are mitigated by constructing two config limits.
-  - C5: [x] Outputs will be reproducible and compliant with specifications.
-- **Next action**: After analyzing results from these configurations, the next wave should target the `learning rate` axis to fine-tune hyperparameters identified during this exploration.
+
+**Why this config set**: This initial wave targets the exploration of foundational PEFT methods, aimed at establishing a baseline for performance. Given the lack of prior experimental evidence, all configurations are grounded in practical methodology and understanding from current literature on PEFT methods.
+
+**Search-space coverage**: This wave focuses exclusively on the axis of PEFT method choice, deferring other critical hyperparameters until this axis is resolved.
+
+**Checklist updates**:
+- **C0**: [x] Confirmed completeness of `prompt.txt`.
+- **C1**: [ ] Not started; no evidence exists to draw from yet.
+- **C2**: [x] Includes both exploitation (lora) and exploration (delora, adalora).
+- **C3**: [x] Covered required comparison axis: PEFT method choice.
+- **C4**: [ ] Stability risks untested; will adjust in subsequent waves based on initial results.
+- **C5**: [ ] Outputs need validation for reproducibility and compliance.
+
+**Next action**: Targeting learning rate adjustments in the following wave after analyzing results from the PEFT method experiments.
+
