@@ -288,7 +288,7 @@ def build_user_prompt(
     followup_md = read_file_safe(prompts_dir / "followup.md") if (prompts_dir / "followup.md").exists() else ""
     error_md = read_file_safe(prompts_dir / "error.md") if (prompts_dir / "error.md").exists() else ""
     prompt_update_context = read_file_safe(store_dir / "prompt_update_context.md", max_chars=2000)
-    human_search_space = read_file_safe(repo_root / "search_space_human.md", max_chars=12000)
+    human_search_space = read_file_safe(prompts_dir / "search_space_human.md", max_chars=12000)
     active_search_space = read_file_safe(store_dir / "search_space.md", max_chars=12000)
 
     error_section = ""

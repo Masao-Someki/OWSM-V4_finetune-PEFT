@@ -7,15 +7,19 @@
 
 ### peft parameters
 
+<!-- Enumerate ALL methods found via web search. Do not limit to this list. -->
 | algorithm | done | comment | config |
 | --- | -- | --- | --- |
-| lora | x | Basic lora as baseline | conf/.../a.caml |
-| delora |  | Test lora variants | |
-| adalora |  | lora variants | |
+| method_A | x | Brief rationale | conf/.../config_0.yaml |
+| method_B |  | Brief rationale | |
+| method_C |  | Brief rationale | |
+| method_D |  | Brief rationale | |
+| method_E |  | Brief rationale | |
+| ... (add all discovered methods) |  | | |
 
-Experimented all patrmeters?: no
+Experimented all parameters?: no
 Summary:
-Lora worked the best among all other altgoithms with the same parameter set, i.e., ranks, alpha, etc.
+method_A worked the best among tested methods with the same parameter set.
 
 ### Peft parameters
 - Will be extended after all the experiments from peft parameters have been finished.

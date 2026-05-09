@@ -1,8 +1,0 @@
-defaults:
-  - ../base_recipe_template
-
-algorithm: delora
-lr: 5e-5
-exp_tag: exp_20260509_204840_variant_b
-batch_size: 16
-max_epochs: 5
