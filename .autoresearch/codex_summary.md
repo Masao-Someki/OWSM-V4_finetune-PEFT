@@ -1,16 +1,11 @@
 # Wave Summary
 
-**Why this config set**: This initial wave targets the exploration of foundational PEFT methods, aimed at establishing a baseline for performance. Given the lack of prior experimental evidence, all configurations are grounded in practical methodology and understanding from current literature on PEFT methods.
+- **Why this config set**: This wave targets different learning rates while maintaining the same `lora` settings to explore their effect on performance. Research indicates that higher learning rates can lead to faster convergence but with the risk of overshooting minima. Conversely, lower rates allow for finer updates but require more epochs.
 
-**Search-space coverage**: This wave focuses exclusively on the axis of PEFT method choice, deferring other critical hyperparameters until this axis is resolved.
+- **Search-space coverage**: This wave focuses exclusively on the learning rate (`lr`) axis while keeping other parameters constant. The chosen method is `lora`.
 
-**Checklist updates**:
-- **C0**: [x] Confirmed completeness of `prompt.txt`.
-- **C1**: [ ] Not started; no evidence exists to draw from yet.
-- **C2**: [x] Includes both exploitation (lora) and exploration (delora, adalora).
-- **C3**: [x] Covered required comparison axis: PEFT method choice.
-- **C4**: [ ] Stability risks untested; will adjust in subsequent waves based on initial results.
-- **C5**: [ ] Outputs need validation for reproducibility and compliance.
+- **Checklist updates**: 
+  - [x] Confirmed that `lr` is a viable axis for exploration.
+  - [ ] Awaiting results from the current learning rate variations.
 
-**Next action**: Targeting learning rate adjustments in the following wave after analyzing results from the PEFT method experiments.
-
+- **Next action**: After resolving the learning rate axis, the next focus will shift to the `method` axis to explore variations within it, such as `delora` and `adalora`.

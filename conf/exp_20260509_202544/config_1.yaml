@@ -1,0 +1,10 @@
+defaults:
+  - ../base_recipe_template
+
+lr: 2e-5
+exp_tag: exp_20260509_202544_lr_2e-5
+
+method:
+  type: lora
+  param_a: 16
+  param_b: 0.1
