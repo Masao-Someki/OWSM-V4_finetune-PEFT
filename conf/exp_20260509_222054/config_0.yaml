@@ -1,0 +1,10 @@
+defaults:
+  - ../base_recipe_template
+
+# Baseline: LoRA method, as most common/advised PEFT baseline for transformer models (and the default in this repo family)
+exp_tag: exp_20260509_222054_lora
+method:
+  type: lora
+  r: 8
+  alpha: 16
+  dropout: 0.05

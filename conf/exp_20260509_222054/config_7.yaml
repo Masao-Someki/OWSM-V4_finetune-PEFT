@@ -1,0 +1,10 @@
+defaults:
+  - ../base_recipe_template
+
+# LoRA variant: much higher rank, test capacity
+exp_tag: exp_20260509_222054_lora_r32
+method:
+  type: lora
+  r: 32
+  alpha: 64
+  dropout: 0.05

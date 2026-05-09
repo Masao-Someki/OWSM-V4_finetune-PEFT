@@ -1,0 +1,10 @@
+defaults:
+  - ../base_recipe_template
+
+# Adapter: Standard adapter block PEFT, known for strong performance on some sequence tasks
+exp_tag: exp_20260509_222054_adapter
+method:
+  type: adapter
+  reduction_factor: 16
+  non_linearity: relu
+  dropout: 0.05

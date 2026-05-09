@@ -1,0 +1,8 @@
+defaults:
+  - ../base_recipe_template
+
+# OFT: Orthogonal Fusion Tuning, simple add-on for some models
+exp_tag: exp_20260509_222054_oft
+method:
+  type: oft
+  reduction_factor: 16
