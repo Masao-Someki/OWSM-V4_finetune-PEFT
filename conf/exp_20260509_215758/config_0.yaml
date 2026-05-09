@@ -1,9 +1,0 @@
-defaults:
-  - ../base_recipe_template
-
-exp_tag: exp_20260509_215758_lora
-method:
-  type: lora
-  r: 8
-  alpha: 16
-  dropout: 0.05

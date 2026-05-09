@@ -380,6 +380,43 @@ Use this base planning template as the primary instruction:
 {prompt_md}
 """
 
+    needs_roadmap = (mode == "bootstrap") or (
+        read_file_safe(store_dir / "prompt_update_context.md").startswith("prompt.txt was manually updated")
+    )
+
+    if needs_roadmap:
+        search_plan_required_line = (
+            "6. `.autoresearch/store/search_plan.md` — full multi-wave roadmap"
+            " (bootstrap or prompt-changed run)"
+        )
+        search_plan_detail = (
+            "For `.autoresearch/store/search_plan.md` (FULL ROADMAP — bootstrap or prompt-changed):\n"
+            "- Write a comprehensive multi-wave research roadmap covering ALL axes from `prompt.txt` section 6.\n"
+            "- Use `store/planning.md` as the definitive candidate inventory — every candidate listed there must appear in the roadmap.\n"
+            "- IMPORTANT: the roadmap is a reference document, NOT a list of configs to run this wave."
+            " Do not filter candidates based on max_configs or practicality."
+            " List everything from planning.md. The configs you propose separately are just this wave's subset.\n"
+            "- Structure as a sequence of waves, each targeting one axis:\n"
+            "  - Every wave MUST use a markdown table — no bullet lists, no prose-only sections.\n"
+            "  - Table columns: candidate | status | comment | config | source\n"
+            "  - List ALL candidates from planning.md for that axis. All start as status=pending.\n"
+            "  - Include unlock condition: what result from this wave allows moving to the next.\n"
+            "- Follow the structure/style of `search_plan_human.md` as the format template.\n"
+            "- For numeric axes: use coarse, high-information values (e.g. `1e-5, 1e-4, 1e-3`) rather than dense increments."
+        )
+    else:
+        search_plan_required_line = (
+            "6. `.autoresearch/store/search_plan.md` — update status column only"
+            " (mark done/pending/skipped); do NOT rewrite the roadmap structure or candidate lists"
+        )
+        search_plan_detail = (
+            "For `.autoresearch/store/search_plan.md` (STATUS UPDATE ONLY — iterative run):\n"
+            "- Do NOT rewrite the roadmap structure or candidate lists.\n"
+            "- Only update the status column of candidates based on experiments.csv: pending → done or skipped.\n"
+            "- Add config path to the config column for completed runs.\n"
+            "- Do not add or remove candidates. Do not change wave order."
+        )
+
     return f"""## Task
 
 Plan and write the next experiment wave.
@@ -461,8 +498,8 @@ You MUST write these files (use `<file path="...">...</file>` format):
 2. `.autoresearch/array_conf.txt` — list of those config paths
 3. `.autoresearch/store/next_exp_name.txt` — must contain exactly: `{next_exp_name}`
 4. `.autoresearch/codex_summary.md` — your rationale and wave summary
-5. `.autoresearch/store/search_plan.md` — regenerated from `prompt.txt` + web research (active file)
-6. `.autoresearch/store/search_plan_report.md` — consolidated search-space index and research-results table
+5. `.autoresearch/store/search_plan_report.md` — consolidated search-space index and research-results table
+{search_plan_required_line}
 
 Include these sections in codex_summary.md:
 - **Why this config set**: evidence from experiments.csv
@@ -470,20 +507,7 @@ Include these sections in codex_summary.md:
 - **Checklist updates**: which IDs change status and why
 - **Next action**: what the wave after this should target
 
-For `.autoresearch/store/search_plan.md`:
-- Write a comprehensive multi-wave research roadmap covering ALL axes from `prompt.txt` section 6.
-- Use `store/planning.md` as the definitive candidate inventory — every candidate listed there must appear in the roadmap.
-- Structure as a sequence of waves, each targeting one axis:
-  - Every wave MUST use a markdown table for candidates — no bullet lists, no prose-only sections.
-  - Table columns: candidate | status | comment | config | source
-  - Wave N: <axis name> — list ALL candidates from planning.md for that axis, with trial order and source links.
-  - Mark candidates done/pending/skipped based on experiments.csv evidence.
-  - Include unlock condition: what result from this wave allows moving to the next.
-- The current wave (being proposed now) is Wave N; future waves are planned but not yet started.
-- Do NOT limit to only the current wave's candidates — the full roadmap across all axes must be visible.
-- Update the roadmap each run: mark completed candidates, add new evidence, adjust future wave order if needed.
-- Follow the structure/style of `search_plan_human.md` as the format template.
-- For numeric axes: use coarse, high-information values (e.g. `1e-5, 1e-4, 1e-3`) rather than dense increments.
+{search_plan_detail}
 
 For `.autoresearch/store/search_plan_report.md`:
 - Write a compact human-readable summary of the current search space.
