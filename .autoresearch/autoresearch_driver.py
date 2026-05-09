@@ -75,6 +75,42 @@ def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _extract_axes_from_prompt(prompt_text: str) -> list[str]:
+    """
+    Extract axis bullets from section:
+    "6) What to explore in this wave (axes, not values)".
+    Falls back to an empty list if not detected.
+    """
+    lines = prompt_text.splitlines()
+    axes: list[str] = []
+    in_axes_section = False
+    for raw in lines:
+        line = raw.strip()
+        if not in_axes_section:
+            if line.startswith("6) "):
+                in_axes_section = True
+            continue
+
+        # stop at next numbered section
+        if line.startswith("7) "):
+            break
+
+        if line.startswith("- "):
+            item = line[2:].strip()
+            # Skip instruction bullets and keep actual candidate axis bullets.
+            lower = item.lower()
+            if (
+                not item
+                or "list the tuning axes" in lower
+                or "do not write numeric" in lower
+                or "planner will propose" in lower
+                or item == "Write:"
+            ):
+                continue
+            axes.append(item)
+    return axes
+
+
 def sync_search_space_from_root_prompt(repo_root: Path, prompts_dir: Path, prompt_text: str) -> bool:
     """
     Generate `.autoresearch/prompts/search_space.md` from repo-root `prompt.txt`.
@@ -82,6 +118,26 @@ def sync_search_space_from_root_prompt(repo_root: Path, prompts_dir: Path, promp
     out_path = prompts_dir / "search_space.md"
     prompts_dir.mkdir(parents=True, exist_ok=True)
     prompt_hash = _sha256_text(prompt_text)
+    axes = _extract_axes_from_prompt(prompt_text)
+    axes_md = "\n".join([f"- [ ] `{a}`" for a in axes]) if axes else "- [ ] (No axes detected. Fill `prompt.txt` section 6 explicitly.)"
+    if axes:
+        axis_blocks = []
+        for axis in axes:
+            axis_blocks.append(
+                "\n".join([
+                    f"#### Axis: `{axis}`",
+                    "- [ ] Candidate values (explicit list): `v1`, `v2`, `v3`",
+                    "- [ ] Trial order: `1) ... 2) ... 3) ...`",
+                    "- [ ] Fixed/paired settings for fair comparison:",
+                    "- [ ] Expand condition:",
+                    "- [ ] Stop condition:",
+                    "- [ ] Rationale (1-2 lines):",
+                    "- [ ] Sources (URLs):",
+                ])
+            )
+        axis_detail_md = "\n\n".join(axis_blocks)
+    else:
+        axis_detail_md = "#### Axis details\n- [ ] No axes detected from `prompt.txt` section 6."
 
     generated = f"""# Search Strategy Checklist (Generated)
 
@@ -99,13 +155,13 @@ Prompt SHA256: `{prompt_hash}`
   - [ ] Confirm debug gate policy (`yes/no`) from `prompt.txt`.
   - [ ] Confirm trial budget (max configs).
 - [ ] 2. Stability-first smoke (small)
-  - [ ] Start from conservative learning rate and small epoch/step budget.
+  - [ ] Start from conservative values on highest-risk axes defined in `prompt.txt`.
   - [ ] Validate OOM/instability before broader search.
 - [ ] 3. Primary axis sweep (coarse)
-  - [ ] Prioritize `learning rate` and `optimizer` first.
-  - [ ] Keep architecture/method-specific params conservative while selecting optimizer/LR region.
+  - [ ] Choose initial high-impact axes only from `prompt.txt` section 6.
+  - [ ] Keep method-specific params conservative while selecting stable regions.
 - [ ] 4. Secondary axis sweep (coarse)
-  - [ ] Tune `batch size`, `warmup_steps`, `max_epochs` around stable region.
+  - [ ] Expand to remaining axes from `prompt.txt` section 6 around stable regions.
 - [ ] 5. Method-family compare
   - [ ] Compare candidate adaptation/model method families under the best shared hyperparameter region.
 - [ ] 6. Method-specific parameter refine
@@ -124,22 +180,24 @@ Prompt SHA256: `{prompt_hash}`
   - [ ] stop/expand condition
 
 ### Required Web-Research Outputs
-- [ ] `learning rate`: candidate ranges + ordering + heuristic basis
-- [ ] `optimizer`: candidate set + ordering
-- [ ] `batch size`, `warmup_steps`, `max_epochs`: safe-to-aggressive ordering
-- [ ] `method family`: full candidate list from official docs and/or recent references
-- [ ] `method-specific parameters`: family-specific knobs and ranges
+- [ ] Build this section ONLY from axes listed in `prompt.txt` section 6.
+- [ ] Do not add extra axes not present in `prompt.txt` unless explicitly allowed there.
+- [ ] For each axis below, provide: candidates/range, trial order, rationale links, and stop/expand condition.
+{axes_md}
+
+### Axis Value Enumeration (must fill before planning)
+{axis_detail_md}
 
 ## Practical Wave Policy
 - Wave 1: stability-first + minimum viable comparison set.
-- Wave 2: coarse search on highest-impact axes.
+- Wave 2: coarse search on high-impact axes from `prompt.txt`.
 - Wave 3: method-family breadth check (based on web-collected full list).
 - Wave 4+: local parameter search around the best method/config.
 
-## prompt.txt (current)
-```text
-{prompt_text}
-```
+## Source Reference
+- Source file: repository-root `prompt.txt`
+- Prompt SHA256: `{prompt_hash}`
+- To inspect details, read `prompt.txt` directly (do not duplicate full text here).
 """
     before = out_path.read_text(encoding="utf-8", errors="replace") if out_path.exists() else ""
     if before == generated:

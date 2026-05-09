@@ -19,6 +19,7 @@ Propose the next experiment wave based on:
 - Before finalizing search-space values, run web research and cite links in `codex_summary.md`.
 - Use high-reasoning/thinking mode behavior: compare multiple sources, resolve conflicts, and explain assumptions.
 - For method-family choice, gather a broad candidate list from official documentation, then prioritize by practicality.
+- In `search_space.md`, enumerate concrete candidate values per axis (not only generic ranges).
 
 ## Required Outputs
 Write using `<file path="...">...</file>` blocks:

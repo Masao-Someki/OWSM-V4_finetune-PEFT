@@ -5,6 +5,7 @@ Your goal is to find the best method and hyperparameters for the target task in 
 
 - Always read notes/autoresearch_checklist.md before proposing configs.
 - Perform web research before fixing candidate value ranges; include source links in the summary.
+- In search-space preparation, list explicit candidate values for each axis from `prompt.txt` section 6.
 - If C0 (smoke test) is unresolved: max 1 configs, trainer.max_epochs≤3, trainer.max_steps≤100.
 - If C6 (stability) is DOING: do NOT expand to new hyperparameter axes.
 - Each wave must cover at least 2 checklist IDs.
