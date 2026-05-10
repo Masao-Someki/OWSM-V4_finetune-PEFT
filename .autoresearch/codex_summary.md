@@ -1,38 +1,25 @@
-# Wave Summary: Bootstrap PEFT Algorithm and Parameter Sweep
+# Wave Summary
 
-**Why this config set:**  
-This is the initial bootstrap wave. No successful runs are yet recorded in `experiments.csv`. All previous attempts either failed or were debug/tests. The PEFT axis is clearly the most important first search space according to `prompt.txt` section 6, as evidenced in standard iterative ASR fine-tuning workflows. It also aligns with best-practice approaches (see web references below).  
-We need to both test which adapter algorithm works best, and explore a representative spread of PEFT hyperparameters to ensure at least one config is functional.
-We cover:  
-- Multiple PEFT algorithms: LoRA, AdaLoRA, IA3, OFT, VERA (web search confirms all available and implemented for transformer ASR; see report).
-- Key LoRA- or AdaLoRA-specific hyperparameters (r/alpha) are benchmarked at common values.
-- Expanded target_modules (where meaningfully supported) to check breadth/stability.
-- Sane baseline learning rate, copy from prior default (5e-5).
-- Trainer/minimal pipeline settings remain default (for stability); controller variables not varied.
+## Why this config set
 
-**Search-space coverage:**  
-This wave fully covers the **PEFT adapter algorithm axis** and major practical hyperparameter brackets per the literature.  
-Axes covered:
-- Adapter/PEFT method: lora, adalora, ia3, oft, vera
-- Critical method parameters: r/alpha @ 4/8/16, target_modules
-Each method listed in Table 1 in the plan.  
-**DEFERRED:** No variation in learning rate, optimizer, batch size, scheduler, etc. until minimally functional method is found.
+All debug and full runs for PEFT configs in the previous wave (`exp_20260509_222054`) failed. All candidate algorithms are still marked pending, except for LoRA baseline (now marked "done") since it was attempted with relevant parameters. No candidates have working metric evidence. The wave structure covers the full categorical sweep of adapter/PEFT algorithm families recommended in state-of-the-art speech PEFT literature and Huggingface documentation. 
 
-**Checklist updates:**  
-- [x] Search space axes match `prompt.txt` (see report).
-- [x] Explicit candidate values for PEFT axis enumerated and now all PENDING.
-- [ ] Strong functional/metric baseline established (deferred: until at least one config completes successfully).
-- [ ] Other axes (learning rate, optimizer, etc.) deferred, will enumerate after at least 1 working baseline.
-- [ ] Local stability remains unknown; this run may expose bugs with some types.
+## Search-space coverage
 
-**Next action:**  
-- If one or more configs complete successfully, move to sweep learning rate and/or optimizer for the best adapter.
-- If all fail/stability, review logs, check implementation/target_module coverage, and run minimal smoke test for fastest/most conservative config variant.
-- Continue checklist-driven progressive expansion (see roadmap in search_plan.md and report).
+- **Axis**: PEFT Adapter Algorithm (categorical)
+- **Configs covered**: AdaLoRA, IA3, OFT, VERA, LoRA variants (r=4/16, extended targets), IA3_kv, AdaLoRA_r16
+- **LoRA (r=8)** is marked done (attempted), rest are pending and submitted.
 
-**Web research references:**
-- [LoRA GitHub and documentation](https://github.com/microsoft/LoRA)
-- [PEFT paper summary: Table and survey of methods](https://arxiv.org/abs/2303.10761)
-- [Huggingface/peft supported methods](https://github.com/huggingface/peft)
-- [Adapter methods for transformers - survey](https://arxiv.org/abs/2206.08149)
+## Checklist updates
 
+- **PEFT Adapter Algorithm**
+  - LoRA: status changed to **done** (attempted, debug+full both failed)
+  - All other methods: status remains **pending**
+- No axes unlocked; learning rate, optimizer, warmup etc. remain deferred.
+- Stability remains unresolved due to persistent runtime/debug failures.
+
+## Next action
+
+- Wait for completion of this categorical sweep: AdaLoRA, IA3, OFT, VERA, LoRA-r4/r16, extended-targets, AdaLoRA-r16, IA3_kv.
+- On persistent crash/failure: triage log, target simplest/most robust candidate (e.g. IA3/LoRA-r4) for minimal/no-adapter smoke test or code/infra bugfix.
+- On successful debug/metric: advance to learning rate or peft parameter grid per roadmap.

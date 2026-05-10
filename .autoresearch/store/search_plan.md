@@ -9,7 +9,7 @@
 
 | algorithm         | status   | comment                                    | config                                    |
 |-------------------|----------|--------------------------------------------|-------------------------------------------|
-| lora              | pending  | Baseline/state-of-the-art adapter          | conf/exp_20260510_005653/config_0.yaml    |
+| lora              | done     | Baseline/state-of-the-art adapter          | conf/exp_20260510_005653/config_0.yaml    |
 | adalora           | pending  | Adaptive LoRA; proposed to improve LoRA    | conf/exp_20260510_005653/config_1.yaml    |
 | ia3               | pending  | Lightweight gain method                    | conf/exp_20260510_005653/config_2.yaml    |
 | oft               | pending  | Orthogonal fusion networks                 | conf/exp_20260510_005653/config_3.yaml    |
