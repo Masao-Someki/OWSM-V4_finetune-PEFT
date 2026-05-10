@@ -343,9 +343,10 @@ Bugfix mode — the debug gate job failed. Do NOT plan a new wave.
 
 Your ONLY task:
 1. Read the failure log below to identify the root cause.
-2. Fix the broken config files (in `conf/` under the current exp_name).
-3. Output only the fixed config files using `<file path="...">...</file>`.
-4. Do NOT modify `search_plan.md`, `next_exp_name.txt`, or any other state files.
+2. Fix the root cause. You may update `conf/`, `src/`, `scripts/`, `run.py`, or `tests/` if needed.
+3. Prefer the smallest safe fix. If config changes are needed, update the active experiment config under `conf/`.
+4. Output only the fixed files using `<file path="...">...</file>`.
+5. Do NOT modify `search_plan.md`, `next_exp_name.txt`, or any `.autoresearch/store/*` state files.
 
 ## Failure log
 ```
@@ -647,6 +648,14 @@ ALLOWED_PREFIXES = (
     "tests/",
 )
 
+BUGFIX_ALLOWED_PREFIXES = (
+    "conf/",
+    "src/",
+    "scripts/",
+    "run.py",
+    "tests/",
+)
+
 
 def apply_file_operations(response_text: str, repo_root: Path) -> list[str]:
     written: list[str] = []
@@ -728,6 +737,24 @@ def commit_to_current_branch(repo_root: Path, next_exp_name: str, written_files:
         "-c", "user.name=autoresearch-bot",
         "-c", "user.email=autoresearch-bot@users.noreply.github.com",
         "commit", "-m", f"autoresearch: propose {next_exp_name}",
+        cwd=repo_root,
+    )
+    run_git("push", "origin", branch, cwd=repo_root)
+    return branch
+
+
+def commit_bugfix_to_current_branch(repo_root: Path, written_files: list[str]) -> str:
+    _, branch = run_git("rev-parse", "--abbrev-ref", "HEAD", cwd=repo_root)
+    branch = branch.strip()
+    run_git("add", "--", *written_files, cwd=repo_root)
+    _, diff = run_git("diff", "--cached", "--name-only", cwd=repo_root, check=False)
+    if not diff.strip():
+        print("[WARN] nothing staged after add")
+        return ""
+    run_git(
+        "-c", "user.name=autoresearch-bot",
+        "-c", "user.email=autoresearch-bot@users.noreply.github.com",
+        "commit", "-m", "autoresearch: bugfix failed debug config",
         cwd=repo_root,
     )
     run_git("push", "origin", branch, cwd=repo_root)
@@ -850,6 +877,26 @@ def main() -> int:
             "- See .autoresearch/store/last_response.txt",
         ])
         return 1
+
+    if mode == "bugfix":
+        bugfix_writes = [p for p in written if any(p.startswith(prefix) for prefix in BUGFIX_ALLOWED_PREFIXES)]
+        if not bugfix_writes:
+            print("[ERROR] bugfix mode wrote no allowed fix files")
+            return 1
+        if len(bugfix_writes) != len(written):
+            print("[ERROR] bugfix mode wrote files outside allowed bugfix paths")
+            return 1
+        try:
+            branch = commit_bugfix_to_current_branch(repo_root, bugfix_writes)
+        except Exception as e:
+            print(f"[ERROR] git commit/push failed: {e}", file=sys.stderr)
+            try_notify("AutoResearch: Bugfix Git Commit Failed", [f"- error: `{str(e)[:200]}`"])
+            return 1
+        try_notify("AutoResearch: Bugfix Proposed", [
+            f"- branch: `{branch or '(no changes)'}`",
+            f"- fixed_files: `{len(bugfix_writes)}`",
+        ])
+        return 0
 
     # Verify next_exp_name output.
     next_exp_name_path = autoresearch_dir / "store" / "next_exp_name.txt"

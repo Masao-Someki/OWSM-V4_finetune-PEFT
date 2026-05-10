@@ -1,0 +1,17 @@
+defaults:
+  - ../../exp_20260510_005653/config_0.yaml
+
+recipedir: .
+exp_tag: exp_20260509_222054_config_0_a0
+exp_dir: ${recipedir}/exp/exp_20260509_222054/${exp_tag}
+wandb:
+  group: exp_20260509_222054
+num_device: 1
+num_nodes: 1
+max_samples_per_subset_train: 10
+max_samples_per_subset_valid: 10
+max_samples_per_subset_test: 10
+trainer:
+  fast_dev_run: 10
+  max_steps: 100
+  max_epochs: 3

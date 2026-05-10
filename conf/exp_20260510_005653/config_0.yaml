@@ -1,5 +1,6 @@
 defaults:
-  - ../owsm_peft_lora_basic.yaml
+  - ../default.yaml
+  - ../dataset.yaml
 
 # exp_tag will uniquely identify this run
 exp_tag: exp_20260510_005653_lora_r8_alpha8
