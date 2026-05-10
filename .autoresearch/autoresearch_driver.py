@@ -38,7 +38,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--model-bugfix", default="")
     p.add_argument("--model-prompt-refresh", default="")
     p.add_argument("--model-search-plan", default="gpt-4.1")
-    p.add_argument("--mode", choices=["auto", "bootstrap", "iterative"], default="auto")
+    p.add_argument("--mode", choices=["auto", "bootstrap", "iterative", "bugfix"], default="auto")
     p.add_argument("--max-configs", type=int, default=10)
     p.add_argument("--max-tokens", type=int, default=8192)
     p.add_argument("--cache-dirs", nargs="*", default=["conf", "src"],
@@ -330,7 +330,29 @@ def build_user_prompt(
     active_search_plan = read_file_safe(store_dir / "search_plan.md", max_chars=12000)
 
     mode_section = ""
-    if mode == "bootstrap":
+    if mode == "bugfix":
+        failure_logs_dir = autoresearch_dir / "failure_logs"
+        failure_log = ""
+        if failure_logs_dir.exists():
+            logs = sorted(failure_logs_dir.glob("*.log"), key=lambda p: p.stat().st_mtime, reverse=True)
+            if logs:
+                failure_log = read_file_safe(logs[0], max_chars=4000)
+        mode_section = f"""
+## Mode
+Bugfix mode — the debug gate job failed. Do NOT plan a new wave.
+
+Your ONLY task:
+1. Read the failure log below to identify the root cause.
+2. Fix the broken config files (in `conf/` under the current exp_name).
+3. Output only the fixed config files using `<file path="...">...</file>`.
+4. Do NOT modify `search_plan.md`, `next_exp_name.txt`, or any other state files.
+
+## Failure log
+```
+{failure_log}
+```
+"""
+    elif mode == "bootstrap":
         mode_section = """
 ## Mode
 Bootstrap mode (first wave initialization).
@@ -771,7 +793,7 @@ def main() -> int:
     ])
 
     # Phase 1: Generate search_plan.md roadmap (bootstrap or prompt changed only).
-    needs_roadmap = (mode == "bootstrap") or prompt_changed
+    needs_roadmap = (mode == "bootstrap") or (prompt_changed and mode != "bugfix")
     research_model = args.model_research.strip() or args.model
     if needs_roadmap:
         print(f"[INFO] Phase 1: generating search_plan.md roadmap (model={research_model})")

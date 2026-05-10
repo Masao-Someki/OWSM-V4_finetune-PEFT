@@ -36,36 +36,25 @@ jobs:
           git config user.name "autoresearch-bot"
           git config user.email "autoresearch-bot@users.noreply.github.com"
 
-      - name: Check for debug failure
-        id: check_status
+      - name: Detect planner mode
+        id: mode
         run: |
           status_file=".autoresearch/store/latest_status.json"
           if [ -f "${status_file}" ]; then
-            status="$(python -c "import json,sys; d=json.load(open('${status_file}')); print(d.get('status',''))")"
-            echo "status=${status}"
-            if [ "${status}" = "DEBUG_FAILED" ]; then
-              echo "skip=true" >> "$GITHUB_OUTPUT"
-              echo "[INFO] Debug job failed — skipping wave planner."
-            else
-              echo "skip=false" >> "$GITHUB_OUTPUT"
-            fi
+            status="$(python -c "import json; d=json.load(open('${status_file}')); print(d.get('status',''))")"
           else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            status=""
           fi
-
-      - name: Detect planner mode
-        if: steps.check_status.outputs.skip != 'true'
-        id: mode
-        run: |
-          if [ -f .autoresearch/store/bootstrap_done.json ]; then
+          if [ "${status}" = "DEBUG_FAILED" ]; then
+            echo "mode=bugfix" >> "$GITHUB_OUTPUT"
+          elif [ -f .autoresearch/store/bootstrap_done.json ]; then
             echo "mode=iterative" >> "$GITHUB_OUTPUT"
           else
             echo "mode=bootstrap" >> "$GITHUB_OUTPUT"
           fi
-          echo "Detected mode: $(cat "$GITHUB_OUTPUT" | tail -1)"
+          echo "Detected mode: $(tail -1 "$GITHUB_OUTPUT")"
 
       - name: Run autoresearch driver
-        if: steps.check_status.outputs.skip != 'true'
         id: driver
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
