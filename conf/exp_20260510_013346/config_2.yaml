@@ -1,0 +1,10 @@
+defaults:
+  - ../owsm_peft_lora_basic.yaml
+
+exp_tag: exp_20260510_013346_ia3
+lr: 5e-5
+
+peft:
+  type: ia3
+  target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+  task_type: seq_2_seq_lm
