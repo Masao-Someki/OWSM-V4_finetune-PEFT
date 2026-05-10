@@ -1,19 +1,30 @@
-# Wave Summary for exp_20260510_011434
+# Wave Summary for exp_20260510_012658
 
-**Why this config set:**  
-The previous array job failed debug for all non-LoRA candidates, with status DEBUG_FAILED for AdaLoRA and no stable or successful result for any candidate except the already-done LoRA baseline. As all PEFT algorithm variants are part of the same search axis and all failed at debug or did not reach execution, this wave is a targeted recovery: same axis, but with the most minimal, diagnostic configuration (4 samples per set, 10 steps, 1 epoch, `fast_dev_run: 10`). This will pinpoint implementation, model, or pipeline bugs rather than hyperparameter issues and will allow maximal parallel debugging across all remaining candidates before scientific sweep recommences.
+## Why this config set
 
-**Search-space coverage:**  
-- This wave targets the **active axis**: PEFT Adapter Algorithm (categorical, 9 remaining candidates).
-- All methods from search plan are covered, with paths updated for current exp_name.
-- No new axes explored.  
-- Test converges → once stability is verified, progression to optimizer/lr/batch per plan.
+**Evidence from experiments.csv**:  
+- Across all recent waves (exp_20260509_* and exp_20260510_*), every config attempting a debug run **failed**.  
+- All algorithm variants (lora, adalora, ia3, oft, vera and their parameterizations) have unresolved stability or runtime errors.
+- No config has completed a successful run long enough to measure core metrics, making functional correctness and pipeline debug the immediate gating concern.
 
-**Checklist updates:**  
-- All previously "pending" candidates on the PEFT axis are submitted as "done" (pending execution).
-- No new axes/rows are opened; axis status will update next after stable completion.
+**Current status**:
+- The prior wave (exp_20260510_011434) attempted a wide method sweep, each with `fast_dev_run: 10` and highly restricted data sizes (`max_samples_per_subset_{split}: 4`), yet all FAILED.
+- No evidence exists for metric quality or correctness, indicating a fundamental implementation or environment problem across all methods.
 
-**Next action:**  
-1. Review ALL debug logs closely as soon as any config completes (fail = trace+fix; success = unlock next axis).
-2. Only after >1 candidate (esp. AdaLoRA or IA3) go to non-debug FAIL, move to targeted bug/compat fixes.
-3. Once any config completes a successful debug run, prepare a clean run for the same candidate with an increased number of steps/samples per normal protocol.
+## Search-space coverage
+
+- **Primary axis**: Only PEFT algorithm/method—**all tested candidates failed**.
+- No other axes (learning rate, optimizer, etc.) are unlocked or justified yet.
+
+## Checklist updates
+
+- *Stability* checklist items remain **DOING**—no config is marked successful.
+- All PEFT candidates remain "pending"/unresolved, as no config completed or produced metric evidence.
+
+## Next action
+
+- **Focus remains on minimal debug runs for all candidate PEFT methods**.
+- No expansion along other search axes (lr, optimizer, etc.) is warranted until a baseline run completes successfully.
+- Diagnostic action for the next wave: further minimize or instrument for error output, and/or test infrastructure details (dataset access/paths, CUDA and model loading, etc.).
+- If possible, isolate the method with fewest customizations for the next test (e.g. vanilla LoRA), and further reduce data/batch/max_steps until *any* completion signal is achieved. Also consider logging or runtime config options to capture stack trace or error information.
+
