@@ -1,30 +1,19 @@
-# Wave Summary: exp_20260509_235129
+# Wave Summary – exp_20260510_005403
 
-## Why this config set
+**Why this config set**
+- All prior runs (including debug-gate minimal configs) for every PEFT method candidate failed, most within seconds, with nonzero exit code and no metrics.
+- The runs used up to 10 samples and up to 10 steps, so infra and PEFT init bugs are likely, not model convergence or resource issues.
+- To move forward, we must resolve debug failure. This config reduces every axis even further — only 2 samples per split, only 6 max steps, and only 3 fast_dev_run steps. Remains on basic LoRA as minimum-repro baseline.
 
-- All PEFT methods in previous wave failed immediately (status=FAILED, exit_code=1, zero runtime, see experiments.csv).
-- No evidence any specific PEFT method or hyperparameter is the root cause.
-- All configs failed fast, including LoRA baseline, IA3, Adapter, Prefix, Adalora, OFT, and LoRA r2/r32 variants.
-- The likely root cause is infrastructure (code/data/initialization incompatibility) rather than algorithm.
-- Common debug-gate protocols (lightning, PyTorch, espnet) recommend a `fast_dev_run` or <10 steps as first triage.
-- Therefore, a single minimal test config with LoRA (as archetype PEFT, minimal r/alpha/dropout, 3 steps) is used to trigger exactly where/what the error is.
+**Search-space coverage**
+- This wave does not expand the PEFT axis further. Instead, it continues the smoke/debug gate until job script and batch setup with PEFT+speech data completes at least one (trivially) successful training batch.
+- Does not open search on other axes (lr, optimizer, batch size, etc) until at least one run shows "SUCCEEDED".
 
-## Search-space coverage
+**Checklist updates**
+- No "done" promotion for new method candidates; all remain "done" for attempted sweeps, but stability is blocked at the debug/sanity test phase.
+- This run checks the "minimal debug/sanity" checklist item to trace and unblock the cause of job failure.
 
-- Axis: PEFT Method. Diagnostic step only.
-- Only LoRA tested in this step, as universal testbed for PEFT infra.
-- **No true algorithmic search**—this is a troubleshooting/triage wave due to SYSTEMATIC FAILURE in all prior configs.
-
-## Checklist updates
-
-- Mark all previous PEFT method runs as `done` or `skipped` if tested (per prompt: only status update allowed), except this new one.
-- Propose no new methods or hyperparams until error root cause is found.
-- Checklist/progress is effectively paused at the lowest debug gate.
-
-## Next action
-
-- After this run: 
-    - If FAILURE, collect full stack/error, update checklist as SYSTEMIC ERROR, and begin ablations (e.g., remove PEFT, try vanilla model).
-    - If SUCCESS, repeat with r=8, full dropout, then adapter/ia3/prefix in debug mode to isolate which method/param breaks pipeline.
-    - Only once at least one PEFT method passes debug gate, resume full search wave (max 10 per wave).
-
+**Next action**
+- If this run succeeds, rerun 1–3 PEFT types (lora, adapter, ia3) with 2–10 samples per split in fast_dev_run/minimal steps to verify generality.
+- If this run fails, carefully inspect logs, especially for YAML config errors, unexpected import failures, and shape mismatch at batch/data/model.
+- No expansion of parameter space until this fails and is root-caused.

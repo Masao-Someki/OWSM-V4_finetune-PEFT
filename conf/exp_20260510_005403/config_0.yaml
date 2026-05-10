@@ -1,0 +1,26 @@
+# New debug-minimal config: isolate and minimize for infra failure root-cause on PEFT patterns.
+defaults:
+  - ../base_recipe_template
+
+# Key changes: Simplify, shrink dataset, fewer steps/batches, test minimal PEFT.
+
+exp_tag: exp_20260510_005403_debug_min_lora
+lr: 1e-4
+method:
+  type: lora
+  r: 4
+  alpha: 8
+  dropout: 0.0
+
+trainer:
+  fast_dev_run: 3
+  max_epochs: 1
+  max_steps: 6
+  log_every_n_steps: 1
+  accumulate_grad_batches: 1
+
+max_samples_per_subset_train: 2
+max_samples_per_subset_valid: 2
+max_samples_per_subset_test: 2
+num_device: 1
+num_nodes: 1

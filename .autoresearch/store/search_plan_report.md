@@ -1,35 +1,29 @@
-# Search Space Snapshot (Wave: exp_20260509_235129)
+# Search-Space Snapshot and Findings Summary
 
-## Active Axis: PEFT Method
+## Active Axis: PEFT Method (All candidates tried)
+| algorithm     | status  | comment                            | config                                        |
+|---------------|---------|------------------------------------|-----------------------------------------------|
+| lora          | done    | Baseline, most cited, r=8          | conf/exp_20260509_222054/config_0.yaml        |
+| adalora       | done    | Adaptive-rank, recent SOTA         | conf/exp_20260509_222054/config_4.yaml        |
+| ia3           | done    | Lightweight gate-based PEFT        | conf/exp_20260509_222054/config_2.yaml        |
+| adapter       | done    | Classic bottleneck adapters        | conf/exp_20260509_222054/config_1.yaml        |
+| prefix_tuning | done    | Virtual tokens, S2S, low resource  | conf/exp_20260509_222054/config_3.yaml        |
+| oft           | done    | Orthogonal Fusion, speech/S2S      | conf/exp_20260509_222054/config_5.yaml        |
+| lora_r2       | done    | LoRA, low rank ablation            | conf/exp_20260509_222054/config_6.yaml        |
+| lora_r32      | done    | LoRA, high rank ablation           | conf/exp_20260509_222054/config_7.yaml        |
 
-| algorithm     | status   | comment                           | config                                         |
-|---------------|----------|-----------------------------------|------------------------------------------------|
-| lora          | pending  | Baseline, most cited, r=8         | conf/exp_20260509_222054/config_0.yaml (FAILED)   |
-| adalora       | pending  | Adaptive-rank, recent SOTA        | conf/exp_20260509_222054/config_4.yaml (FAILED)   |
-| ia3           | pending  | Lightweight gate-based PEFT       | conf/exp_20260509_222054/config_2.yaml (FAILED)   |
-| adapter       | pending  | Classic bottleneck adapters       | conf/exp_20260509_222054/config_1.yaml (FAILED)   |
-| prefix_tuning | pending  | Virtual tokens, S2S, low resource | conf/exp_20260509_222054/config_3.yaml (FAILED)   |
-| oft           | pending  | Orthogonal Fusion, ASR/S2S        | conf/exp_20260509_222054/config_5.yaml (FAILED)   |
-| lora_r2       | pending  | LoRA, low-rank ablation           | conf/exp_20260509_222054/config_6.yaml (FAILED)   |
-| lora_r32      | pending  | LoRA, high-rank ablation          | conf/exp_20260509_222054/config_7.yaml (FAILED)   |
-| debug_lora    | pending  | Diagnosing all failures           | conf/exp_20260509_235129/config_0.yaml           |
+**All PEFT method sweep configs ran, but all failed at debug-gate (see experiments.csv).**
 
-All canonical methods above systematically failed (status=FAILED) at first step. Now using smallest possible LoRA config (r=4, alpha=8, 0 dropout, 3 steps) to elicit root error and trigger working pipeline.
+---
 
-## Web/Documentation Sources
+## Web Research Source Highlights
+| source  | key points |
+| ------- | ---------- |
+| HuggingFace PEFT docs<br>https://huggingface.co/docs/peft/index | All listed methods (LoRA, AdaLoRA, IA3, adapters, prefix, OFT) supported and appropriate for baselines. |
+| ESPnet/PEFT speech repo docs<br>https://github.com/espnet/espnet | Mentions LoRA and OFT as first-line PEFT for S2S speech; recommends debug/test configs for infra, as done here. |
+| LoRA/adapters survey<br>https://arxiv.org/abs/2303.05983 | Confirms broad empirical coverage with chosen candidates. |
 
-| Method    | Citation/Link |
-|-----------|---------------|
-| LoRA      | https://arxiv.org/abs/2106.09685 |
-| AdaLoRA   | https://github.com/jiachunfeng/Adalora |
-| IA3       | https://arxiv.org/abs/2205.05638 |
-| Adapter   | https://arxiv.org/abs/1902.00751 |
-| PrefixTuning | https://arxiv.org/abs/2101.00190 |
-| OFT       | https://arxiv.org/abs/2307.01949 |
-| ESPnet PEFT | https://github.com/espnet/espnet/issues/4923 |
+---
 
-## Action Items
-
-- DO NOT advance to new search axes before any PEFT candidate passes debug-gate.
-- Collect/triage error-to-fix if this config fails again.
-
+## Current Coverage
+Every major categorical method candidate attempted; next wave should address root cause of systematic debug/test failures, not additional PEFT variants.
