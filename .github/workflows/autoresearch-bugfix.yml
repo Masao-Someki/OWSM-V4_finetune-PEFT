@@ -1,19 +1,19 @@
-name: AutoResearch Wave Planner
+name: AutoResearch Bugfix
 
 on:
   push:
     branches: [autosearch]
     paths:
-      - ".autoresearch/**"
-      - "prompt.txt"
+      - ".autoresearch/failure_logs/**"
+      - ".autoresearch/store/latest_status.json"
   workflow_dispatch:
 
 concurrency:
-  group: autoresearch-planner
-  cancel-in-progress: false  # Keep queued runs; do not skip.
+  group: autoresearch-bugfix
+  cancel-in-progress: false
 
 jobs:
-  plan-next-wave:
+  bugfix:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -36,35 +36,33 @@ jobs:
           git config user.name "autoresearch-bot"
           git config user.email "autoresearch-bot@users.noreply.github.com"
 
-      - name: Detect planner mode
-        id: mode
+      - name: Detect bugfix trigger
+        id: bugfix
         run: |
-          status_file=".autoresearch/store/latest_status.json"
-          if [ -f "${status_file}" ]; then
-            status="$(python -c "import json; d=json.load(open('${status_file}')); print(d.get('status',''))")"
-          else
-            status=""
-          fi
-          if [ "${status}" = "DEBUG_FAILED" ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "mode=iterative" >> "$GITHUB_OUTPUT"
-          elif [ -f .autoresearch/store/bootstrap_done.json ]; then
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "mode=iterative" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-            echo "mode=bootstrap" >> "$GITHUB_OUTPUT"
-          fi
-          echo "Detected mode: $(tail -1 "$GITHUB_OUTPUT")"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import glob
+          import json
+          import os
 
-      - name: Skip planner while bugfix is pending
-        if: steps.mode.outputs.skip == 'true'
+          status_file = ".autoresearch/store/latest_status.json"
+          status = ""
+          if os.path.exists(status_file):
+              with open(status_file, encoding="utf-8") as f:
+                  status = json.load(f).get("status", "")
+          has_logs = bool(glob.glob(".autoresearch/failure_logs/*.log"))
+          should_run = has_logs and status == "DEBUG_FAILED"
+          print(f"status={status}")
+          print(f"has_logs={'true' if has_logs else 'false'}")
+          print(f"should_run={'true' if should_run else 'false'}")
+          PY
+
+      - name: Skip bugfix when no failure logs are present
+        if: steps.bugfix.outputs.should_run != 'true'
         run: |
-          echo "DEBUG_FAILED is active; dedicated bugfix workflow will handle this run."
+          echo "No pending bugfix logs found; nothing to do."
 
-      - name: Run autoresearch driver
-        id: driver
-        if: steps.mode.outputs.skip != 'true'
+      - name: Run autoresearch bugfix driver
+        if: steps.bugfix.outputs.should_run == 'true'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -74,7 +72,7 @@ jobs:
             --prompts-dir .autoresearch/prompts \
             --csv-path experiments.csv \
             --autoresearch-dir .autoresearch \
-            --mode "${{ steps.mode.outputs.mode }}" \
+            --mode bugfix \
             --model gpt-4.1-mini \
             --model-research gpt-4.1 \
             --model-bugfix gpt-4.1-mini \
@@ -82,6 +80,28 @@ jobs:
             --model-search-plan gpt-4.1 \
             --max-configs 10 \
             --max-tokens 8192
+
+      - name: Clear failure logs after successful bugfix
+        if: steps.bugfix.outputs.should_run == 'true' && success()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          status_path = Path(".autoresearch/store/latest_status.json")
+          if status_path.exists():
+              data = json.loads(status_path.read_text(encoding="utf-8"))
+              data["status"] = "BUGFIX_PROPOSED"
+              status_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+          PY
+          find .autoresearch/failure_logs -type f -name '*.log' -delete
+          git add -A .autoresearch/failure_logs .autoresearch/store/latest_status.json
+          if [ -n "$(git diff --cached --name-only)" ]; then
+            git commit -m "autoresearch: clear bugfix failure logs"
+            git push origin "${GITHUB_REF_NAME}"
+          else
+            echo "No cleanup changes to commit."
+          fi
 
       - name: Notify Slack on failure
         if: failure()
@@ -103,7 +123,7 @@ jobs:
           sha = os.environ.get("GITHUB_SHA", "")[:10]
           payload = {
               "text": (
-                  "GitHub Actions failed: AutoResearch Wave Planner\n"
+                  "GitHub Actions failed: AutoResearch Bugfix\n"
                   f"- repo: {os.environ.get('GITHUB_REPOSITORY')}\n"
                   f"- branch: {ref}\n"
                   f"- sha: {sha}\n"

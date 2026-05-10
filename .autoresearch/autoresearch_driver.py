@@ -11,6 +11,7 @@ via regex.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import os
@@ -711,6 +712,68 @@ def normalize_array_conf_file(repo_root: Path, written: list[str], exp_name: str
     return written
 
 
+def load_base_config_statuses(csv_path: Path) -> dict[str, set[str]]:
+    if not csv_path.exists() or csv_path.stat().st_size == 0:
+        return {}
+    statuses: dict[str, set[str]] = {}
+    with csv_path.open(encoding="utf-8", errors="replace", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            config_path = (row.get("base_config") or "").strip()
+            status = (row.get("status") or "").strip().upper()
+            if not config_path or not status:
+                continue
+            statuses.setdefault(config_path, set()).add(status)
+    return statuses
+
+
+def _reconcile_markdown_status_file(path: Path, config_statuses: dict[str, set[str]]) -> bool:
+    if not path.exists():
+        return False
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    changed = False
+    new_lines: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if (
+            stripped.startswith("|")
+            and "conf/" in line
+            and not re.match(r"^\|\s*-", stripped)
+            and "status" not in stripped.lower()
+        ):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if len(cells) >= 4:
+                config_idx = next((i for i, cell in enumerate(cells) if cell.startswith("conf/")), -1)
+                if config_idx != -1:
+                    config_path = cells[config_idx]
+                    current_status = cells[1].lower() if len(cells) > 1 else ""
+                    if current_status != "skipped":
+                        statuses = config_statuses.get(config_path, set())
+                        next_status = "done" if "COMPLETED" in statuses else "pending"
+                        if len(cells) > 1 and cells[1] != next_status:
+                            cells[1] = next_status
+                            line = "| " + " | ".join(cells) + " |"
+                            changed = True
+        new_lines.append(line)
+    if changed:
+        path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+    return changed
+
+
+def reconcile_search_plan_statuses(repo_root: Path, csv_path: Path, written: list[str]) -> list[str]:
+    config_statuses = load_base_config_statuses(csv_path)
+    changed_any = False
+    for rel_path in (
+        ".autoresearch/store/search_plan.md",
+        ".autoresearch/store/search_plan_report.md",
+    ):
+        if _reconcile_markdown_status_file(repo_root / rel_path, config_statuses):
+            changed_any = True
+            if rel_path not in written:
+                written.append(rel_path)
+    return written if changed_any else written
+
+
 # ---------------------------------------------------------------------------
 # Git operations
 # ---------------------------------------------------------------------------
@@ -869,6 +932,7 @@ def main() -> int:
 
     # Apply file operations from model output.
     written = prewritten + apply_file_operations(response_text, repo_root)
+    written = reconcile_search_plan_statuses(repo_root, csv_path, written)
 
     if not written:
         print("[ERROR] model wrote no files. Check .autoresearch/store/last_response.txt")
