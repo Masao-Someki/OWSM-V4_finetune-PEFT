@@ -1,6 +1,6 @@
 [WARN] /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/scripts/load-keys.sh not found; continuing without it.
 [INFO] exp_name=exp_20260510_013346
-[INFO] job_id=18148653 array_job_id=na task_id=0
+[INFO] job_id=18148779 array_job_id=na task_id=0
 [INFO] config_list=.autoresearch/array_conf.txt
 [INFO] selected_index=0 selected_config=conf/exp_20260510_013346/config_0.yaml
 [INFO] runtime_config=conf/exp_20260510_013346/generated/runtime_na_0.yaml
@@ -8,13 +8,13 @@ INFO:espnet3.systems.base.system:Initialized BaseSystem with training_config=Tru
 INFO:espnet3:System: BaseSystem
 INFO:espnet3:Requested stages: ['train']
 INFO:espnet3:Resolved stages: ['train']
-INFO:espnet3:=== ESPnet3 run started: 2026-05-09T20:36:06.149050 ===
-INFO:espnet3:=== ESPnet3 run started: 2026-05-09T20:36:06.151603 ===
+INFO:espnet3:=== ESPnet3 run started: 2026-05-09T20:46:33.845886 ===
+INFO:espnet3:=== ESPnet3 run started: 2026-05-09T20:46:33.846434 ===
 INFO:espnet3:Command: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/bin/python run.py --stages train --training_config conf/exp_20260510_013346/generated/runtime_na_0.yaml
 INFO:espnet3:Python: 3.11.15 | packaged by conda-forge | (main, Mar  5 2026, 16:45:40) [GCC 14.3.0]
 INFO:espnet3:Working directory: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
 INFO:espnet3:Training config: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/conf/exp_20260510_013346/generated/runtime_na_0.yaml
-INFO:espnet3:Git: commit=dd5d34e5bbc9c8cbf86e84d01187cf1845a39fb4, short_commit=dd5d34e, branch=autosearch, worktree=dirty
+INFO:espnet3:Git: commit=de87a78976bb1c6c7e9c07c7371304903aff6c9b, short_commit=de87a78, branch=autosearch, worktree=dirty
 INFO:espnet3:Cluster env:
 OMPI_MCA_plm_slurm_args=--external-launcher
 SLURM_CLUSTER_NAME=delta
@@ -23,19 +23,19 @@ SLURM_CPUS_ON_NODE=4
 SLURM_CPUS_PER_TASK=4
 SLURM_GPUS_ON_NODE=1
 SLURM_GTIDS=0
-SLURM_JOBID=18148653
+SLURM_JOBID=18148779
 SLURM_JOB_ACCOUNT=bbjs-delta-gpu
 SLURM_JOB_CPUS_PER_NODE=4
-SLURM_JOB_END_TIME=1778380547
+SLURM_JOB_END_TIME=1778381158
 SLURM_JOB_GID=202
 SLURM_JOB_GPUS=3
-SLURM_JOB_ID=18148653
+SLURM_JOB_ID=18148779
 SLURM_JOB_NAME=exp_20260510_013346_debug
 SLURM_JOB_NODELIST=gpub047
 SLURM_JOB_NUM_NODES=1
 SLURM_JOB_PARTITION=gpuA40x4
 SLURM_JOB_QOS=bbjs-delta-gpu
-SLURM_JOB_START_TIME=1778376947
+SLURM_JOB_START_TIME=1778377558
 SLURM_JOB_UID=68569
 SLURM_JOB_USER=someki1
 SLURM_LOCALID=0
@@ -53,7 +53,7 @@ SLURM_PROCID=0
 SLURM_SUBMIT_DIR=/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
 SLURM_SUBMIT_HOST=dt-login03.delta.ncsa.illinois.edu
 SLURM_TASKS_PER_NODE=1
-SLURM_TASK_PID=381709
+SLURM_TASK_PID=390985
 SLURM_TOPOLOGY_ADDR=ss00.ss11.gpub047
 SLURM_TOPOLOGY_ADDR_PATTERN=switch.switch.node
 SLURM_TRES_PER_TASK=cpu=4
@@ -65,19 +65,19 @@ SLURM_CPUS_ON_NODE=4
 SLURM_CPUS_PER_TASK=4
 SLURM_GPUS_ON_NODE=1
 SLURM_GTIDS=0
-SLURM_JOBID=18148653
+SLURM_JOBID=18148779
 SLURM_JOB_ACCOUNT=bbjs-delta-gpu
 SLURM_JOB_CPUS_PER_NODE=4
-SLURM_JOB_END_TIME=1778380547
+SLURM_JOB_END_TIME=1778381158
 SLURM_JOB_GID=202
 SLURM_JOB_GPUS=3
-SLURM_JOB_ID=18148653
+SLURM_JOB_ID=18148779
 SLURM_JOB_NAME=exp_20260510_013346_debug
 SLURM_JOB_NODELIST=gpub047
 SLURM_JOB_NUM_NODES=1
 SLURM_JOB_PARTITION=gpuA40x4
 SLURM_JOB_QOS=bbjs-delta-gpu
-SLURM_JOB_START_TIME=1778376947
+SLURM_JOB_START_TIME=1778377558
 SLURM_JOB_UID=68569
 SLURM_JOB_USER=someki1
 SLURM_LOCALID=0
@@ -95,7 +95,7 @@ SLURM_PROCID=0
 SLURM_SUBMIT_DIR=/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
 SLURM_SUBMIT_HOST=dt-login03.delta.ncsa.illinois.edu
 SLURM_TASKS_PER_NODE=1
-SLURM_TASK_PID=381709
+SLURM_TASK_PID=390985
 SLURM_TOPOLOGY_ADDR=ss00.ss11.gpub047
 SLURM_TOPOLOGY_ADDR_PATTERN=switch.switch.node
 SLURM_TRES_PER_TASK=cpu=4
@@ -301,7 +301,7 @@ INFO:lightning:valid dataset[0]: _espnet3_local_dataset__work_hdd_bbjs_someki1_2
 INFO: test datasets: None
 INFO:lightning:test datasets: None
 INFO:espnet3.components.callbacks.default_callbacks:Callback[0] class: lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint
-INFO:espnet3.components.callbacks.default_callbacks:Callback[0]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7fc3047ce2d0>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[0]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f83ac7a3150>
 INFO:espnet3.components.callbacks.default_callbacks:  auto_insert_metric_name: False
 INFO:espnet3.components.callbacks.default_callbacks:  best_k_models: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:  best_model_path: ''
@@ -320,7 +320,7 @@ INFO:espnet3.components.callbacks.default_callbacks:  save_top_k: 1
 INFO:espnet3.components.callbacks.default_callbacks:  save_weights_only: False
 INFO:espnet3.components.callbacks.default_callbacks:  verbose: False
 INFO:espnet3.components.callbacks.default_callbacks:Callback[1] class: lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint
-INFO:espnet3.components.callbacks.default_callbacks:Callback[1]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7fc304968290>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[1]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f83acaa7050>
 INFO:espnet3.components.callbacks.default_callbacks:  auto_insert_metric_name: False
 INFO:espnet3.components.callbacks.default_callbacks:  best_k_models: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:  best_model_path: ''
@@ -339,11 +339,11 @@ INFO:espnet3.components.callbacks.default_callbacks:  save_top_k: 3
 INFO:espnet3.components.callbacks.default_callbacks:  save_weights_only: True
 INFO:espnet3.components.callbacks.default_callbacks:  verbose: False
 INFO:espnet3.components.callbacks.default_callbacks:Callback[2] class: espnet3.components.callbacks.default_callbacks.AverageCheckpointsCallback
-INFO:espnet3.components.callbacks.default_callbacks:Callback[2]: <espnet3.components.callbacks.default_callbacks.AverageCheckpointsCallback object at 0x7fc304539590>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[2]: <espnet3.components.callbacks.default_callbacks.AverageCheckpointsCallback object at 0x7f83ac727350>
 INFO:espnet3.components.callbacks.default_callbacks:  best_ckpt_callbacks: list(len=1)
 INFO:espnet3.components.callbacks.default_callbacks:  output_dir: './exp/exp_20260510_013346/exp_20260510_013346_config_0_a0'
 INFO:espnet3.components.callbacks.default_callbacks:Callback[3] class: lightning.pytorch.callbacks.lr_monitor.LearningRateMonitor
-INFO:espnet3.components.callbacks.default_callbacks:Callback[3]: <lightning.pytorch.callbacks.lr_monitor.LearningRateMonitor object at 0x7fc304698d10>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[3]: <lightning.pytorch.callbacks.lr_monitor.LearningRateMonitor object at 0x7f83ac726d90>
 INFO:espnet3.components.callbacks.default_callbacks:  last_momentum_values: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:  last_weight_decay_values: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:  log_momentum: False
@@ -351,10 +351,10 @@ INFO:espnet3.components.callbacks.default_callbacks:  log_weight_decay: False
 INFO:espnet3.components.callbacks.default_callbacks:  logging_interval: None
 INFO:espnet3.components.callbacks.default_callbacks:  lrs: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:Callback[4] class: espnet3.components.callbacks.default_callbacks.MetricsLogger
-INFO:espnet3.components.callbacks.default_callbacks:Callback[4]: <espnet3.components.callbacks.default_callbacks.MetricsLogger object at 0x7fc345056c10>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[4]: <espnet3.components.callbacks.default_callbacks.MetricsLogger object at 0x7f83ac8fdb10>
 INFO:espnet3.components.callbacks.default_callbacks:  log_every_n_steps: 100
 INFO:espnet3.components.callbacks.default_callbacks:Callback[5] class: lightning.pytorch.callbacks.progress.tqdm_progress.TQDMProgressBar
-INFO:espnet3.components.callbacks.default_callbacks:Callback[5]: <lightning.pytorch.callbacks.progress.tqdm_progress.TQDMProgressBar object at 0x7fc304538b10>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[5]: <lightning.pytorch.callbacks.progress.tqdm_progress.TQDMProgressBar object at 0x7f83acdfadd0>
 INFO: Using bfloat16 Automatic Mixed Precision (AMP)
 INFO:lightning.pytorch.utilities.rank_zero:Using bfloat16 Automatic Mixed Precision (AMP)
 INFO: GPU available: True (cuda), used: True
