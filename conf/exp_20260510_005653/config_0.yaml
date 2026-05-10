@@ -1,0 +1,16 @@
+defaults:
+  - ../owsm_peft_lora_basic.yaml
+
+# exp_tag will uniquely identify this run
+exp_tag: exp_20260510_005653_lora_r8_alpha8
+
+# lora: the default from previous conf/owsm_peft_lora_basic.yaml
+peft:
+  type: lora
+  r: 8
+  lora_alpha: 8
+  lora_dropout: 0.05
+  task_type: seq_2_seq_lm
+  target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+lr: 5e-5
