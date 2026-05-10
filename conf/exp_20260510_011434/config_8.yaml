@@ -1,0 +1,25 @@
+defaults:
+  - ../default.yaml
+  - ../dataset.yaml
+
+exp_tag: exp_20260510_011434_ia3_long_targets
+
+# IA3 (kv-only target_modules); minimal debug.
+peft:
+  type: ia3
+  task_type: seq_2_seq_lm
+  target_modules: ["linear_q", "linear_v"]
+
+model:
+  _target_: src.peft_model.OWSMFinetune
+  model_tag: ${base_model_tag}
+  peft: ${peft}
+
+trainer:
+  fast_dev_run: 10
+  max_epochs: 1
+  max_steps: 10
+
+max_samples_per_subset_train: 4
+max_samples_per_subset_valid: 4
+max_samples_per_subset_test: 4
