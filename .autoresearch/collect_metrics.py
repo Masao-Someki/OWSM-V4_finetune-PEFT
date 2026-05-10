@@ -43,7 +43,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--csv-path", default="experiments.csv")
     p.add_argument("--lock-path", default=".autoresearch/store/experiments.csv.lock")
     p.add_argument("--output", default=".autoresearch/store/latest_metrics.json")
-    p.add_argument("--error-output", default=".autoresearch/store/latest_error.log")
     p.add_argument("--results-dir", default=".autoresearch/results")
     p.add_argument("--logs-dir", default="logs")
     return p.parse_args()
@@ -174,16 +173,6 @@ def copy_error_to_results(
     )
 
 
-def collect_aggregate_error_log(failed_run_uids: list[str], results_errors_dir: Path) -> str:
-    """Build aggregate error log content for .autoresearch/store/latest_error.log."""
-    chunks = []
-    for run_uid in failed_run_uids[:5]:
-        safe_uid = run_uid.replace("/", "_")
-        p = results_errors_dir / f"{safe_uid}.txt"
-        if p.exists():
-            chunks.append(p.read_text(encoding="utf-8", errors="replace"))
-    return "\n\n".join(chunks)
-
 
 # ---------------------------------------------------------------------------
 # Main
@@ -277,17 +266,6 @@ def main() -> int:
     # -----------------------------------------------------------------------
     for run_uid in failed_run_uids:
         copy_error_to_results(logs_dir, args.exp_name, run_uid, results_errors_dir)
-
-    # .autoresearch/store/latest_error.log (aggregated)
-    err_path = Path(args.error_output)
-    err_path.parent.mkdir(parents=True, exist_ok=True)
-    if failed_run_uids:
-        agg = collect_aggregate_error_log(failed_run_uids, results_errors_dir)
-        if agg:
-            err_path.write_text(agg, encoding="utf-8")
-            print(f"[INFO] wrote aggregated error log: {err_path}")
-    else:
-        err_path.write_text("")
 
     # -----------------------------------------------------------------------
     # Step 4: write latest_metrics.json

@@ -318,13 +318,9 @@ def build_user_prompt(
     next_goal = read_file_safe(store_dir / "next_goal.md")
     latest_metrics = read_file_safe(store_dir / "latest_metrics.json")
     latest_status = read_file_safe(store_dir / "latest_status.json")
-    latest_error = read_file_safe(store_dir / "latest_error.log", max_chars=3000)
     checklist = read_file_safe(store_dir / "checklist.md")
     findings = read_file_safe(store_dir / "findings.md", max_chars=4000)
     csv_text = read_csv_tail(csv_path, n_rows=20)
-
-    has_errors = (store_dir / "latest_error.log").exists() and \
-                 (store_dir / "latest_error.log").stat().st_size > 0
 
     prompt_md = read_file_safe(prompts_dir / "prompt.md") if (prompts_dir / "prompt.md").exists() else ""
     followup_md = read_file_safe(prompts_dir / "followup.md") if (prompts_dir / "followup.md").exists() else ""
@@ -332,15 +328,6 @@ def build_user_prompt(
     prompt_update_context = read_file_safe(store_dir / "prompt_update_context.md", max_chars=2000)
     human_search_plan = read_file_safe(prompts_dir / "search_plan_human.md", max_chars=12000)
     active_search_plan = read_file_safe(store_dir / "search_plan.md", max_chars=12000)
-
-    error_section = ""
-    if has_errors:
-        error_section = f"""
-## latest_error.log (failures detected — diagnose first)
-```
-{latest_error}
-```
-"""
 
     mode_section = ""
     if mode == "bootstrap":
@@ -360,13 +347,7 @@ Iterative mode (wave 2+).
 """
 
     template_section = ""
-    if has_errors and error_md:
-        template_section = f"""
-## Template Focus
-Use this error-handling template as the primary instruction:
-{error_md}
-"""
-    elif mode == "iterative" and followup_md:
+    if mode == "iterative" and followup_md:
         template_section = f"""
 ## Template Focus
 Use this follow-up template as the primary instruction:
@@ -427,7 +408,6 @@ Plan and write the next experiment wave.
 ```json
 {latest_status}
 ```
-{error_section}
 ---
 
 ## store/checklist.md (current state)
@@ -492,23 +472,15 @@ def resolve_mode(args_mode: str, store_dir: Path) -> str:
     return "iterative" if marker.exists() else "bootstrap"
 
 
-def has_recent_errors(store_dir: Path) -> bool:
-    err = store_dir / "latest_error.log"
-    return err.exists() and err.stat().st_size > 0
-
 
 def select_model(
     args: argparse.Namespace,
     prompt_changed: bool,
-    has_errors: bool,
 ) -> tuple[str, str]:
     model_research = args.model_research.strip() or args.model
-    model_bugfix = args.model_bugfix.strip() or model_research
     model_prompt_refresh = args.model_prompt_refresh.strip() or model_research
     model_search_plan = args.model_search_plan.strip() or model_prompt_refresh
 
-    if has_errors:
-        return model_bugfix, "bugfix"
     if prompt_changed:
         return model_search_plan, "search_plan"
     return model_research, "research"
@@ -775,8 +747,7 @@ def main() -> int:
         return 1
 
     prompt_changed, prewritten = detect_and_apply_prompt_updates(repo_root, prompts_dir, store_dir)
-    has_errors = has_recent_errors(store_dir)
-    selected_model, model_reason = select_model(args, prompt_changed=prompt_changed, has_errors=has_errors)
+    selected_model, model_reason = select_model(args, prompt_changed=prompt_changed)
     if prompt_changed:
         print("[INFO] prompt.txt changed since last run; refreshed prompt/update notes and will regenerate search_plan.")
     repo_context = read_dirs_as_context(repo_root, args.cache_dirs) if args.cache_dirs else ""

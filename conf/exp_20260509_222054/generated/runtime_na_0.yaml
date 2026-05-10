@@ -1,5 +1,5 @@
 defaults:
-  - ../../exp_20260509_222054/config_0.yaml
+  - ../../exp_20260509_235129/config_0.yaml
 
 recipedir: .
 exp_tag: exp_20260509_222054_config_0_a0

@@ -164,7 +164,6 @@ def git_push_results(exp_name: str = "") -> None:
         ".autoresearch/store/watcher_state.json",
         ".autoresearch/store/latest_status.json",
         ".autoresearch/store/latest_metrics.json",
-        ".autoresearch/store/latest_error.log",
         ".autoresearch/store/experiments.csv.lock",
         ".autoresearch/store/next_goal.md",
         "experiments.csv",
@@ -206,7 +205,6 @@ def collect_metrics(exp_name: str, array_job_id: str) -> dict:
         "--csv-path", str(REPO_ROOT / "experiments.csv"),
         "--lock-path", str(REPO_ROOT / ".autoresearch" / "store" / "experiments.csv.lock"),
         "--output", str(REPO_ROOT / ".autoresearch" / "store" / "latest_metrics.json"),
-        "--error-output", str(REPO_ROOT / ".autoresearch" / "store" / "latest_error.log"),
     ], cwd=str(REPO_ROOT))
     if rc != 0:
         print(f"[WARN] collect_metrics failed (rc={rc}): {err}", file=sys.stderr)

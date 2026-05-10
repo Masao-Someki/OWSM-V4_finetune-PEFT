@@ -228,9 +228,6 @@ if [ "${submit_with_debug}" = "true" ]; then
     debug_log_path="logs/${exp_name}/debug_${debug_job_id}.log"
     if [ -f "${debug_log_path}" ]; then
       cp -f "${debug_log_path}" ".autoresearch/failure_logs/debug_${debug_job_id}.log"
-      cp -f "${debug_log_path}" ".autoresearch/store/latest_error.log"
-    else
-      echo "debug log not found: ${debug_log_path}" > .autoresearch/store/latest_error.log
     fi
     cat > .autoresearch/store/latest_status.json <<EOF
 {
@@ -243,7 +240,7 @@ if [ "${submit_with_debug}" = "true" ]; then
 EOF
     current_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
     if [ -n "${current_branch}" ]; then
-      git add .autoresearch/store/latest_error.log .autoresearch/store/latest_status.json .autoresearch/failure_logs/ "${experiments_csv}" || true
+      git add .autoresearch/store/latest_status.json .autoresearch/failure_logs/ "${experiments_csv}" || true
       if [ -n "$(git diff --cached --name-only)" ]; then
         git -c user.name=autoresearch-bot -c user.email=autoresearch-bot@users.noreply.github.com commit -m "autoresearch: debug failed ${exp_name} (${debug_job_id})" || true
         git push origin "${current_branch}" || true
