@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=32
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
 #SBATCH --time=6:00:00
-# SBATCH -p gpuA40x4,gpuA100x4,gpuA40x4-preempt,gpuA100x4-preempt,gpuA40x4-interactive,gpuA100x4-interactive
-#SBATCH -p cpu
-#SBATCH --account bbjs-delta-cpu
+#SBATCH -p gpuA40x4,gpuA100x4
+# SBATCH -p cpu
+#SBATCH --account bbjs-delta-gpu
 # SBATCH --gres=gpu:1
 #SBATCH --output=logs/%x/%A_%a.log
 #SBATCH --error=logs/%x/%A_%a.log
@@ -44,11 +44,11 @@ max_configs=10
 debug_task_id=""
 debug_time="01:00:00"
 debug_mem="32G"
-debug_partition="gpuA40x4,gpuA100x4,gpuA40x4-preempt,gpuA100x4-preempt,gpuA40x4-interactive,gpuA100x4-interactive"
+debug_partition="gpuA40x4,gpuA100x4"
 debug_account="bbjs-delta-gpu"
 debug_gres="gpu:1"
 debug_cpus=4
-array_partition="gpuA40x4,gpuA100x4,gpuA40x4-preempt,gpuA100x4-preempt,gpuA40x4-interactive,gpuA100x4-interactive"
+array_partition="gpuA40x4,gpuA100x4"
 array_account="bbjs-delta-gpu"
 array_gres="gpu:1"
 array_cpus=4

@@ -1,0 +1,8 @@
+defaults:
+  - ../../exp_20260509_222054/config_7.yaml
+
+recipedir: .
+exp_tag: exp_20260509_222054_config_7_a7
+exp_dir: ${recipedir}/exp/exp_20260509_222054/${exp_tag}
+wandb:
+  group: exp_20260509_222054

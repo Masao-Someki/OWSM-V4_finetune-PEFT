@@ -190,7 +190,7 @@ def git_push_results(exp_name: str = "") -> None:
         "-c", "user.email=autoresearch-watcher@cluster",
         "commit", "-m", f"autoresearch: results {now_iso()}"
     )
-    git("push", "origin", "main")
+    git("push", "origin", "autosearch")
     print("[INFO] git push done")
 
 
@@ -304,8 +304,11 @@ def submit_next_experiment(state: dict) -> Optional[str]:
 
     rc, out, err = run_cmd([
         "bash",
-        str(REPO_ROOT / ".autoresearch" / "submit-array-with-debug.sh"),
-        next_exp_name, array_range, str(config_list),
+        str(REPO_ROOT / "scripts" / "run-array.sh"),
+        "--submit_with_debug", "true",
+        "--exp_name", next_exp_name,
+        "--array_range", array_range,
+        "--config_list", str(config_list),
     ], cwd=str(REPO_ROOT))
 
     if rc != 0:
