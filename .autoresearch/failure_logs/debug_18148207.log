@@ -1,20 +1,20 @@
 [WARN] /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/scripts/load-keys.sh not found; continuing without it.
 [INFO] exp_name=exp_20260509_222054
-[INFO] job_id=18148019 array_job_id=na task_id=0
+[INFO] job_id=18148207 array_job_id=na task_id=0
 [INFO] config_list=.autoresearch/array_conf.txt
-[INFO] selected_index=0 selected_config=conf/exp_20260509_222054/config_0.yaml
+[INFO] selected_index=0 selected_config=conf/exp_20260509_235129/config_0.yaml
 [INFO] runtime_config=conf/exp_20260509_222054/generated/runtime_na_0.yaml
 INFO:espnet3.systems.base.system:Initialized BaseSystem with training_config=True inference_config=False metrics_config=False exp_dir=exp/exp_20260509_222054/exp_20260509_222054_config_0_a0
 INFO:espnet3:System: BaseSystem
 INFO:espnet3:Requested stages: ['train']
 INFO:espnet3:Resolved stages: ['train']
-INFO:espnet3:=== ESPnet3 run started: 2026-05-09T18:51:02.984044 ===
-INFO:espnet3:=== ESPnet3 run started: 2026-05-09T18:51:02.984697 ===
+INFO:espnet3:=== ESPnet3 run started: 2026-05-09T19:03:41.332169 ===
+INFO:espnet3:=== ESPnet3 run started: 2026-05-09T19:03:41.334811 ===
 INFO:espnet3:Command: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/bin/python run.py --stages train --training_config conf/exp_20260509_222054/generated/runtime_na_0.yaml
 INFO:espnet3:Python: 3.11.15 | packaged by conda-forge | (main, Mar  5 2026, 16:45:40) [GCC 14.3.0]
 INFO:espnet3:Working directory: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
 INFO:espnet3:Training config: /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/conf/exp_20260509_222054/generated/runtime_na_0.yaml
-INFO:espnet3:Git: commit=c06d0b7d22747266ee9a3a2e52766f1bd357733a, short_commit=c06d0b7, branch=autosearch, worktree=dirty
+INFO:espnet3:Git: commit=3e8d2d1af91b8f06b6df28dfe6e56908e1f13148, short_commit=3e8d2d1, branch=autosearch, worktree=dirty
 INFO:espnet3:Cluster env:
 OMPI_MCA_plm_slurm_args=--external-launcher
 SLURM_CLUSTER_NAME=delta
@@ -23,19 +23,19 @@ SLURM_CPUS_ON_NODE=4
 SLURM_CPUS_PER_TASK=4
 SLURM_GPUS_ON_NODE=1
 SLURM_GTIDS=0
-SLURM_JOBID=18148019
+SLURM_JOBID=18148207
 SLURM_JOB_ACCOUNT=bbjs-delta-gpu
 SLURM_JOB_CPUS_PER_NODE=4
-SLURM_JOB_END_TIME=1778374217
+SLURM_JOB_END_TIME=1778374986
 SLURM_JOB_GID=202
 SLURM_JOB_GPUS=2
-SLURM_JOB_ID=18148019
+SLURM_JOB_ID=18148207
 SLURM_JOB_NAME=exp_20260509_222054_debug
-SLURM_JOB_NODELIST=gpub051
+SLURM_JOB_NODELIST=gpub012
 SLURM_JOB_NUM_NODES=1
 SLURM_JOB_PARTITION=gpuA40x4
 SLURM_JOB_QOS=bbjs-delta-gpu
-SLURM_JOB_START_TIME=1778370617
+SLURM_JOB_START_TIME=1778371386
 SLURM_JOB_UID=68569
 SLURM_JOB_USER=someki1
 SLURM_LOCALID=0
@@ -43,7 +43,7 @@ SLURM_MEM_PER_NODE=32768
 SLURM_MPI_TYPE=cray_shasta
 SLURM_NNODES=1
 SLURM_NODEID=0
-SLURM_NODELIST=gpub051
+SLURM_NODELIST=gpub012
 SLURM_NPROCS=1
 SLURM_NTASKS=1
 SLURM_NTASKS_PER_NODE=1
@@ -53,8 +53,8 @@ SLURM_PROCID=0
 SLURM_SUBMIT_DIR=/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
 SLURM_SUBMIT_HOST=dt-login03.delta.ncsa.illinois.edu
 SLURM_TASKS_PER_NODE=1
-SLURM_TASK_PID=1374661
-SLURM_TOPOLOGY_ADDR=ss00.ss11.gpub051
+SLURM_TASK_PID=69665
+SLURM_TOPOLOGY_ADDR=ss00.ss09.gpub012
 SLURM_TOPOLOGY_ADDR_PATTERN=switch.switch.node
 SLURM_TRES_PER_TASK=cpu=4
 INFO:espnet3:Cluster env:
@@ -65,19 +65,19 @@ SLURM_CPUS_ON_NODE=4
 SLURM_CPUS_PER_TASK=4
 SLURM_GPUS_ON_NODE=1
 SLURM_GTIDS=0
-SLURM_JOBID=18148019
+SLURM_JOBID=18148207
 SLURM_JOB_ACCOUNT=bbjs-delta-gpu
 SLURM_JOB_CPUS_PER_NODE=4
-SLURM_JOB_END_TIME=1778374217
+SLURM_JOB_END_TIME=1778374986
 SLURM_JOB_GID=202
 SLURM_JOB_GPUS=2
-SLURM_JOB_ID=18148019
+SLURM_JOB_ID=18148207
 SLURM_JOB_NAME=exp_20260509_222054_debug
-SLURM_JOB_NODELIST=gpub051
+SLURM_JOB_NODELIST=gpub012
 SLURM_JOB_NUM_NODES=1
 SLURM_JOB_PARTITION=gpuA40x4
 SLURM_JOB_QOS=bbjs-delta-gpu
-SLURM_JOB_START_TIME=1778370617
+SLURM_JOB_START_TIME=1778371386
 SLURM_JOB_UID=68569
 SLURM_JOB_USER=someki1
 SLURM_LOCALID=0
@@ -85,7 +85,7 @@ SLURM_MEM_PER_NODE=32768
 SLURM_MPI_TYPE=cray_shasta
 SLURM_NNODES=1
 SLURM_NODEID=0
-SLURM_NODELIST=gpub051
+SLURM_NODELIST=gpub012
 SLURM_NPROCS=1
 SLURM_NTASKS=1
 SLURM_NTASKS_PER_NODE=1
@@ -95,8 +95,8 @@ SLURM_PROCID=0
 SLURM_SUBMIT_DIR=/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
 SLURM_SUBMIT_HOST=dt-login03.delta.ncsa.illinois.edu
 SLURM_TASKS_PER_NODE=1
-SLURM_TASK_PID=1374661
-SLURM_TOPOLOGY_ADDR=ss00.ss11.gpub051
+SLURM_TASK_PID=69665
+SLURM_TOPOLOGY_ADDR=ss00.ss09.gpub012
 SLURM_TOPOLOGY_ADDR_PATTERN=switch.switch.node
 SLURM_TRES_PER_TASK=cpu=4
 INFO:espnet3:Runtime env:
@@ -196,7 +196,7 @@ trainer:
   accumulate_grad_batches: 1
   check_val_every_n_epoch: 1
   gradient_clip_val: 1.0
-  log_every_n_steps: 100
+  log_every_n_steps: 1
   max_epochs: 3
   logger:
   - _target_: lightning.pytorch.loggers.TensorBoardLogger
@@ -213,9 +213,9 @@ max_epochs: 1
 warmup_steps: 0
 method:
   type: lora
-  r: 8
-  alpha: 16
-  dropout: 0.05
+  r: 4
+  alpha: 8
+  dropout: 0.0
 recipedir: .
 wandb:
   group: exp_20260509_222054
@@ -234,7 +234,7 @@ INFO:lightning:valid dataset: None
 INFO: test datasets: None
 INFO:lightning:test datasets: None
 INFO:espnet3.components.callbacks.default_callbacks:Callback[0] class: lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint
-INFO:espnet3.components.callbacks.default_callbacks:Callback[0]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f61e647bed0>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[0]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f7bd61f6610>
 INFO:espnet3.components.callbacks.default_callbacks:  auto_insert_metric_name: False
 INFO:espnet3.components.callbacks.default_callbacks:  best_k_models: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:  best_model_path: ''
@@ -253,7 +253,7 @@ INFO:espnet3.components.callbacks.default_callbacks:  save_top_k: 1
 INFO:espnet3.components.callbacks.default_callbacks:  save_weights_only: False
 INFO:espnet3.components.callbacks.default_callbacks:  verbose: False
 INFO:espnet3.components.callbacks.default_callbacks:Callback[1] class: lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint
-INFO:espnet3.components.callbacks.default_callbacks:Callback[1]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f61e6fd3c90>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[1]: <lightning.pytorch.callbacks.model_checkpoint.ModelCheckpoint object at 0x7f7bd6de2210>
 INFO:espnet3.components.callbacks.default_callbacks:  auto_insert_metric_name: False
 INFO:espnet3.components.callbacks.default_callbacks:  best_k_models: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:  best_model_path: ''
@@ -272,11 +272,11 @@ INFO:espnet3.components.callbacks.default_callbacks:  save_top_k: 3
 INFO:espnet3.components.callbacks.default_callbacks:  save_weights_only: True
 INFO:espnet3.components.callbacks.default_callbacks:  verbose: False
 INFO:espnet3.components.callbacks.default_callbacks:Callback[2] class: espnet3.components.callbacks.default_callbacks.AverageCheckpointsCallback
-INFO:espnet3.components.callbacks.default_callbacks:Callback[2]: <espnet3.components.callbacks.default_callbacks.AverageCheckpointsCallback object at 0x7f61e646c150>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[2]: <espnet3.components.callbacks.default_callbacks.AverageCheckpointsCallback object at 0x7f7bd6ec16d0>
 INFO:espnet3.components.callbacks.default_callbacks:  best_ckpt_callbacks: list(len=1)
 INFO:espnet3.components.callbacks.default_callbacks:  output_dir: './exp/exp_20260509_222054/exp_20260509_222054_config_0_a0'
 INFO:espnet3.components.callbacks.default_callbacks:Callback[3] class: lightning.pytorch.callbacks.lr_monitor.LearningRateMonitor
-INFO:espnet3.components.callbacks.default_callbacks:Callback[3]: <lightning.pytorch.callbacks.lr_monitor.LearningRateMonitor object at 0x7f61e64d0a10>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[3]: <lightning.pytorch.callbacks.lr_monitor.LearningRateMonitor object at 0x7f7bd61f5810>
 INFO:espnet3.components.callbacks.default_callbacks:  last_momentum_values: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:  last_weight_decay_values: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:  log_momentum: False
@@ -284,10 +284,10 @@ INFO:espnet3.components.callbacks.default_callbacks:  log_weight_decay: False
 INFO:espnet3.components.callbacks.default_callbacks:  logging_interval: None
 INFO:espnet3.components.callbacks.default_callbacks:  lrs: dict(len=0)
 INFO:espnet3.components.callbacks.default_callbacks:Callback[4] class: espnet3.components.callbacks.default_callbacks.MetricsLogger
-INFO:espnet3.components.callbacks.default_callbacks:Callback[4]: <espnet3.components.callbacks.default_callbacks.MetricsLogger object at 0x7f61e64d3750>
-INFO:espnet3.components.callbacks.default_callbacks:  log_every_n_steps: 100
+INFO:espnet3.components.callbacks.default_callbacks:Callback[4]: <espnet3.components.callbacks.default_callbacks.MetricsLogger object at 0x7f7bd61f6f10>
+INFO:espnet3.components.callbacks.default_callbacks:  log_every_n_steps: 1
 INFO:espnet3.components.callbacks.default_callbacks:Callback[5] class: lightning.pytorch.callbacks.progress.tqdm_progress.TQDMProgressBar
-INFO:espnet3.components.callbacks.default_callbacks:Callback[5]: <lightning.pytorch.callbacks.progress.tqdm_progress.TQDMProgressBar object at 0x7f61e64d0b50>
+INFO:espnet3.components.callbacks.default_callbacks:Callback[5]: <lightning.pytorch.callbacks.progress.tqdm_progress.TQDMProgressBar object at 0x7f7bd61f6150>
 INFO: GPU available: True (cuda), used: True
 INFO:lightning.pytorch.utilities.rank_zero:GPU available: True (cuda), used: True
 INFO: TPU available: False, using: 0 TPU cores
@@ -300,7 +300,7 @@ WARNING:py.warnings:/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test
 
 INFO: LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 INFO:lightning.pytorch.accelerators.cuda:LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
-ERROR:espnet3:Stage 'train' failed after 0.39s
+ERROR:espnet3:Stage 'train' failed after 0.36s
 Traceback (most recent call last):
   File "/work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/.pixi/envs/default/lib/python3.11/site-packages/hydra/_internal/instantiate/_instantiate2.py", line 92, in _call_target
     return _target_(*args, **kwargs)
