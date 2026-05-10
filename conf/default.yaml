@@ -32,7 +32,7 @@ scheduler:
   warmup_steps: 6000
 
 
-dataloader:
+override dataloader:
   collate_fn:
     _target_: espnet2.train.collate_fn.CommonCollateFn
     int_pad_value: -1

@@ -384,6 +384,40 @@ Use this base planning template as the primary instruction:
 {prompt_md}
 """
 
+    if mode == "bugfix":
+        return f"""## Task
+
+Fix the failed debug run. Do not plan a new wave.
+
+**mode**: `{mode}`
+**timestamp**: {now_iso()}
+
+---
+{mode_section}
+---
+
+## latest_status.json
+```json
+{latest_status}
+```
+
+---
+
+## experiments.csv (header + last 20 rows)
+```csv
+{csv_text}
+```
+
+---
+
+## Failure handling rules
+- Output only `<file path="...">...</file>` blocks.
+- Allowed paths: `conf/`, `src/`, `scripts/`, `run.py`, `tests/`.
+- Do not write `.autoresearch/` files.
+- Do not propose a new experiment wave.
+- Make the smallest safe fix that addresses the failure log.
+"""
+
     search_plan_required_line = (
         "6. `.autoresearch/store/search_plan.md` — update status column only"
         " (mark done/pending/skipped); do NOT rewrite the roadmap structure or candidate lists"
