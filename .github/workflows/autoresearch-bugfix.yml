@@ -81,8 +81,23 @@ jobs:
             --max-configs 10 \
             --max-tokens 8192
 
-      - name: Clear failure logs after successful bugfix
+      - name: Verify bugfix commit was created
+        id: verify_fix
         if: steps.bugfix.outputs.should_run == 'true' && success()
+        run: |
+          git fetch origin "${GITHUB_REF_NAME}" --depth=2
+          latest_msg="$(git log origin/${GITHUB_REF_NAME} -1 --pretty=%s)"
+          echo "latest_message=${latest_msg}" >> "$GITHUB_OUTPUT"
+          if [[ "${latest_msg}" == autoresearch:\ bugfix* ]]; then
+            echo "has_fix_commit=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_fix_commit=false" >> "$GITHUB_OUTPUT"
+            echo "Expected a bugfix commit, got: ${latest_msg}"
+            exit 1
+          fi
+
+      - name: Clear failure logs after successful bugfix
+        if: steps.verify_fix.outputs.has_fix_commit == 'true'
         run: |
           python - <<'PY'
           import json

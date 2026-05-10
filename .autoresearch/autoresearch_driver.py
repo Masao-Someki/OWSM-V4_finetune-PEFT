@@ -858,7 +858,11 @@ def main() -> int:
         print("[ERROR] OPENAI_API_KEY not set")
         return 1
 
-    prompt_changed, prewritten = detect_and_apply_prompt_updates(repo_root, prompts_dir, store_dir)
+    if mode == "bugfix":
+        prompt_changed = False
+        prewritten = []
+    else:
+        prompt_changed, prewritten = detect_and_apply_prompt_updates(repo_root, prompts_dir, store_dir)
     selected_model, model_reason = select_model(args, prompt_changed=prompt_changed)
     if prompt_changed:
         print("[INFO] prompt.txt changed since last run; refreshed prompt/update notes and will regenerate search_plan.")
@@ -932,7 +936,8 @@ def main() -> int:
 
     # Apply file operations from model output.
     written = prewritten + apply_file_operations(response_text, repo_root)
-    written = reconcile_search_plan_statuses(repo_root, csv_path, written)
+    if mode != "bugfix":
+        written = reconcile_search_plan_statuses(repo_root, csv_path, written)
 
     if not written:
         print("[ERROR] model wrote no files. Check .autoresearch/store/last_response.txt")
