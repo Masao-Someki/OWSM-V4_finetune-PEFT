@@ -490,7 +490,7 @@ For `.autoresearch/store/search_plan_report.md`:
 
 
 def resolve_mode(args_mode: str, store_dir: Path) -> str:
-    if args_mode in {"bootstrap", "iterative"}:
+    if args_mode in {"bootstrap", "iterative", "bugfix"}:
         return args_mode
     marker = store_dir / "bootstrap_done.json"
     return "iterative" if marker.exists() else "bootstrap"
@@ -499,12 +499,16 @@ def resolve_mode(args_mode: str, store_dir: Path) -> str:
 
 def select_model(
     args: argparse.Namespace,
+    mode: str,
     prompt_changed: bool,
 ) -> tuple[str, str]:
+    model_bugfix = args.model_bugfix.strip() or args.model
     model_research = args.model_research.strip() or args.model
     model_prompt_refresh = args.model_prompt_refresh.strip() or model_research
     model_search_plan = args.model_search_plan.strip() or model_prompt_refresh
 
+    if mode == "bugfix":
+        return model_bugfix, "bugfix"
     if prompt_changed:
         return model_search_plan, "search_plan"
     return model_research, "research"
@@ -863,7 +867,7 @@ def main() -> int:
         prewritten = []
     else:
         prompt_changed, prewritten = detect_and_apply_prompt_updates(repo_root, prompts_dir, store_dir)
-    selected_model, model_reason = select_model(args, prompt_changed=prompt_changed)
+    selected_model, model_reason = select_model(args, mode=mode, prompt_changed=prompt_changed)
     if prompt_changed:
         print("[INFO] prompt.txt changed since last run; refreshed prompt/update notes and will regenerate search_plan.")
     repo_context = read_dirs_as_context(repo_root, args.cache_dirs) if args.cache_dirs else ""
