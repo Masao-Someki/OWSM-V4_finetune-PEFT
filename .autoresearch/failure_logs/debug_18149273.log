@@ -1,0 +1,7 @@
+[WARN] /work/hdd/bbjs/someki1/20_other_project/10_autoresearch_test/scripts/load-keys.sh not found; continuing without it.
+[INFO] exp_name=exp_20260510_013346
+[INFO] job_id=18149273 array_job_id=na task_id=0
+[INFO] config_list=.autoresearch/array_conf.txt
+[INFO] selected_index=0 selected_config=conf/exp_20260510_013346/config_0.yaml
+[INFO] runtime_config=conf/exp_20260510_013346/generated/runtime_na_0.yaml
+[2026-05-09T22:07:08.191] error: *** JOB 18149273 ON gpub047 CANCELLED AT 2026-05-09T22:07:08 DUE TO TIME LIMIT ***
