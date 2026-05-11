@@ -1,0 +1,19 @@
+defaults:
+  - ../default.yaml
+  - ../dataset.yaml
+
+lr: 5e-5
+exp_tag: exp_20260510_wave1_peft_methods_lokr
+
+peft:
+  type: lokr
+  r: 8
+  alpha: 8
+  module_dropout: 0.05
+  task_type: seq_2_seq_lm
+  target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+model:
+  _target_: src.peft_model.OWSMFinetune
+  model_tag: ${base_model_tag}
+  peft: ${peft}
