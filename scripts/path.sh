@@ -57,7 +57,7 @@ init_git_ssh() {
 init_git_ssh
 
 if [ -z "${WANDB_ENTITY:-}" ]; then
-  export WANDB_ENTITY="masao-someki"
+  export WANDB_ENTITY=$(cat scripts/wandb_entity.key)
 fi
 if [ -z "${WANDB_PROJECT:-}" ]; then
   export WANDB_PROJECT="owsm-peft-autoresearch"

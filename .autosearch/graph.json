@@ -1,0 +1,115 @@
+{
+  "nodes": [
+    "BugfixStage",
+    "BuildSearchPlanStage",
+    "CollectMetricsStage",
+    "DebugGateStage",
+    "LoopEndStage",
+    "SubmitArrayJobStage",
+    "WatchExperimentStage",
+    "WavePlanStage"
+  ],
+  "normal_edges": [
+    {
+      "from": "Start",
+      "to": "BuildSearchPlanStage",
+      "type": "previous_to_stage"
+    },
+    {
+      "from": "BuildSearchPlanStage",
+      "to": "WavePlanStage",
+      "type": "on_success"
+    },
+    {
+      "from": "DebugGateStage",
+      "to": "SubmitArrayJobStage",
+      "type": "on_success"
+    },
+    {
+      "from": "DebugGateStage",
+      "to": "BugfixStage",
+      "type": "on_failure"
+    },
+    {
+      "from": "SubmitArrayJobStage",
+      "to": "WatchExperimentStage",
+      "type": "on_success"
+    },
+    {
+      "from": "WatchExperimentStage",
+      "to": "CollectMetricsStage",
+      "type": "on_success"
+    },
+    {
+      "from": "CollectMetricsStage",
+      "to": "LoopEndStage",
+      "type": "on_success"
+    },
+    {
+      "from": "LoopEndStage",
+      "to": "End",
+      "type": "on_failure"
+    }
+  ],
+  "loop_edges": [
+    {
+      "from": "BugfixStage",
+      "to": "DebugGateStage",
+      "type": "on_success"
+    },
+    {
+      "from": "LoopEndStage",
+      "to": "WavePlanStage",
+      "type": "on_success"
+    },
+    {
+      "from": "WavePlanStage",
+      "to": "DebugGateStage",
+      "type": "on_success"
+    }
+  ],
+  "transitions": {
+    "BuildSearchPlanStage": {
+      "on_success": "WavePlanStage",
+      "on_incomplete": null,
+      "end_condition": ".autosearch/store/search_plan.md has been generated and .autosearch/store/prompt_state.json sha256 matches prompt.txt."
+    },
+    "WavePlanStage": {
+      "on_success": "DebugGateStage",
+      "on_incomplete": null,
+      "end_condition": "Next-wave artifacts are generated and committed (store/next_exp_name.txt, .autoresearch/array_conf.txt, configs)."
+    },
+    "LoopEndStage": {
+      "on_success": "WavePlanStage",
+      "on_failure": "End",
+      "on_incomplete": null,
+      "end_condition": "search-plan exhaustion decision has been made."
+    },
+    "DebugGateStage": {
+      "on_success": "SubmitArrayJobStage",
+      "on_failure": "BugfixStage",
+      "on_incomplete": null,
+      "end_condition": "Debug job is COMPLETED or failure log/status is saved."
+    },
+    "BugfixStage": {
+      "on_success": "DebugGateStage",
+      "on_incomplete": null,
+      "end_condition": "bugfix commits exist, failure logs are cleared, and status is BUGFIX_PROPOSED."
+    },
+    "SubmitArrayJobStage": {
+      "on_success": "WatchExperimentStage",
+      "on_incomplete": null,
+      "end_condition": "The array job has been submitted via sbatch and array_job_id is recorded in watcher_state.json."
+    },
+    "WatchExperimentStage": {
+      "on_success": "CollectMetricsStage",
+      "on_incomplete": null,
+      "end_condition": "All tasks in the array job have reached a terminal state (COMPLETED / FAILED / CANCELLED / TIMEOUT)."
+    },
+    "CollectMetricsStage": {
+      "on_success": "LoopEndStage",
+      "on_incomplete": null,
+      "end_condition": "store/latest_metrics.json has been updated and committed."
+    }
+  }
+}
