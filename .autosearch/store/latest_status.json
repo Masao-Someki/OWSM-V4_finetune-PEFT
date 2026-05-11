@@ -1,6 +1,5 @@
 {
   "exp_name": "exp_20260510_wave1_peft_methods_round2",
-  "debug_job_id": "18161162",
-  "status": "DEBUG_FAILED",
-  "debug_state": "FAILED"
+  "array_job_id": "18161174",
+  "status": "COMPLETED"
 }

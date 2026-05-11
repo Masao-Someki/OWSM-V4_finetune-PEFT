@@ -1,0 +1,121 @@
+{
+  "exp_name": "exp_20260510_wave1_peft_methods_round2",
+  "array_job_id": "18161174",
+  "collected_at": "2026-05-10T22:28:00-05:00",
+  "wave_summary": [
+    {
+      "run_uid": "18161162_0_exp_20260510_wave1_peft_methods_round2_config_0_a0",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_0.yaml",
+      "peft_type": "lora",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_2_exp_20260510_wave1_peft_methods_round2_config_2_a2",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_2.yaml",
+      "peft_type": "loha",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_1_exp_20260510_wave1_peft_methods_round2_config_1_a1",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_1.yaml",
+      "peft_type": "adalora",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_5_exp_20260510_wave1_peft_methods_round2_config_5_a5",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_5.yaml",
+      "peft_type": "oft",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_0_exp_20260510_wave1_peft_methods_round2_config_0_a0",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_0.yaml",
+      "peft_type": "lora",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_4_exp_20260510_wave1_peft_methods_round2_config_4_a4",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_4.yaml",
+      "peft_type": "ia3",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_3_exp_20260510_wave1_peft_methods_round2_config_3_a3",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_3.yaml",
+      "peft_type": "lokr",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_6_exp_20260510_wave1_peft_methods_round2_config_6_a6",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_6.yaml",
+      "peft_type": "boft",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_8_exp_20260510_wave1_peft_methods_round2_config_8_a8",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_8.yaml",
+      "peft_type": "ln_tuning",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_7_exp_20260510_wave1_peft_methods_round2_config_7_a7",
+      "base_config": "conf/exp_20260510_wave1_peft_methods/config_7.yaml",
+      "peft_type": "vera",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    },
+    {
+      "run_uid": "18161174_9_exp_20260510_wave1_peft_methods_round2_config_5_a9",
+      "base_config": "conf/exp_20260510_wave1_peft_methods_round2/config_5.yaml",
+      "peft_type": "hra",
+      "lr": "5e-05",
+      "trainer_max_epochs": "2",
+      "wer": null,
+      "cer": null,
+      "status": "FAILED"
+    }
+  ],
+  "best_run_uid": "",
+  "best_wer": null,
+  "failed_count": 11,
+  "results_dir": ".autoresearch/results/exp_20260510_wave1_peft_methods_round2"
+}
