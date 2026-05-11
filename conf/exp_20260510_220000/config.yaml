@@ -1,0 +1,110 @@
+# Wave 1 continuation: PEFT method-family screening (remaining candidates)
+# Goal: identify at least one method that starts cleanly under the current debug gate.
+# Rationale: most recent failures happened early and across methods, so keep run budget focused on compatibility screening.
+
+defaults:
+  - ../owsm_peft_lora_basic.yaml
+
+exp_name: exp_20260510_220000
+wave: 1
+axis: peft_type
+notes: "Continue method-family sweep with broad practical coverage before hyperparameter tuning."
+
+# Shared controls for comparability with prior Wave 1 runs
+lr: 5e-5
+trainer:
+  max_epochs: 3
+  max_steps: 100
+  fast_dev_run: 10
+  accumulate_grad_batches: 2
+  gradient_clip_val: 5
+  precision: bf16
+
+# Candidate set for this wave
+# Keep one known baseline + untested methods from the roadmap.
+candidates:
+  - exp_tag: exp_20260510_220000_lora_baseline
+    peft:
+      type: lora
+      r: 8
+      lora_alpha: 8
+      lora_dropout: 0.05
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_loha
+    peft:
+      type: loha
+      r: 8
+      alpha: 8
+      module_dropout: 0.05
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_lokr
+    peft:
+      type: lokr
+      r: 8
+      alpha: 8
+      module_dropout: 0.05
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_boft
+    peft:
+      type: boft
+      boft_block_size: 8
+      boft_n_butterfly_factor: 1
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_fourierft
+    peft:
+      type: fourierft
+      n_frequency: 1000
+      scaling: 8
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_hra
+    peft:
+      type: hra
+      r: 8
+      apply_GS: false
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_vblora
+    peft:
+      type: vblora
+      r: 8
+      num_vectors: 64
+      vector_length: 256
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_randlora
+    peft:
+      type: randlora
+      r: 8
+      alpha: 8
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_delora
+    peft:
+      type: delora
+      r: 8
+      lora_alpha: 8
+      lora_dropout: 0.05
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
+
+  - exp_tag: exp_20260510_220000_espnet_lora
+    peft:
+      type: espnet_lora
+      r: 8
+      lora_alpha: 8
+      lora_dropout: 0.05
+      task_type: seq_2_seq_lm
+      target_modules: ["linear_q", "linear_k", "linear_v", "linear_out", "w_1", "w_2"]
